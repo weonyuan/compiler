@@ -1,0 +1,19 @@
+#header {
+  padding: 10px;
+}
+
+#logo {
+  display: inline-block;
+  font-size: 18pt;
+}
+
+#btnCompile {
+  float: right;
+  height: 100%;
+}
+
+footer {
+  font-size: 9pt;
+  margin-top: 20px;
+  text-align: center;
+}
