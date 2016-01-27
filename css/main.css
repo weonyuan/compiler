@@ -12,6 +12,14 @@
   height: 100%;
 }
 
+#bodyContent {
+  margin: 10px;
+}
+
+#inputText {
+  resize: none;
+}
+
 footer {
   font-size: 9pt;
   margin-top: 20px;
