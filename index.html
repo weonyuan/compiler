@@ -1,36 +1,28 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  <meta name="author"             content="Weon Yuan" />
-  <title>Compiler</title>
-
-  <!-- Shared libraries -->
-  <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
-
-  <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
-  <script type="text/javascript" src="bootstrap.js"></script>
-
-  <!-- User-defined libraries -->
-  <link rel="stylesheet" href="css/main.css" type="text/css" />
-
-  
-
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="author" content="Weon Yuan" />
+    <title>Compiler</title>
+    <!-- Shared libraries -->
+    <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+    <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="bootstrap.js"></script>
+    <!-- User-defined libraries -->
+    <link rel="stylesheet" href="css/main.css" type="text/css" />
+    <script type="text/javascript" src="js/lexer.js"></script>
 </head>
+
 <body>
-  <nav id="header" class="navbar-default">
-    <div id="logo"
-         class="col-md-11">compiler<sup>2</sup></div>
-    <button id="btnCompile"
-            class="btn btn-primary col-md-1">Compile</button>
-  </nav>
-  <div id="bodyContent">
-    <textarea id="inputText"
-              cols="40"
-              rows="10"
-              placeholder="Enter your code here."
-              autofocus></textarea>
-  </div>
-  <footer>Made by Weon. But I'm not a rapper.</footer>
+    <nav id="header" class="navbar-default">
+        <div id="logo" class="col-md-11">compiler<sup>2</sup></div>
+        <button id="btnCompile" class="btn btn-primary col-md-1" onclick="compile()">Compile</button>
+    </nav>
+    <div id="bodyContent">
+        <textarea id="inputText" cols="40" rows="10" placeholder="Enter your code here." autofocus></textarea>
+    </div>
+    <footer>Made by Weon. But I'm not a rapper.</footer>
 </body>
+
 </html>
