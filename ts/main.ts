@@ -1,3 +1,4 @@
+///<reference path="globals.ts" />
 /*
     main.ts
 
@@ -5,10 +6,17 @@
     calling the compiler.
 */
 
-module Compiler {
+module COMPILER {
     export class Main {
-        public compile(): void {
-            Lexer.tokenize();
+        public static compile(): void {
+            var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
+            Lexer.tokenize(sourceCode);
+        }
+
+        public static log(msg): void {
+            console.log('log');
+
+            //document.createElement('div')
         }
     }
 }

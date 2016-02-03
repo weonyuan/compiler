@@ -1,20 +1,22 @@
-///<reference path="main.ts" />
+///<reference path="globals.ts" />
 /*
     lexer.ts
 
     Responsible for tokenizing the input code and storing
     the tokens in a list.
 */
-var Compiler;
-(function (Compiler) {
+var COMPILER;
+(function (COMPILER) {
     var Lexer = (function () {
         function Lexer() {
         }
-        Lexer.prototype.tokenize = function () {
+        Lexer.tokenize = function (input) {
             console.log('performing tokenize()');
+            for (var i = 0; i < input.length; i++) {
+            }
             var tokens = [];
         };
         return Lexer;
     })();
-    Compiler.Lexer = Lexer;
-})(Compiler || (Compiler = {}));
+    COMPILER.Lexer = Lexer;
+})(COMPILER || (COMPILER = {}));

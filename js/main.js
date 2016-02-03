@@ -1,18 +1,24 @@
+///<reference path="globals.ts" />
 /*
     main.ts
 
     Responsible for managing the user interface and
     calling the compiler.
 */
-var Compiler;
-(function (Compiler) {
+var COMPILER;
+(function (COMPILER) {
     var Main = (function () {
         function Main() {
         }
-        Main.prototype.compile = function () {
-            Compiler.Lexer.tokenize();
+        Main.compile = function () {
+            var sourceCode = document.getElementById('inputText').value;
+            COMPILER.Lexer.tokenize(sourceCode);
+        };
+        Main.log = function (msg) {
+            console.log('log');
+            //document.createElement('div')
         };
         return Main;
     })();
-    Compiler.Main = Main;
-})(Compiler || (Compiler = {}));
+    COMPILER.Main = Main;
+})(COMPILER || (COMPILER = {}));

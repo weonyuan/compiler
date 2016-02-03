@@ -1,4 +1,4 @@
-///<reference path="main.ts" />
+///<reference path="globals.ts" />
 /*
     lexer.ts
 
@@ -6,10 +6,15 @@
     the tokens in a list.
 */
 
-module Compiler {
+module COMPILER {
     export class Lexer {
-        public tokenize(): void {
+        public static tokenize(input): void {
             console.log('performing tokenize()');
+
+            for (var i = 0; i < input.length; i++) {
+                
+            }
+
             var tokens = [];
         } 
     }
