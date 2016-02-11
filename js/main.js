@@ -53,7 +53,6 @@ var COMPILER;
             lastLog.appendChild(divLogMsg);
         };
         Main.resetLog = function () {
-            // Reset the logger
             document.getElementById('logger').innerHTML = '';
         };
         return Main;

@@ -14,7 +14,6 @@
 }
 
 /* Body */
-
 #bodyContent {
     margin: 0px auto;
     padding-bottom: 15px;
@@ -55,8 +54,11 @@ div.message {
     width: 73%;
 }
 
-/* Footer */
+#tokenList {
+    
+}
 
+/* Footer */
 footer {
     font-size: 9pt;
     margin-top: 20px;

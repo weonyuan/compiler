@@ -55,7 +55,6 @@ module COMPILER {
         }
 
         public static resetLog(): void {
-            // Reset the logger
             document.getElementById('logger').innerHTML = '';
         }
     }
