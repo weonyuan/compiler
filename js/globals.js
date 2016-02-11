@@ -31,6 +31,11 @@ var T_PRINT = 20;
 var T_WHILE = 21;
 var T_IF = 22;
 var T_ID = 23;
+// Logger constants
+var LOG_ERROR = -1;
+var LOG_WARNING = 0;
+var LOG_INFO = 1;
+var LOG_SUCCESS = 2;
 // why doesn't this work?
 var _Main;
 var _Lexer;

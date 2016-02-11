@@ -40,6 +40,12 @@ const T_IF: number = 22;
 
 const T_ID: number = 23;
 
+// Logger constants
+const LOG_ERROR: number = -1;
+const LOG_WARNING: number = 0;
+const LOG_INFO: number = 1;
+const LOG_SUCCESS: number = 2;
+
 // why doesn't this work?
 var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
