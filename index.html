@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <meta name="author" content="Weon Yuan" />
-    <title>Compiler</title>
+    <title>aBasicCompiler</title>
     <!-- Shared libraries -->
     <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
     
@@ -21,23 +21,14 @@
 
 <body>
     <nav id="header" class="navbar-default">
-        <div id="logo" class="col-md-11">compiler<sup>2</sup></div>
+        <div id="logo" class="col-md-11">aBasicCompiler</div>
         <button id="btnCompile" class="btn btn-primary col-md-1" onclick="COMPILER.Main.compile()">Compile</button>
     </nav>
     <div id="bodyContent">
-        <textarea id="inputText" cols="40" rows="10" placeholder="Enter your code here." autofocus></textarea>
-        <div id="logger">
-            <div class="log">
-                <div class="label label-warning status">WARNING</div>
-                <div class="message">Hello World</div>
-            </div>
-            <div class="log">
-                <div class="label label-success status">SUCCESS</div>
-                <div class="message">Your code is good.</div>
-            </div>
-        </div>
+        <textarea id="inputText" class="col-md-4" cols="40" rows="10" placeholder="Enter your code here." autofocus></textarea>
+        <div id="logger" class="col-md-8"></div>
     </div>
-    <footer>Made by Weon. But I'm not a rapper.</footer>
+    <footer class="col-md-12">Made by Weon. But I'm not a rapper.</footer>
 </body>
 
 </html>

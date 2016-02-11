@@ -4,7 +4,7 @@
   Global constants and variables.
 */
 
-const APP_NAME: string = 'compiler^2';
+const APP_NAME: string = 'aBasicCompiler';
 const APP_VERSION: string = '1.0';
 
 // Token constants

@@ -1,5 +1,5 @@
 # compiler
-Compiler^2. A compiler made by a compiled language (TypeScript). My other works pertaining to Marist College's CMPT 432 (Design of Compilers) can also be found here.
+aBasicCompiler. Not to be confused with BASIC. A compiler made by a compiled language (TypeScript). My other works pertaining to Marist College's CMPT 432 (Design of Compilers) can also be found here.
 
 ## Setup
 1. Download or fork this repo, and extract if necessary.
