@@ -14,6 +14,31 @@ var COMPILER;
             var sourceCode = document.getElementById('inputText').value;
             COMPILER.Lexer.tokenize(sourceCode);
         };
+        Main.updateTokenTable = function (tokens) {
+            this.resetTokenTable();
+            var tokenTable = document.getElementById('tokenTable');
+            for (var i = 0; i < tokens.length; i++) {
+                var token = document.createElement('tr');
+                token.id = 'token-' + i;
+                tokenTable.appendChild(token);
+                var tokenName = document.createElement('td');
+                tokenName.innerHTML = tokens[i].getName();
+                token.appendChild(tokenName);
+                var tokenValue = document.createElement('td');
+                tokenValue.innerHTML = tokens[i].getValue();
+                token.appendChild(tokenValue);
+            }
+        };
+        Main.resetTokenTable = function () {
+            var tokenTable = document.getElementById('tokenTable');
+            var tokenIndex = 0;
+            var currentToken = document.getElementById('token-' + tokenIndex);
+            while (currentToken !== null) {
+                tokenTable.removeChild(currentToken);
+                currentToken = document.getElementById('token-' + ++tokenIndex);
+                console.log(currentToken);
+            }
+        };
         Main.addLog = function (log) {
             // Construct the log's DOM
             var divLog = document.createElement('div');

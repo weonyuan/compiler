@@ -46,6 +46,36 @@ const LOG_WARNING: number = 0;
 const LOG_INFO: number = 1;
 const LOG_SUCCESS: number = 2;
 
+var tokenPattern = {
+    // Reserved keywords
+    T_PRINT: { type: T_PRINT, regex: /^print$/ },
+    T_WHILE: { type: T_WHILE, regex: /^while$/ },
+    T_IF: { type: T_IF, regex: /^if$/ },
+    T_INT: { type: T_INT, regex: /^int$/ },
+    T_STRING: { type: T_STRING, regex: /^string$/ },
+    T_BOOLEAN: { type: T_BOOLEAN, regex: /^boolean$/ },
+    T_TRUE: { type: T_TRUE, regex: /^true$/ },
+    T_FALSE: { type: T_FALSE, regex: /^false$/ },
+    // Identifiers
+    T_ID: { type: T_ID, regex: /^[a-z]$/ },
+    // Misc (symbols and characters)
+    T_EQUAL: { type: T_EQUAL, regex: /^\=\=$/ },
+    T_NOTEQUAL: { type: T_NOTEQUAL, regex: /^\!\=$/ },
+    T_LBRACE: { type: T_LBRACE, regex: /^\{$/ },
+    T_RBRACE: { type: T_RBRACE, regex: /^\}$/ },
+    T_LPAREN: { type: T_LPAREN, regex: /^\($/ },
+    T_RPAREN: { type: T_RPAREN, regex: /^\)$/ },
+    T_QUOTE: { type: T_QUOTE, regex: /^\"$/ },
+    T_DIGIT: { type: T_DIGIT, regex: /^[0-9]$/ },
+    T_CHAR: { type: T_CHAR, regex: /^[a-z]$/ },
+    T_ADD: { type: T_ADD, regex: /^\+$/ },
+    T_EXCLAMATION: { type: T_EXCLAMATION, regex: /^\!$/ },
+    T_ASSIGN: { type: T_ASSIGN, regex: /^\=$/ },
+    T_WHITESPACE: { type: T_WHITESPACE, regex: /^\s|\n$/ },
+    T_EOF: { type: T_EOF, regex: /^\$$/ }
+};
+
 // why doesn't this work?
 var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
+var _Token: COMPILER.Token;
