@@ -40,7 +40,6 @@ module COMPILER {
             while (currentToken !== null) {
                 tokenTable.removeChild(currentToken);
                 currentToken = document.getElementById('token-' + ++tokenIndex);
-                console.log(currentToken);
             }
         }
 
