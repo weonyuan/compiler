@@ -22,6 +22,8 @@ var COMPILER;
             COMPILER.Main.addLog(log);
             var tokens = [];
             var codeChunks = this.splitCodeBySpace(input);
+            console.log(codeChunks);
+            codeChunks = this.splitChunksToChars(codeChunks);
             var eofExists = false;
             /*
                 x 1. Take the input string
@@ -39,25 +41,32 @@ var COMPILER;
                 while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
                     var currentChunk = codeChunks[currentIndex++];
-                    var buffer = '';
                     console.log(currentChunk);
                     // Match the chunk with a token pattern
+                    var isMatched = false;
                     for (var tokenName in tokenPattern) {
-                        var isMatched = false;
                         if (currentChunk.match(tokenPattern[tokenName].regex)) {
                             isMatched = true;
                             switch (tokenPattern[tokenName].type) {
+                                case T_ASSIGN:
+                                    if (codeChunks[currentIndex + 1] !== undefined) {
+                                        currentChunk += codeChunks[currentIndex++];
+                                        tokenName = 'T_EQUAL';
+                                    }
+                                    break;
                                 case T_EOF:
                                     eofExists = true;
                                     break;
                             }
-                            var token = new COMPILER.Token();
-                            token.setName(tokenName);
-                            token.setType(tokenPattern[tokenName].type);
-                            token.setValue(currentChunk);
-                            tokens.push(token);
                             break;
                         }
+                    }
+                    if (isMatched) {
+                        var token = new COMPILER.Token();
+                        token.setName(tokenName);
+                        token.setType(tokenPattern[tokenName].type);
+                        token.setValue(currentChunk);
+                        tokens.push(token);
                     }
                 }
                 if (!eofExists) {
@@ -106,8 +115,29 @@ var COMPILER;
                     buffer += input.charAt(i);
                 }
             }
-            console.log(codeChunks);
             return codeChunks;
+        };
+        Lexer.splitChunksToChars = function (codeChunks) {
+            var buffer = '';
+            var newCodeChunks = [];
+            var splitRegex = /^[\{ \ }\(\)\!\=\+]$/;
+            for (var i = 0; i < codeChunks.length; i++) {
+                var currentChunk = codeChunks[i];
+                for (var j = 0; j < codeChunks[i].length; j++) {
+                    if (codeChunks[i].charAt(j).match(splitRegex)) {
+                        newCodeChunks.push(codeChunks[i].charAt(j));
+                    }
+                    else {
+                        buffer += codeChunks[i].charAt(j);
+                        if (j === codeChunks[i].length - 1) {
+                            newCodeChunks.push(buffer);
+                            buffer = '';
+                        }
+                    }
+                }
+            }
+            console.log(newCodeChunks);
+            return newCodeChunks;
         };
         return Lexer;
     })();

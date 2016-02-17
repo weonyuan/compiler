@@ -25,6 +25,8 @@ module COMPILER {
             var tokens = [];
 
             var codeChunks: string[] = this.splitCodeBySpace(input);
+            console.log(codeChunks);
+            codeChunks = this.splitChunksToChars(codeChunks);
 
             var eofExists: boolean = false;
 
@@ -46,31 +48,37 @@ module COMPILER {
                 while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
                     var currentChunk: string = codeChunks[currentIndex++];
-                    var buffer: string = '';
                     console.log(currentChunk);
 
                     // Match the chunk with a token pattern
+                    var isMatched: boolean = false;
                     for (var tokenName in tokenPattern) {
-                        var isMatched: boolean = false;
                         if (currentChunk.match(tokenPattern[tokenName].regex)) {
                             isMatched = true;
 
                             switch (tokenPattern[tokenName].type) {
+                                case T_ASSIGN:
+                                    if (codeChunks[currentIndex + 1] !== undefined) {
+                                        currentChunk += codeChunks[currentIndex++];
+                                        tokenName = 'T_EQUAL';
+                                    }
+
+                                    break;
                                 case T_EOF:
                                     eofExists = true;
                                     break;
                             }
-
-
-                            var token = new Token();
-                            token.setName(tokenName);
-                            token.setType(tokenPattern[tokenName].type);
-                            token.setValue(currentChunk);
-
-                            tokens.push(token);
-
                             break;
                         }
+                    }
+
+                    if (isMatched) {
+                        var token = new Token();
+                        token.setName(tokenName);
+                        token.setType(tokenPattern[tokenName].type);
+                        token.setValue(currentChunk);
+
+                        tokens.push(token);
                     }
                 }
 
@@ -102,14 +110,14 @@ module COMPILER {
                 }
             } else {
                 numErrors++;
-                
+
                 log.status = LOG_ERROR;
                 log.msg = 'No code to compile.';
             }
 
             Main.updateTokenTable(tokens);
             Main.addLog(log);
-        } 
+        }
 
         public static splitCodeBySpace(input): string[] {
             var buffer: string = '';
@@ -119,7 +127,6 @@ module COMPILER {
                 if (input.charAt(i).match(splitRegex)) {
                     codeChunks.push(buffer);
                     buffer = '';
-                    // document.getElementById('inputText')
                 } else if (i === input.length - 1) {
                     buffer += input.charAt(i);
                     codeChunks.push(buffer);
@@ -128,8 +135,33 @@ module COMPILER {
                 }
             }
 
-            console.log(codeChunks);
             return codeChunks;
+        }
+
+        public static splitChunksToChars(codeChunks): string[] {
+            var buffer: string = '';
+            var newCodeChunks: string[] = [];
+            var splitRegex = /^[\{ \ }\(\)\!\=\+]$/;
+
+            for (var i = 0; i < codeChunks.length; i++) {
+                var currentChunk: string = codeChunks[i];
+
+                for (var j = 0; j < codeChunks[i].length; j++) {
+                    if (codeChunks[i].charAt(j).match(splitRegex)) {
+                        newCodeChunks.push(codeChunks[i].charAt(j));
+                    } else {
+                        buffer += codeChunks[i].charAt(j);
+
+                        if (j === codeChunks[i].length - 1) {
+                            newCodeChunks.push(buffer);
+                            buffer = '';
+                        }
+                    }
+                }
+            }
+            console.log(newCodeChunks);
+
+            return newCodeChunks;
         }
     }
 }
