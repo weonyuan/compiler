@@ -48,34 +48,33 @@ module COMPILER {
                 while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
                     var currentChunk: string = codeChunks[currentIndex++];
-                    console.log(currentChunk);
 
                     // Match the chunk with a token pattern
                     var isMatched: boolean = false;
-                    for (var tokenName in tokenPattern) {
-                        if (currentChunk.match(tokenPattern[tokenName].regex)) {
-                            isMatched = true;
+                    var matchedTokenName: string = this.matchTokenPattern(currentChunk)
+                    if (matchedTokenName !== null) {
+                        isMatched = true;
 
-                            switch (tokenPattern[tokenName].type) {
-                                case T_ASSIGN:
-                                    if (codeChunks[currentIndex + 1] !== undefined) {
+                        switch (tokenPattern[matchedTokenName].type) {
+                            case T_ASSIGN:
+                                if (codeChunks[currentIndex + 1] !== undefined) {
+                                    if (this.matchTokenPattern(currentChunk + codeChunks[currentIndex]) !== null) {
+                                        console.log('triggered');
                                         currentChunk += codeChunks[currentIndex++];
-                                        tokenName = 'T_EQUAL';
+                                        matchedTokenName = this.matchTokenPattern(currentChunk);
                                     }
-
-                                    break;
-                                case T_EOF:
-                                    eofExists = true;
-                                    break;
-                            }
-                            break;
+                                }
+                                break;
+                            case T_EOF:
+                                eofExists = true;
+                                break;
                         }
                     }
 
                     if (isMatched) {
                         var token = new Token();
-                        token.setName(tokenName);
-                        token.setType(tokenPattern[tokenName].type);
+                        token.setName(matchedTokenName);
+                        token.setType(tokenPattern[matchedTokenName].type);
                         token.setValue(currentChunk);
 
                         tokens.push(token);
@@ -117,6 +116,18 @@ module COMPILER {
 
             Main.updateTokenTable(tokens);
             Main.addLog(log);
+        }
+
+        public static matchTokenPattern(chunk): string {
+            var tokenName: string = null;
+            console.log(chunk);
+            for (name in tokenPattern) {
+                if (chunk.match(tokenPattern[name].regex)) {
+                    tokenName = name;
+                }
+            }
+
+            return tokenName;
         }
 
         public static splitCodeBySpace(input): string[] {
