@@ -25,15 +25,6 @@ var COMPILER;
             console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
             var eofExists = false;
-            /*
-                x 1. Take the input string
-                x 2. Read the string character by character
-                x 3. As you read a new character, build the buffer
-                4. Keep building until you've reached a null/undefined/T_WHITESPSACE
-                5. Take the buffer and put it into a pattern match
-                6. It should match the longest token before comparing the buffer to shorter tokens
-                7. If matched, create a new token from the pattern and push it into token table
-            */
             if (input.length > 0) {
                 var currentIndex = 0;
                 var numErrors = 0;
@@ -79,7 +70,12 @@ var COMPILER;
                         tokens.push(token);
                     }
                 }
-                if (!eofExists) {
+                if (tokens.length === 0) {
+                    numErrors++;
+                    log.status = LOG_ERROR;
+                    log.msg = 'No tokens were found in input string.';
+                }
+                else if (!eofExists) {
                     numWarnings++;
                     log.status = LOG_WARNING;
                     log.msg = 'EOF missing. Adding a EOF token.';
@@ -89,11 +85,6 @@ var COMPILER;
                     token.setValue('$');
                     tokens.push(token);
                     COMPILER.Main.addLog(log);
-                }
-                if (tokens.length === 0) {
-                    numErrors++;
-                    log.status = LOG_ERROR;
-                    log.msg = 'No tokens were found in input string.';
                 }
                 if (numErrors === 0) {
                     log.status = LOG_INFO;
