@@ -25,7 +25,7 @@ module COMPILER {
             var tokens = [];
 
             var codeChunks: string[] = this.splitCodeBySpace(input);
-
+            console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
 
             var eofExists: boolean = false;
@@ -58,6 +58,7 @@ module COMPILER {
 
                         switch (tokenPattern[matchedTokenName].type) {
                             case T_ASSIGN:
+                            case T_EXCLAMATION:
                                 if (codeChunks[currentIndex + 1] !== undefined) {
                                     if (this.matchTokenPattern(currentChunk + codeChunks[currentIndex]) !== null) {
                                         console.log('triggered');
@@ -177,10 +178,13 @@ module COMPILER {
                 var currentChunk: string = codeChunks[i];
 
                 for (var j = 0; j < codeChunks[i].length; j++) {
-                    if (codeChunks[i].charAt(j).match(splitRegex)) {
-                        newCodeChunks.push(buffer);
+                    if (codeChunks[i].charAt(j).match(splitRegex)) {                        
+                        if (buffer.length > 0) {
+                            newCodeChunks.push(buffer);
+                            buffer = '';
+                        }
+
                         newCodeChunks.push(codeChunks[i].charAt(j));
-                        buffer = '';
                     } else {
                         buffer += codeChunks[i].charAt(j);
 
