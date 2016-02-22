@@ -22,7 +22,6 @@ var COMPILER;
             COMPILER.Main.addLog(log);
             var tokens = [];
             var codeChunks = this.splitCodeBySpace(input);
-            console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
             var eofExists = false;
             /*
@@ -38,6 +37,7 @@ var COMPILER;
                 var currentIndex = 0;
                 var numErrors = 0;
                 var numWarnings = 0;
+                var stringMode = false;
                 while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
                     var currentChunk = codeChunks[currentIndex++];
@@ -54,6 +54,14 @@ var COMPILER;
                                         currentChunk += codeChunks[currentIndex++];
                                         matchedTokenName = this.matchTokenPattern(currentChunk);
                                     }
+                                }
+                                break;
+                            case T_QUOTE:
+                                stringMode = !stringMode;
+                                break;
+                            case T_CHAR:
+                                if (!stringMode) {
+                                    matchedTokenName = 'T_ID';
                                 }
                                 break;
                             case T_EOF:
@@ -100,7 +108,6 @@ var COMPILER;
         };
         Lexer.matchTokenPattern = function (chunk) {
             var tokenName = null;
-            console.log(chunk);
             for (name in tokenPattern) {
                 if (chunk.match(tokenPattern[name].regex)) {
                     tokenName = name;
@@ -112,8 +119,12 @@ var COMPILER;
             var buffer = '';
             var codeChunks = [];
             var splitRegex = /^[\s|\n]+$/;
+            var stringMode = false;
             for (var i = 0; i < input.length; i++) {
-                if (input.charAt(i).match(splitRegex)) {
+                if (input.charAt(i).match('\"')) {
+                    stringMode = !stringMode;
+                }
+                if (input.charAt(i).match(splitRegex) && !stringMode) {
                     codeChunks.push(buffer);
                     buffer = '';
                 }
@@ -123,6 +134,10 @@ var COMPILER;
                 }
                 else {
                     buffer += input.charAt(i);
+                }
+                if (stringMode) {
+                    codeChunks.push(buffer);
+                    buffer = '';
                 }
             }
             return codeChunks;
@@ -135,7 +150,9 @@ var COMPILER;
                 var currentChunk = codeChunks[i];
                 for (var j = 0; j < codeChunks[i].length; j++) {
                     if (codeChunks[i].charAt(j).match(splitRegex)) {
+                        newCodeChunks.push(buffer);
                         newCodeChunks.push(codeChunks[i].charAt(j));
+                        buffer = '';
                     }
                     else {
                         buffer += codeChunks[i].charAt(j);
@@ -144,6 +161,7 @@ var COMPILER;
                             buffer = '';
                         }
                     }
+                    console.log(buffer);
                 }
             }
             console.log(newCodeChunks);
