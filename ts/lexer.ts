@@ -23,8 +23,9 @@ module COMPILER {
             Main.addLog(log);
 
             var tokens = [];
+            Main.updateTokenTable(tokens);
 
-            var codeChunks: string[] = this.splitCodeBySpace(input);
+            var codeChunks: any = this.splitCodeBySpace(input);
             console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
 
@@ -36,13 +37,14 @@ module COMPILER {
                 var numWarnings: number = 0;
                 var stringMode: boolean = false;
 
+                TokenizeLoop:
                 while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
-                    var currentChunk: string = codeChunks[currentIndex++];
+                    var currentChunk: any = codeChunks[currentIndex++];
 
                     // Match the chunk with a token pattern
                     var isMatched: boolean = false;
-                    var matchedTokenName: string = this.matchTokenPattern(currentChunk)
+                    var matchedTokenName: string = this.matchTokenPattern(currentChunk.value)
                     if (matchedTokenName !== null) {
                         isMatched = true;
 
@@ -50,10 +52,9 @@ module COMPILER {
                             case T_ASSIGN:
                             case T_EXCLAMATION:
                                 if (codeChunks[currentIndex + 1] !== undefined) {
-                                    if (this.matchTokenPattern(currentChunk + codeChunks[currentIndex]) !== null) {
-                                        console.log('triggered');
+                                    if (this.matchTokenPattern(currentChunk.value + codeChunks[currentIndex].value) !== null) {
                                         currentChunk += codeChunks[currentIndex++];
-                                        matchedTokenName = this.matchTokenPattern(currentChunk);
+                                        matchedTokenName = this.matchTokenPattern(currentChunk.value);
                                     }
                                 }
                                 break;
@@ -65,28 +66,48 @@ module COMPILER {
                                     matchedTokenName = 'T_ID';
                                 }
                                 break;
+                            case T_WHITESPACE:
+                                if (currentChunk.value.match(/^\n$/)) {
+                                    numErrors++;
+
+                                    log.status = LOG_ERROR;
+                                    log.msg = 'Newline is not allowed in strings.';
+                                    Main.addLog(log);
+                                    break TokenizeLoop;
+                                }
+                                break;
                             case T_EOF:
                                 eofExists = true;
                                 break;
                         }
+                    } else {
+                        numErrors++;
+
+                        log.status = LOG_ERROR;
+                        log.msg = 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum;
+                        Main.addLog(log);
+
+                        break;
                     }
 
                     if (isMatched) {
                         var token = new Token();
                         token.setName(matchedTokenName);
                         token.setType(tokenPattern[matchedTokenName].type);
-                        token.setValue(currentChunk);
+                        token.setValue(currentChunk.value);
+                        token.setLineNum(currentChunk.lineNum);
 
                         tokens.push(token);
                     }
                 }
-                
+
                 if (tokens.length === 0) {
                     numErrors++;
 
                     log.status = LOG_ERROR;
                     log.msg = 'No tokens were found in input string.';
-                } else if (!eofExists) {
+                    Main.addLog(log);
+                } else if (numErrors === 0 && !eofExists) {
                     numWarnings++;
 
                     log.status = LOG_WARNING;
@@ -96,15 +117,18 @@ module COMPILER {
                     token.setName('T_EOF');
                     token.setType(T_EOF);
                     token.setValue('$');
+                    token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
 
                     tokens.push(token);
-
-                    Main.addLog(log);
-                }
-                if (numErrors === 0) {
+                } else {
                     log.status = LOG_INFO;
                     log.msg = 'Lexer found ' + numErrors + ' error(s) and ' + numWarnings + ' warning(s).';
                 }
+
+                if (numErrors === 0) {
+                    Main.updateTokenTable(tokens);
+                }
+
             } else {
                 numErrors++;
 
@@ -112,7 +136,6 @@ module COMPILER {
                 log.msg = 'No code to compile.';
             }
 
-            Main.updateTokenTable(tokens);
             Main.addLog(log);
         }
 
@@ -129,27 +152,46 @@ module COMPILER {
 
         public static splitCodeBySpace(input): string[] {
             var buffer: string = '';
-            var codeChunks: string[] = [];
+            var codeChunks = [];
             var splitRegex = /^[\s|\n]+$/
             var stringMode: boolean = false;
+            var currentLineNum: number = 1;
 
             for (var i = 0; i < input.length; i++) {
+                var chunk = {
+                    value: null,
+                    lineNum: null
+                };
+
                 if (input.charAt(i).match('\"')) {
                     stringMode = !stringMode;
                 }
 
+                
+
                 if (input.charAt(i).match(splitRegex) && !stringMode) {
-                    codeChunks.push(buffer);
+                    chunk.value = buffer;
+                    chunk.lineNum = currentLineNum;
+                    codeChunks.push(chunk);
                     buffer = '';
+
+                    if (input.charAt(i).match(/^\n$/)) {
+                        console.log('new line!');
+                        currentLineNum++;
+                    }
                 } else if (i === input.length - 1) {
                     buffer += input.charAt(i);
-                    codeChunks.push(buffer);
+                    chunk.value = buffer;
+                    chunk.lineNum = currentLineNum;
+                    codeChunks.push(chunk);
                 } else {
                     buffer += input.charAt(i);
                 }
 
                 if (stringMode) {
-                    codeChunks.push(buffer);
+                    chunk.value = buffer;
+                    chunk.lineNum = currentLineNum;
+                    codeChunks.push(chunk);
                     buffer = '';
                 }
             }
@@ -163,26 +205,24 @@ module COMPILER {
             var splitRegex = /^[\{ \ }\(\)\!\=\+]$/;
 
             for (var i = 0; i < codeChunks.length; i++) {
-                var currentChunk: string = codeChunks[i];
+                var currentChunk = codeChunks[i];
 
-                for (var j = 0; j < codeChunks[i].length; j++) {
-                    if (codeChunks[i].charAt(j).match(splitRegex)) {                        
+                for (var j = 0; j < currentChunk.value.length; j++) {
+                    if (currentChunk.value.charAt(j).match(splitRegex)) {                        
                         if (buffer.length > 0) {
-                            newCodeChunks.push(buffer);
+                            newCodeChunks.push(currentChunk);
                             buffer = '';
                         }
 
-                        newCodeChunks.push(codeChunks[i].charAt(j));
+                        newCodeChunks.push(currentChunk);
                     } else {
-                        buffer += codeChunks[i].charAt(j);
+                        buffer += currentChunk.value.charAt(j);
 
-                        if (j === codeChunks[i].length - 1) {
-                            newCodeChunks.push(buffer);
+                        if (j === currentChunk.value.length - 1) {
+                            newCodeChunks.push(currentChunk);
                             buffer = '';
                         }
                     }
-
-                    console.log(buffer);
                 }
             }
             console.log(newCodeChunks);
