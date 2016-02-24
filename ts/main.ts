@@ -10,7 +10,11 @@ module COMPILER {
     export class Main {
         public static compile(): void {
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
-            Lexer.tokenize(sourceCode);
+            _Tokens = Lexer.tokenize(sourceCode);
+            
+            if (_Tokens !== null) {
+                Parser.parseProgram(_Tokens);
+            }
         }
 
         public static updateTokenTable(tokens): void {

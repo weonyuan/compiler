@@ -67,4 +67,9 @@ var tokenPattern = {
 // why doesn't this work?
 var _Main;
 var _Lexer;
+var _Parser;
 var _Token;
+var _Errors = 0;
+var _Warnings = 0;
+var _Tokens = [];
+var _CurrentToken = null;

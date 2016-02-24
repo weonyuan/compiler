@@ -23,13 +23,12 @@ var COMPILER;
             var tokens = [];
             COMPILER.Main.updateTokenTable(tokens);
             var codeChunks = this.splitCodeBySpace(input);
-            console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
             var eofExists = false;
             if (input.length > 0) {
                 var currentIndex = 0;
-                var numErrors = 0;
-                var numWarnings = 0;
+                var _Errors = 0;
+                var _Warnings = 0;
                 var stringMode = false;
                 TokenizeLoop: while (currentIndex < codeChunks.length && !eofExists) {
                     // Scan through the chunks
@@ -44,7 +43,7 @@ var COMPILER;
                             case T_EXCLAMATION:
                                 if (codeChunks[currentIndex + 1] !== undefined) {
                                     if (this.matchTokenPattern(currentChunk.value + codeChunks[currentIndex].value) !== null) {
-                                        currentChunk += codeChunks[currentIndex++];
+                                        currentChunk.value += codeChunks[currentIndex++].value;
                                         matchedTokenName = this.matchTokenPattern(currentChunk.value);
                                     }
                                 }
@@ -59,7 +58,7 @@ var COMPILER;
                                 break;
                             case T_WHITESPACE:
                                 if (currentChunk.value.match(/^\n$/)) {
-                                    numErrors++;
+                                    _Errors++;
                                     log.status = LOG_ERROR;
                                     log.msg = 'Newline is not allowed in strings.';
                                     COMPILER.Main.addLog(log);
@@ -72,7 +71,7 @@ var COMPILER;
                         }
                     }
                     else {
-                        numErrors++;
+                        _Errors++;
                         log.status = LOG_ERROR;
                         log.msg = 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum;
                         COMPILER.Main.addLog(log);
@@ -88,13 +87,12 @@ var COMPILER;
                     }
                 }
                 if (tokens.length === 0) {
-                    numErrors++;
+                    _Errors++;
                     log.status = LOG_ERROR;
                     log.msg = 'No tokens were found in input string.';
-                    COMPILER.Main.addLog(log);
                 }
-                else if (numErrors === 0 && !eofExists) {
-                    numWarnings++;
+                else if (_Errors === 0 && !eofExists) {
+                    _Warnings++;
                     log.status = LOG_WARNING;
                     log.msg = 'EOF missing. Adding a EOF token.';
                     var token = new COMPILER.Token();
@@ -106,24 +104,26 @@ var COMPILER;
                 }
                 else {
                     log.status = LOG_INFO;
-                    log.msg = 'Lexer found ' + numErrors + ' error(s) and ' + numWarnings + ' warning(s).';
+                    log.msg = 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).';
                 }
-                if (numErrors === 0) {
+                if (_Errors === 0) {
                     COMPILER.Main.updateTokenTable(tokens);
                 }
             }
             else {
-                numErrors++;
+                _Errors++;
                 log.status = LOG_ERROR;
                 log.msg = 'No code to compile.';
             }
             COMPILER.Main.addLog(log);
+            return tokens;
         };
         Lexer.matchTokenPattern = function (chunk) {
             var tokenName = null;
             for (name in tokenPattern) {
                 if (chunk.match(tokenPattern[name].regex)) {
                     tokenName = name;
+                    break;
                 }
             }
             return tokenName;
@@ -148,7 +148,6 @@ var COMPILER;
                     codeChunks.push(chunk);
                     buffer = '';
                     if (input.charAt(i).match(/^\n$/)) {
-                        console.log('new line!');
                         currentLineNum++;
                     }
                 }
@@ -179,21 +178,35 @@ var COMPILER;
                 for (var j = 0; j < currentChunk.value.length; j++) {
                     if (currentChunk.value.charAt(j).match(splitRegex)) {
                         if (buffer.length > 0) {
-                            newCodeChunks.push(currentChunk);
+                            var bufferChunk = {
+                                value: null,
+                                lineNum: currentChunk.lineNum
+                            };
+                            bufferChunk.value = buffer;
+                            newCodeChunks.push(bufferChunk);
                             buffer = '';
                         }
-                        newCodeChunks.push(currentChunk);
+                        var charChunk = {
+                            value: null,
+                            lineNum: currentChunk.lineNum
+                        };
+                        charChunk.value = currentChunk.value.charAt(j);
+                        newCodeChunks.push(charChunk);
                     }
                     else {
                         buffer += currentChunk.value.charAt(j);
                         if (j === currentChunk.value.length - 1) {
-                            newCodeChunks.push(currentChunk);
+                            var bufferChunk = {
+                                value: null,
+                                lineNum: currentChunk.lineNum
+                            };
+                            bufferChunk.value = buffer;
+                            newCodeChunks.push(bufferChunk);
                             buffer = '';
                         }
                     }
                 }
             }
-            console.log(newCodeChunks);
             return newCodeChunks;
         };
         return Lexer;

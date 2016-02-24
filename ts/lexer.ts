@@ -10,7 +10,7 @@
 
 module COMPILER {
     export class Lexer {
-        public static tokenize(input): void {
+        public static tokenize(input): any {
             Main.resetLog();
 
             var log = {
@@ -22,19 +22,18 @@ module COMPILER {
             log.msg = 'Performing input tokenization through lexer.';
             Main.addLog(log);
 
-            var tokens = [];
+            var tokens: any = [];
             Main.updateTokenTable(tokens);
 
             var codeChunks: any = this.splitCodeBySpace(input);
-            console.log(codeChunks);
             codeChunks = this.splitChunksToChars(codeChunks);
 
             var eofExists: boolean = false;
 
             if (input.length > 0) {
                 var currentIndex: number = 0;
-                var numErrors: number = 0;
-                var numWarnings: number = 0;
+                var _Errors: number = 0;
+                var _Warnings: number = 0;
                 var stringMode: boolean = false;
 
                 TokenizeLoop:
@@ -53,7 +52,7 @@ module COMPILER {
                             case T_EXCLAMATION:
                                 if (codeChunks[currentIndex + 1] !== undefined) {
                                     if (this.matchTokenPattern(currentChunk.value + codeChunks[currentIndex].value) !== null) {
-                                        currentChunk += codeChunks[currentIndex++];
+                                        currentChunk.value += codeChunks[currentIndex++].value;
                                         matchedTokenName = this.matchTokenPattern(currentChunk.value);
                                     }
                                 }
@@ -68,7 +67,7 @@ module COMPILER {
                                 break;
                             case T_WHITESPACE:
                                 if (currentChunk.value.match(/^\n$/)) {
-                                    numErrors++;
+                                    _Errors++;
 
                                     log.status = LOG_ERROR;
                                     log.msg = 'Newline is not allowed in strings.';
@@ -81,7 +80,7 @@ module COMPILER {
                                 break;
                         }
                     } else {
-                        numErrors++;
+                        _Errors++;
 
                         log.status = LOG_ERROR;
                         log.msg = 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum;
@@ -102,13 +101,12 @@ module COMPILER {
                 }
 
                 if (tokens.length === 0) {
-                    numErrors++;
+                    _Errors++;
 
                     log.status = LOG_ERROR;
                     log.msg = 'No tokens were found in input string.';
-                    Main.addLog(log);
-                } else if (numErrors === 0 && !eofExists) {
-                    numWarnings++;
+                } else if (_Errors === 0 && !eofExists) {
+                    _Warnings++;
 
                     log.status = LOG_WARNING;
                     log.msg = 'EOF missing. Adding a EOF token.';
@@ -122,21 +120,23 @@ module COMPILER {
                     tokens.push(token);
                 } else {
                     log.status = LOG_INFO;
-                    log.msg = 'Lexer found ' + numErrors + ' error(s) and ' + numWarnings + ' warning(s).';
+                    log.msg = 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).';
                 }
 
-                if (numErrors === 0) {
+                if (_Errors === 0) {
                     Main.updateTokenTable(tokens);
                 }
 
             } else {
-                numErrors++;
+                _Errors++;
 
                 log.status = LOG_ERROR;
                 log.msg = 'No code to compile.';
             }
 
             Main.addLog(log);
+
+            return tokens;
         }
 
         public static matchTokenPattern(chunk): string {
@@ -144,9 +144,10 @@ module COMPILER {
             for (name in tokenPattern) {
                 if (chunk.match(tokenPattern[name].regex)) {
                     tokenName = name;
+                    break;
                 }
             }
-
+            
             return tokenName;
         }
 
@@ -166,7 +167,6 @@ module COMPILER {
                 if (input.charAt(i).match('\"')) {
                     stringMode = !stringMode;
                 }
-
                 
 
                 if (input.charAt(i).match(splitRegex) && !stringMode) {
@@ -176,7 +176,6 @@ module COMPILER {
                     buffer = '';
 
                     if (input.charAt(i).match(/^\n$/)) {
-                        console.log('new line!');
                         currentLineNum++;
                     }
                 } else if (i === input.length - 1) {
@@ -201,31 +200,48 @@ module COMPILER {
 
         public static splitChunksToChars(codeChunks): string[] {
             var buffer: string = '';
-            var newCodeChunks: string[] = [];
+            var newCodeChunks: any[] = [];
             var splitRegex = /^[\{ \ }\(\)\!\=\+]$/;
 
             for (var i = 0; i < codeChunks.length; i++) {
                 var currentChunk = codeChunks[i];
 
                 for (var j = 0; j < currentChunk.value.length; j++) {
-                    if (currentChunk.value.charAt(j).match(splitRegex)) {                        
+                    if (currentChunk.value.charAt(j).match(splitRegex)) {
                         if (buffer.length > 0) {
-                            newCodeChunks.push(currentChunk);
+                            var bufferChunk = {
+                                value: null,
+                                lineNum: currentChunk.lineNum
+                            };
+
+                            bufferChunk.value = buffer;
+                            newCodeChunks.push(bufferChunk);
                             buffer = '';
                         }
+                        
+                        var charChunk = {
+                            value: null,
+                            lineNum: currentChunk.lineNum
+                        };
 
-                        newCodeChunks.push(currentChunk);
+                        charChunk.value = currentChunk.value.charAt(j);
+                        newCodeChunks.push(charChunk);    
                     } else {
                         buffer += currentChunk.value.charAt(j);
 
                         if (j === currentChunk.value.length - 1) {
-                            newCodeChunks.push(currentChunk);
+                            var bufferChunk = {
+                                value: null,
+                                lineNum: currentChunk.lineNum
+                            };
+
+                            bufferChunk.value = buffer;
+                            newCodeChunks.push(bufferChunk);
                             buffer = '';
                         }
                     }
                 }
             }
-            console.log(newCodeChunks);
             return newCodeChunks;
         }
     }

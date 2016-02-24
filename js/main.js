@@ -12,7 +12,10 @@ var COMPILER;
         }
         Main.compile = function () {
             var sourceCode = document.getElementById('inputText').value;
-            COMPILER.Lexer.tokenize(sourceCode);
+            _Tokens = COMPILER.Lexer.tokenize(sourceCode);
+            if (_Tokens !== null) {
+                COMPILER.Parser.parseProgram(_Tokens);
+            }
         };
         Main.updateTokenTable = function (tokens) {
             this.resetTokenTable();

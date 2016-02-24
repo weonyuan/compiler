@@ -78,4 +78,10 @@ var tokenPattern = {
 // why doesn't this work?
 var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
+var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
+
+var _Errors: number = 0;
+var _Warnings: number = 0;
+var _Tokens: any = [];
+var _CurrentToken: any = null;
