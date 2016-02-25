@@ -17,9 +17,10 @@ var COMPILER;
         };
         // { StatementList }
         Parser.parseBlock = function () {
+            console.log('parseBlock()');
             _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
             if (_CurrentToken.getType() === T_LBRACE) {
+                _CurrentToken = this.getNextToken();
                 this.parseStatementList();
                 if (_CurrentToken.getType() !== T_RBRACE) {
                     console.log('error');
@@ -39,8 +40,7 @@ var COMPILER;
         // Statement StatementList
         // epsilon
         Parser.parseStatementList = function () {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
+            console.log('parseStatementList()');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                 case T_WHILE:
@@ -54,6 +54,7 @@ var COMPILER;
                     this.parseStatementList();
                     break;
                 default:
+                    // epsilon
                     break;
             }
         };
@@ -64,6 +65,7 @@ var COMPILER;
         // IfStatement
         // Block
         Parser.parseStatement = function () {
+            console.log('parseStatement()');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                     this.parsePrintStatement();
@@ -99,14 +101,16 @@ var COMPILER;
         };
         // print ( Expr )
         Parser.parsePrintStatement = function () {
+            console.log('parsePrintStatement()');
             if (_CurrentToken.getType() === T_PRINT) {
                 _CurrentToken = this.getNextToken();
                 console.log(_CurrentToken);
                 if (_CurrentToken.getType() === T_LPAREN) {
                     this.parseExpr();
-                    _CurrentToken = this.getNextToken();
                     console.log(_CurrentToken);
+                    _CurrentToken = this.getNextToken();
                     if (_CurrentToken.getType() !== T_RPAREN) {
+                        _CurrentToken = this.getNextToken();
                         console.log('print statement parse error');
                     }
                 }
@@ -117,10 +121,10 @@ var COMPILER;
         };
         // Id = Expr
         Parser.parseAssignmentStatement = function () {
+            console.log('parseAssignmentStatement()');
             this.parseId();
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
-            if (_CurrentToken === T_ASSIGN) {
+            if (_CurrentToken.getType() === T_ASSIGN) {
+                _CurrentToken = this.getNextToken();
                 this.parseExpr();
             }
             else {
@@ -129,10 +133,11 @@ var COMPILER;
         };
         // type Id
         Parser.parseVarDecl = function () {
+            console.log('parseVarDecl()');
             this.parseType();
             this.parseId();
         };
-        // while BooleanExpr Block
+        // TODO: while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             this.parseBooleanExpr();
             this.parseBlock();
@@ -154,16 +159,17 @@ var COMPILER;
         // BooleanExpr
         // Id
         Parser.parseExpr = function () {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
+            console.log('parseExpr()');
             switch (_CurrentToken.getType()) {
-                case T_INT:
+                case T_DIGIT:
                     this.parseIntExpr();
                     break;
-                case T_STRING:
+                case T_QUOTE:
                     this.parseStringExpr();
                     break;
-                case T_BOOLEAN:
+                case T_TRUE:
+                case T_FALSE:
+                case T_LPAREN:
                     this.parseBooleanExpr();
                     break;
                 case T_ID:
@@ -177,68 +183,94 @@ var COMPILER;
         // digit intop Expr
         // digit
         Parser.parseIntExpr = function () {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
+            console.log('parseIntExpr()');
             if (_CurrentToken.getType() === T_DIGIT) {
-                if (this.getNextToken() === T_ADD) {
+                _CurrentToken = this.getNextToken();
+                // Check to see if the new token is + operator
+                if (_CurrentToken.getType() === T_ADD) {
+                    // Grab the next token and verify for a digit
                     _CurrentToken = this.getNextToken();
-                    switch (_CurrentToken.getType()) {
-                        case T_INT:
-                        case T_STRING:
-                        case T_BOOLEAN:
-                        case T_ID:
-                            this.parseExpr();
-                            break;
-                        default:
-                            console.log('parseIntExpr error');
-                            break;
-                    }
+                    this.parseExpr();
                 }
             }
             else {
                 console.log('not a digit: ' + _CurrentToken.getValue());
             }
         };
-        // " CharList "
+        // TODO: " CharList "
         Parser.parseStringExpr = function () {
+            if (_CurrentToken.getType() === T_QUOTE) {
+                this.parseCharList();
+                _CurrentToken = this.getNextToken();
+                if (_CurrentToken.getType() !== T_QUOTE) {
+                    console.log('parseStringExpr error: expected a quote');
+                }
+            }
         };
         // ( Expr boolop Expr )
         // boolval
         Parser.parseBooleanExpr = function () {
-            this.parseExpr();
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
-            if (_CurrentToken === T_EQUAL || _CurrentToken === T_NOTEQUAL) {
-                this.parseExpr();
+            if (_CurrentToken.getType() === T_LPAREN) {
                 _CurrentToken = this.getNextToken();
-                console.log(_CurrentToken);
-                if (_CurrentToken !== T_RPAREN) {
-                    console.log('expected right param in boolean expr parse');
+                this.parseExpr();
+                this.parseBoolOp();
+                this.parseExpr();
+                if (_CurrentToken.getType() === T_RPAREN) {
+                    _CurrentToken = this.getNextToken();
                 }
+            }
+        };
+        // char
+        Parser.parseId = function () {
+            console.log('parseId()');
+            if (_CurrentToken.getType() !== T_ID) {
+                console.log('parseid error');
+            }
+            else {
+                _CurrentToken = this.getNextToken();
+            }
+        };
+        // TODO
+        // char CharList
+        // space CharList
+        // epsilon
+        Parser.parseCharList = function () {
+            _CurrentToken = this.getNextToken();
+            switch (_CurrentToken.getType()) {
+                case T_CHAR:
+                case T_WHITESPACE:
+                    this.parseCharList();
+                    break;
+                default:
+                    break;
+            }
+        };
+        // int | string | boolean
+        Parser.parseType = function () {
+            console.log('parseType()');
+            switch (_CurrentToken.getType()) {
+                case T_INT:
+                case T_STRING:
+                case T_BOOLEAN:
+                    _CurrentToken = this.getNextToken();
+                    break;
+                default:
+                    console.log('expected a valid data type');
+                    break;
+            }
+        };
+        // TODO
+        // == | !=
+        Parser.parseBoolOp = function () {
+            console.log('parseBoolOp()');
+            if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
+                _CurrentToken = this.getNextToken();
             }
             else {
                 console.log('expected boolean operator in parsebooleanexpr()');
             }
         };
-        // char
-        Parser.parseId = function () {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
-            if (_CurrentToken.getType() !== T_ID) {
-                console.log('error');
-            }
-        };
-        // char CharList
-        // space CharList
-        // epsilon
-        Parser.parseCharList = function () {
-        };
-        // int | string | boolean
-        Parser.parseType = function () {
-        };
-        // == | !=
-        Parser.parseBoolOp = function () {
-        };
+        // TODO
         // +
         Parser.parseIntOp = function () {
         };
