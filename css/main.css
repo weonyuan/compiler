@@ -22,6 +22,7 @@
 }
 
 #inputText {
+    overflow-x: auto;
     resize: none;
     width: 96%;
 }

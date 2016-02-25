@@ -92,13 +92,17 @@ var COMPILER;
                     }
                     COMPILER.Main.updateTokenTable(tokens);
                 }
+                else {
+                    tokens = null;
+                }
             }
             else {
                 _Errors++;
                 COMPILER.Main.addLog(LOG_ERROR, 'No code to compile!');
             }
-            // Main.addLog(log);
             COMPILER.Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            _Warnings = 0;
+            _Errors = 0;
             return tokens;
         };
         Lexer.matchTokenPattern = function (chunk) {

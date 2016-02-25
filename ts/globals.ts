@@ -83,4 +83,5 @@ var _Token: COMPILER.Token;
 var _Errors: number = 0;
 var _Warnings: number = 0;
 var _Tokens: any = [];
+var _PreviousToken: any = null;
 var _CurrentToken: any = null;

@@ -23,13 +23,51 @@
 
 <body>
     <nav id="header" class="navbar-default">
-        <div id="logo" class="col-md-11">aBasicCompiler</div>
-        <button id="btnCompile" class="btn btn-primary col-md-1" onclick="COMPILER.Main.compile()">Compile</button>
+        <div class="container-fluid">
+            <div id="logo" class="col-sm-3 col-md-5">aBasicCompiler</div>
+            <div class="dropdown col-sm-7">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Programs<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li class="dropdown-header"><strong>So Basic</strong></li>
+                    <li><a href="#">Bare</a></li>
+                    <li><a href="#">Variable declarations</a></li>
+                    <li class="dropdown-header"><strong>Print</strong></li>
+                    <li><a href="#">Print 1</a></li>
+                    <li><a href="#">Another one...</a></li>
+                    <li class="dropdown-header"><strong>If</strong></li>
+                    <li><a href="#">If boolop</a></li>
+                    <li><a href="#">If expression</a></li>
+                    <li class="dropdown-header"><strong>While</strong></li>
+                    <li><a href="#">While true</a></li>
+                    <li><a href="#">While expression...</a></li>
+                    <li class="dropdown-header"><strong>Integer</strong></li>
+                    <li><a href="#">Basic a + b</a></li>
+                    <li><a href="#">+ + + + + + +</a></li>
+                    <li class="dropdown-header"><strong>String</strong></li>
+                    <li><a href="#">Empty (just like my feelings)</a></li>
+                    <li><a href="#">hi</a></li>
+                    <li><a href="#">oh captain my captain</a></li>
+                    <li class="dropdown-header"><strong>Boolean</strong></li>
+                    <li><a href="#">truth</a></li>
+                    <li><a href="#">Sandwiched booleans</a></li>
+                    <li class="dropdown-header"><strong>Scope</strong></li>
+                    <li><a href="#">Level 1/2 (depends where you start)</a></li>
+                    <li><a href="#">Scope within a scope within a scope</a></li>
+                    <li class="dropdown-header"><strong>Software Dev Bad Practices (SDBP)</strong></li>
+                    <li><a href="#">I'm not a one-liner</a></li>
+                    <li><a href="#">But I love math!</a></li>
+                    <li><a href="#">Not for the OCD...</a></li>
+                    <li><a href="#">Daniel Craig</a></li>
+                    <li><a href="#">Sometimes 42 is not the answer</a></li>
+                </ul>
+            </div>
+            <button id="btnCompile" class="btn btn-primary col-sm-2 col-md-1" onclick="COMPILER.Main.compile()">Compile</button>
+        </div>
     </nav>
     <div id="bodyContent">
         <div id="sourceCode" class="col-sm-5 col-md-5">
             <div class="panel-heading"><label>Source Code</label></div>
-            <textarea id="inputText" rows="10" placeholder="Enter your code here." autofocus></textarea>
+            <textarea id="inputText" rows="10" placeholder="Enter your code here." wrap="off" autofocus></textarea>
         </div>
 
         <div id="consoleLog" class="col-sm-7 col-md-7">

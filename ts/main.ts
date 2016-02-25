@@ -12,8 +12,9 @@ module COMPILER {
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
             _Tokens = Lexer.tokenize(sourceCode);
             
-            if (_Tokens !== null) {
+            if (_Tokens !== null && _Tokens !== undefined) {
                 Parser.init(_Tokens);
+                Parser.printResults();
             }
         }
 

@@ -71,4 +71,5 @@ var _Token;
 var _Errors = 0;
 var _Warnings = 0;
 var _Tokens = [];
+var _PreviousToken = null;
 var _CurrentToken = null;

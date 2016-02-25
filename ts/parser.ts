@@ -9,18 +9,24 @@
 module COMPILER {
     export class Parser {
         public static init(tokens): void {
+            Main.addLog(LOG_INFO, 'Performing parsing.');
+
+            // Load up the first token and let's get parsing!
             this.getNextToken();
+            _PreviousToken = _CurrentToken;
             this.parseProgram();
         }
 
         // Block $
         public static parseProgram(): void {
+            // console.log('parseProgram()');
             this.parseBlock();
             this.parseEOF();
         }
 
         // { StatementList }
         public static parseBlock(): void {
+            // console.log('parseBlock()');
             if (_CurrentToken.getType() === T_LBRACE) {
                 this.getNextToken();
                 this.parseStatementList();
@@ -28,23 +34,21 @@ module COMPILER {
                 if (_CurrentToken.getType() === T_RBRACE) {
                     this.getNextToken();
                 } else {
-                    console.log('expecting a right brace');
+                    _Errors++;
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': Expected T_RBRACE but received ' + _CurrentToken.getName() + '.');
                 }
             } else {
                 _Errors++;
-                var log = {
-                    status: null,
-                    msg: null
-                };
-
-                Main.addLog(LOG_ERROR, 'Expected \'\{\'');
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_LBRACE but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // Statement StatementList
         // epsilon
         public static parseStatementList(): void {
-            console.log('parseStatementList()');
+            // console.log('parseStatementList()');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                 case T_WHILE:
@@ -70,7 +74,7 @@ module COMPILER {
         // IfStatement
         // Block
         public static parseStatement(): void {
-            console.log('parseStatement()');
+            // console.log('parseStatement()');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                     this.parsePrintStatement();
@@ -94,79 +98,84 @@ module COMPILER {
                     break;
                 default:
                     _Errors++;
-                    var log = {
-                        status: null,
-                        msg: null
-                    };
-
-                    Main.addLog(LOG_ERROR, 'Invalid syntax');
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': ' + _CurrentToken.getName() + ' is not a valid statement.');
                     break;
             }
         }
 
         // print ( Expr )
         public static parsePrintStatement(): void {
-            console.log('parsePrintStatement()');
+            // console.log('parsePrintStatement()');
             if (_CurrentToken.getType() === T_PRINT) {
                 this.getNextToken();
-                console.log(_CurrentToken);
-
 
                 if (_CurrentToken.getType() === T_LPAREN) {
                     this.getNextToken();
                     this.parseExpr();
-                    console.log(_CurrentToken);
 
                     if (_CurrentToken.getType() === T_RPAREN) {
                         this.getNextToken();
                     } else {
-                        console.log('print statement parse error');
+                        _Errors++;
+                        Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                               ': Expected T_RPAREN but received ' + _CurrentToken.getName() + '.');
                     }
                 } else {
-                    console.log('print statement parse error');
+                    _Errors++;
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': Expected T_LPAREN but received ' + _CurrentToken.getName() + '.');
                 }
             }
         }
 
         // Id = Expr
         public static parseAssignmentStatement(): void {
-            console.log('parseAssignmentStatement()');
+            // console.log('parseAssignmentStatement()');
             this.parseId();
 
             if (_CurrentToken.getType() === T_ASSIGN) {
                 this.getNextToken();
                 this.parseExpr();
             } else {
-                console.log('assignment parse error');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_ASSIGN but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // type Id
         public static parseVarDecl(): void {
-            console.log('parseVarDecl()');
+            // console.log('parseVarDecl()');
             this.parseType();
             this.parseId();
         }
 
         // while BooleanExpr Block
         public static parseWhileStatement(): void {
+            // console.log('parseWhileStatement()');
             if (_CurrentToken.getType() === T_WHILE) {
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
             } else {
-                console.log('error parsing while statement');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_WHILE but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // if BooleanExpr block
         public static parseIfStatement(): void {
+            // console.log('parseIfStatement()');
             if (_CurrentToken.getType() === T_IF) {
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
             } else {
-                console.log('error parsing if statement');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_IF but received ' + _CurrentToken.getName() + '.');
             }
         }
 
@@ -175,7 +184,7 @@ module COMPILER {
         // BooleanExpr
         // Id
         public static parseExpr(): void {
-            console.log('parseExpr()');
+            // console.log('parseExpr()');
             switch (_CurrentToken.getType()) {
                 case T_DIGIT:
                     this.parseIntExpr();
@@ -192,7 +201,9 @@ module COMPILER {
                     this.parseId();
                     break;
                 default:
-                    console.log('parseExpr error');
+                    _Errors++;
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': ' + _CurrentToken.getName() + ' is not a valid expression.');
                     break;
             }
         }
@@ -200,8 +211,7 @@ module COMPILER {
         // digit intop Expr
         // digit
         public static parseIntExpr(): void {
-            console.log('parseIntExpr()');
-
+            // console.log('parseIntExpr()');
             if (_CurrentToken.getType() === T_DIGIT) {
                 this.getNextToken();
 
@@ -212,13 +222,14 @@ module COMPILER {
                     this.parseExpr();
                 }
             } else {
-                console.log('not a digit: ' + _CurrentToken.getValue());
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_DIGIT but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // " CharList "
         public static parseStringExpr(): void {
-            console.log('parseStringExpr()');
+            // console.log('parseStringExpr()');
             if (_CurrentToken.getType() === T_QUOTE) {
                 this.getNextToken();
 
@@ -226,17 +237,21 @@ module COMPILER {
                 if (_CurrentToken.getType() === T_QUOTE) {
                     this.getNextToken();
                 } else {
-                    console.log('parseStringExpr error: expected a quote');
+                    _Errors++;
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': Expected T_QUOTE but received ' + _CurrentToken.getName() + '.');
                 }
             } else {
-                console.log('expected a quote');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_QUOTE but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // ( Expr boolop Expr )
         // boolval
         public static parseBooleanExpr(): void {
-            console.log('parseBooleanExpr()');
+            // console.log('parseBooleanExpr()');
             if (_CurrentToken.getType() === T_LPAREN) {
                 this.getNextToken();
                 this.parseExpr();
@@ -246,21 +261,24 @@ module COMPILER {
                 if (_CurrentToken.getType() === T_RPAREN) {
                     this.getNextToken();
                 }
-            } else if (_CurrentToken.getType() === T_TRUE
-                || _CurrentToken.getType() === T_FALSE) {
+            } else if (   _CurrentToken.getType() === T_TRUE
+                       || _CurrentToken.getType() === T_FALSE) {
                 this.getNextToken();
             } else {
-                console.log('error parsing boolean expression');
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': ' + _CurrentToken.getName() + ' is not a valid boolean expression.');
             }
         }
 
         // char
         public static parseId(): void {
-            console.log('parseId()');
-            if (_CurrentToken.getType() !== T_ID) {
-                console.log('parseid error');
-            } else {
+            // console.log('parseId()');
+            if (_CurrentToken.getType() === T_ID) {
                 this.getNextToken();
+            } else {
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() + 
+                                       ': Expected T_ID but received ' + _CurrentToken.getName() + '.');
             }
         }
 
@@ -268,6 +286,7 @@ module COMPILER {
         // space CharList
         // epsilon
         public static parseCharList(): void {
+            // console.log('parseCharList()');
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
@@ -282,7 +301,7 @@ module COMPILER {
 
         // int | string | boolean
         public static parseType(): void {
-            console.log('parseType()');
+            // console.log('parseType()');
             switch (_CurrentToken.getType()) {
                 case T_INT:
                 case T_STRING:
@@ -290,39 +309,50 @@ module COMPILER {
                     this.getNextToken();
                     break;
                 default:
-                    console.log('expected a valid data type');
+                    _Errors++;
+                    Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                           ': Expected T_TYPE but received ' + _CurrentToken.getName() + '.');
                     break;
             }
         }
 
         // == | !=
         public static parseBoolOp(): void {
-            console.log('parseBoolOp()');
+            // console.log('parseBoolOp()');
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
                 this.getNextToken();
             } else {
-                console.log('expected boolean operator in parsebooleanexpr()');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected a valid boolean operator but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         // $
         public static parseEOF(): void {
-            console.log('parseEOF()');
-
+            // console.log('parseEOF()');
             if (_CurrentToken.getType() === T_EOF) {
-                console.log('found the EOF!');
                 this.getNextToken();
 
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
                     this.parseProgram();
                 }
             } else {
-                console.log('expected $');
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                                       ': Expected T_EOP but received ' + _CurrentToken.getName() + '.');
             }
         }
 
         public static getNextToken(): void {
+            _PreviousToken = _CurrentToken;
             _CurrentToken = _Tokens.shift();
+        }
+
+        public static printResults(): void {
+            Main.addLog(LOG_INFO, 'Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            _Warnings = 0;
+            _Errors = 0;
         }
     }
 }

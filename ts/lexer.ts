@@ -1,5 +1,4 @@
 ///<reference path="token.ts" />
-
 ///<reference path="globals.ts" />
 /*
     lexer.ts
@@ -104,6 +103,8 @@ module COMPILER {
                     }
 
                     Main.updateTokenTable(tokens);
+                } else {
+                    tokens = null;
                 }
 
             } else {
@@ -111,8 +112,9 @@ module COMPILER {
                 Main.addLog(LOG_ERROR, 'No code to compile!');
             }
 
-            // Main.addLog(log);
             Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            _Warnings = 0;
+            _Errors = 0;
 
             return tokens;
         }
