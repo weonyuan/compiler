@@ -19,7 +19,6 @@ var COMPILER;
             var codeChunks = this.splitCodeBySpace(input);
             codeChunks = this.splitChunksToChars(codeChunks);
             console.log(codeChunks);
-            var eofExists = false;
             var _Errors = 0;
             var _Warnings = 0;
             if (input.length > 0) {
@@ -100,7 +99,7 @@ var COMPILER;
                 _Errors++;
                 COMPILER.Main.addLog(LOG_ERROR, 'No code to compile!');
             }
-            COMPILER.Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            COMPILER.Main.addLog(LOG_INFO, 'Tokenizing complete. Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _Warnings = 0;
             _Errors = 0;
             return tokens;

@@ -45,6 +45,7 @@ const LOG_ERROR: number = -1;
 const LOG_WARNING: number = 0;
 const LOG_INFO: number = 1;
 const LOG_SUCCESS: number = 2;
+const LOG_VERBOSE: number = 3;
 
 var tokenPattern = {
     // Reserved keywords
@@ -80,6 +81,7 @@ var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
 
+var _VerboseMode: boolean = false;
 var _Errors: number = 0;
 var _Warnings: number = 0;
 var _Tokens: any = [];

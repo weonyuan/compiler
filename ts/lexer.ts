@@ -20,7 +20,6 @@ module COMPILER {
             codeChunks = this.splitChunksToChars(codeChunks);
             console.log(codeChunks);
 
-            var eofExists: boolean = false;
             var _Errors: number = 0;
             var _Warnings: number = 0;
 
@@ -112,7 +111,7 @@ module COMPILER {
                 Main.addLog(LOG_ERROR, 'No code to compile!');
             }
 
-            Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            Main.addLog(LOG_INFO, 'Tokenizing complete. Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _Warnings = 0;
             _Errors = 0;
 

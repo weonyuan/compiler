@@ -12,6 +12,7 @@ var COMPILER;
         }
         Parser.init = function (tokens) {
             COMPILER.Main.addLog(LOG_INFO, 'Performing parsing.');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Initializing verbose mode!');
             // Load up the first token and let's get parsing!
             this.getNextToken();
             _PreviousToken = _CurrentToken;
@@ -26,10 +27,14 @@ var COMPILER;
         // { StatementList }
         Parser.parseBlock = function () {
             // console.log('parseBlock()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a left brace.');
             if (_CurrentToken.getType() === T_LBRACE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left brace!');
                 this.getNextToken();
                 this.parseStatementList();
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right brace.');
                 if (_CurrentToken.getType() === T_RBRACE) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right brace!');
                     this.getNextToken();
                 }
                 else {
@@ -104,12 +109,18 @@ var COMPILER;
         // print ( Expr )
         Parser.parsePrintStatement = function () {
             // console.log('parsePrintStatement()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a print.');
             if (_CurrentToken.getType() === T_PRINT) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a print!');
                 this.getNextToken();
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a left parenthese.');
                 if (_CurrentToken.getType() === T_LPAREN) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                     this.getNextToken();
                     this.parseExpr();
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                     if (_CurrentToken.getType() === T_RPAREN) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                         this.getNextToken();
                     }
                     else {
@@ -129,7 +140,9 @@ var COMPILER;
         Parser.parseAssignmentStatement = function () {
             // console.log('parseAssignmentStatement()');
             this.parseId();
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an equal sign.');
             if (_CurrentToken.getType() === T_ASSIGN) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received an equal sign!');
                 this.getNextToken();
                 this.parseExpr();
             }
@@ -148,7 +161,9 @@ var COMPILER;
         // while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             // console.log('parseWhileStatement()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a while.');
             if (_CurrentToken.getType() === T_WHILE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a while!');
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -162,7 +177,9 @@ var COMPILER;
         // if BooleanExpr block
         Parser.parseIfStatement = function () {
             // console.log('parseIfStatement()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an if.');
             if (_CurrentToken.getType() === T_IF) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received an if!');
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -205,10 +222,14 @@ var COMPILER;
         // digit
         Parser.parseIntExpr = function () {
             // console.log('parseIntExpr()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a digit.');
             if (_CurrentToken.getType() === T_DIGIT) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a digit!');
                 this.getNextToken();
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a plus sign.');
                 // Check to see if the new token is + operator
                 if (_CurrentToken.getType() === T_ADD) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
@@ -222,10 +243,14 @@ var COMPILER;
         // " CharList "
         Parser.parseStringExpr = function () {
             // console.log('parseStringExpr()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
             if (_CurrentToken.getType() === T_QUOTE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a quote!');
                 this.getNextToken();
                 this.parseCharList();
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
                 if (_CurrentToken.getType() === T_QUOTE) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a quote!');
                     this.getNextToken();
                 }
                 else {
@@ -244,17 +269,22 @@ var COMPILER;
         // boolval
         Parser.parseBooleanExpr = function () {
             // console.log('parseBooleanExpr()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting either a left parenthese or a boolean.');
             if (_CurrentToken.getType() === T_LPAREN) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                 this.getNextToken();
                 this.parseExpr();
                 this.parseBoolOp();
                 this.parseExpr();
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                 if (_CurrentToken.getType() === T_RPAREN) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                     this.getNextToken();
                 }
             }
             else if (_CurrentToken.getType() === T_TRUE
                 || _CurrentToken.getType() === T_FALSE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.getNextToken();
             }
             else {
@@ -265,7 +295,9 @@ var COMPILER;
         // char
         Parser.parseId = function () {
             // console.log('parseId()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an id.');
             if (_CurrentToken.getType() === T_ID) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received an id!');
                 this.getNextToken();
             }
             else {
@@ -279,9 +311,11 @@ var COMPILER;
         // epsilon
         Parser.parseCharList = function () {
             // console.log('parseCharList()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a character.');
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a character!');
                     this.getNextToken();
                     this.parseCharList();
                     break;
@@ -293,10 +327,12 @@ var COMPILER;
         // int | string | boolean
         Parser.parseType = function () {
             // console.log('parseType()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a valid data type.');
             switch (_CurrentToken.getType()) {
                 case T_INT:
                 case T_STRING:
                 case T_BOOLEAN:
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.getNextToken();
                     break;
                 default:
@@ -309,7 +345,9 @@ var COMPILER;
         // == | !=
         Parser.parseBoolOp = function () {
             // console.log('parseBoolOp()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.getNextToken();
             }
             else {
@@ -320,8 +358,10 @@ var COMPILER;
         };
         // $
         Parser.parseEOP = function () {
-            // console.log('parseEOF()');
+            // console.log('parseEOP()');
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an end of program character.');
             if (_CurrentToken.getType() === T_EOP) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Received an end of program character!');
                 this.getNextToken();
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
                     this.parseProgram();
@@ -338,7 +378,7 @@ var COMPILER;
             _CurrentToken = _Tokens.shift();
         };
         Parser.printResults = function () {
-            COMPILER.Main.addLog(LOG_INFO, 'Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            COMPILER.Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _Warnings = 0;
             _Errors = 0;
         };

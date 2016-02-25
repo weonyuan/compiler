@@ -10,6 +10,7 @@ module COMPILER {
     export class Parser {
         public static init(tokens): void {
             Main.addLog(LOG_INFO, 'Performing parsing.');
+            Main.addLog(LOG_VERBOSE, 'Initializing verbose mode!');
 
             // Load up the first token and let's get parsing!
             this.getNextToken();
@@ -27,11 +28,16 @@ module COMPILER {
         // { StatementList }
         public static parseBlock(): void {
             // console.log('parseBlock()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a left brace.');
+
             if (_CurrentToken.getType() === T_LBRACE) {
+                Main.addLog(LOG_VERBOSE, 'Received a left brace!');
                 this.getNextToken();
                 this.parseStatementList();
+                Main.addLog(LOG_VERBOSE, 'Expecting a right brace.');
 
                 if (_CurrentToken.getType() === T_RBRACE) {
+                    Main.addLog(LOG_VERBOSE, 'Received a right brace!');
                     this.getNextToken();
                 } else {
                     _Errors++;
@@ -107,14 +113,20 @@ module COMPILER {
         // print ( Expr )
         public static parsePrintStatement(): void {
             // console.log('parsePrintStatement()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a print.');
             if (_CurrentToken.getType() === T_PRINT) {
+                Main.addLog(LOG_VERBOSE, 'Received a print!');
                 this.getNextToken();
+                Main.addLog(LOG_VERBOSE, 'Expecting a left parenthese.');
 
                 if (_CurrentToken.getType() === T_LPAREN) {
+                    Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                     this.getNextToken();
                     this.parseExpr();
+                    Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
 
                     if (_CurrentToken.getType() === T_RPAREN) {
+                        Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                         this.getNextToken();
                     } else {
                         _Errors++;
@@ -133,8 +145,10 @@ module COMPILER {
         public static parseAssignmentStatement(): void {
             // console.log('parseAssignmentStatement()');
             this.parseId();
+            Main.addLog(LOG_VERBOSE, 'Expecting an equal sign.');
 
             if (_CurrentToken.getType() === T_ASSIGN) {
+                Main.addLog(LOG_VERBOSE, 'Received an equal sign!');
                 this.getNextToken();
                 this.parseExpr();
             } else {
@@ -154,7 +168,10 @@ module COMPILER {
         // while BooleanExpr Block
         public static parseWhileStatement(): void {
             // console.log('parseWhileStatement()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a while.');
+
             if (_CurrentToken.getType() === T_WHILE) {
+                Main.addLog(LOG_VERBOSE, 'Received a while!');
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -168,7 +185,10 @@ module COMPILER {
         // if BooleanExpr block
         public static parseIfStatement(): void {
             // console.log('parseIfStatement()');
+            Main.addLog(LOG_VERBOSE, 'Expecting an if.');
+
             if (_CurrentToken.getType() === T_IF) {
+                Main.addLog(LOG_VERBOSE, 'Received an if!');
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -212,11 +232,17 @@ module COMPILER {
         // digit
         public static parseIntExpr(): void {
             // console.log('parseIntExpr()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a digit.');
+
             if (_CurrentToken.getType() === T_DIGIT) {
+                Main.addLog(LOG_VERBOSE, 'Received a digit!');
                 this.getNextToken();
+                Main.addLog(LOG_VERBOSE, 'Expecting a plus sign.');
 
                 // Check to see if the new token is + operator
                 if (_CurrentToken.getType() === T_ADD) {
+                    Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
+
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
@@ -230,11 +256,17 @@ module COMPILER {
         // " CharList "
         public static parseStringExpr(): void {
             // console.log('parseStringExpr()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
+
             if (_CurrentToken.getType() === T_QUOTE) {
+                Main.addLog(LOG_VERBOSE, 'Received a quote!');
                 this.getNextToken();
 
                 this.parseCharList();
+                Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
+
                 if (_CurrentToken.getType() === T_QUOTE) {
+                    Main.addLog(LOG_VERBOSE, 'Received a quote!');
                     this.getNextToken();
                 } else {
                     _Errors++;
@@ -252,17 +284,23 @@ module COMPILER {
         // boolval
         public static parseBooleanExpr(): void {
             // console.log('parseBooleanExpr()');
+            Main.addLog(LOG_VERBOSE, 'Expecting either a left parenthese or a boolean.');
+
             if (_CurrentToken.getType() === T_LPAREN) {
+                Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                 this.getNextToken();
                 this.parseExpr();
                 this.parseBoolOp();
                 this.parseExpr();
+                Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
 
                 if (_CurrentToken.getType() === T_RPAREN) {
+                    Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                     this.getNextToken();
                 }
             } else if (   _CurrentToken.getType() === T_TRUE
                        || _CurrentToken.getType() === T_FALSE) {
+                Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.getNextToken();
             } else {
                 Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
@@ -273,7 +311,10 @@ module COMPILER {
         // char
         public static parseId(): void {
             // console.log('parseId()');
+            Main.addLog(LOG_VERBOSE, 'Expecting an id.');
+
             if (_CurrentToken.getType() === T_ID) {
+                Main.addLog(LOG_VERBOSE, 'Received an id!');
                 this.getNextToken();
             } else {
                 _Errors++;
@@ -287,9 +328,12 @@ module COMPILER {
         // epsilon
         public static parseCharList(): void {
             // console.log('parseCharList()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a character.');
+
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
+                    Main.addLog(LOG_VERBOSE, 'Received a character!');
                     this.getNextToken();
                     this.parseCharList();
                     break;
@@ -302,10 +346,13 @@ module COMPILER {
         // int | string | boolean
         public static parseType(): void {
             // console.log('parseType()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a valid data type.');
+
             switch (_CurrentToken.getType()) {
                 case T_INT:
                 case T_STRING:
                 case T_BOOLEAN:
+                    Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.getNextToken();
                     break;
                 default:
@@ -319,7 +366,10 @@ module COMPILER {
         // == | !=
         public static parseBoolOp(): void {
             // console.log('parseBoolOp()');
+            Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
+
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
+                Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.getNextToken();
             } else {
                 _Errors++;
@@ -330,8 +380,11 @@ module COMPILER {
 
         // $
         public static parseEOP(): void {
-            // console.log('parseEOF()');
+            // console.log('parseEOP()');
+            Main.addLog(LOG_VERBOSE, 'Expecting an end of program character.');
+
             if (_CurrentToken.getType() === T_EOP) {
+                Main.addLog(LOG_VERBOSE, 'Received an end of program character!');
                 this.getNextToken();
 
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
@@ -350,7 +403,7 @@ module COMPILER {
         }
 
         public static printResults(): void {
-            Main.addLog(LOG_INFO, 'Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _Warnings = 0;
             _Errors = 0;
         }

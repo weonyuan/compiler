@@ -36,6 +36,7 @@ var LOG_ERROR = -1;
 var LOG_WARNING = 0;
 var LOG_INFO = 1;
 var LOG_SUCCESS = 2;
+var LOG_VERBOSE = 3;
 var tokenPattern = {
     // Reserved keywords
     T_PRINT: { type: T_PRINT, regex: /^print$/ },
@@ -68,6 +69,7 @@ var _Main;
 var _Lexer;
 var _Parser;
 var _Token;
+var _VerboseMode = false;
 var _Errors = 0;
 var _Warnings = 0;
 var _Tokens = [];

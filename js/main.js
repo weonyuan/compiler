@@ -51,10 +51,6 @@ var COMPILER;
             var divLogStatus = document.createElement('div');
             divLogStatus.className = 'label status';
             switch (status) {
-                case LOG_ERROR:
-                    divLogStatus.className += ' label-danger';
-                    divLogStatus.innerHTML = 'ERROR';
-                    break;
                 case LOG_WARNING:
                     divLogStatus.className += ' label-warning';
                     divLogStatus.innerHTML = 'WARNING';
@@ -67,10 +63,17 @@ var COMPILER;
                     divLogStatus.className += ' label-success';
                     divLogStatus.innerHTML = 'SUCCESS';
                     break;
+                case LOG_VERBOSE:
+                    divLogStatus.className += ' label-primary';
+                    divLogStatus.innerHTML = 'VERBOSE';
+                    break;
                 default:
                     divLogStatus.className += ' label-danger';
                     divLogStatus.innerHTML = 'ERROR';
                     break;
+            }
+            if (status === LOG_VERBOSE && !_VerboseMode) {
+                return;
             }
             var lastLog = document.getElementsByClassName('log')[document.getElementsByClassName('log').length - 1];
             lastLog.appendChild(divLogStatus);
