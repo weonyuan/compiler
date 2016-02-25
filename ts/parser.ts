@@ -21,7 +21,7 @@ module COMPILER {
         public static parseProgram(): void {
             // console.log('parseProgram()');
             this.parseBlock();
-            this.parseEOF();
+            this.parseEOP();
         }
 
         // { StatementList }
@@ -329,9 +329,9 @@ module COMPILER {
         }
 
         // $
-        public static parseEOF(): void {
+        public static parseEOP(): void {
             // console.log('parseEOF()');
-            if (_CurrentToken.getType() === T_EOF) {
+            if (_CurrentToken.getType() === T_EOP) {
                 this.getNextToken();
 
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {

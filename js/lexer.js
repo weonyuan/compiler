@@ -79,13 +79,13 @@ var COMPILER;
                     COMPILER.Main.addLog(LOG_ERROR, 'No tokens were found in input string.');
                 }
                 if (_Errors === 0) {
-                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOF) {
+                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOP) {
                         // Send a warning and append a EOP token to the source code
                         _Warnings++;
                         COMPILER.Main.addLog(LOG_WARNING, 'EOP missing. Adding a EOP token.');
                         var token = new COMPILER.Token();
                         token.setName('T_EOP');
-                        token.setType(T_EOF);
+                        token.setType(T_EOP);
                         token.setValue('$');
                         token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
                         tokens.push(token);

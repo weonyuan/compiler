@@ -16,7 +16,7 @@ var T_ADD = 5;
 var T_EXCLAMATION = 6;
 var T_ASSIGN = 7;
 var T_WHITESPACE = 8;
-var T_EOF = 9;
+var T_EOP = 9;
 var T_EQUAL = 10;
 var T_NOTEQUAL = 11;
 var T_TYPE = 12;
@@ -62,7 +62,7 @@ var tokenPattern = {
     T_EXCLAMATION: { type: T_EXCLAMATION, regex: /^\!$/ },
     T_ASSIGN: { type: T_ASSIGN, regex: /^\=$/ },
     T_WHITESPACE: { type: T_WHITESPACE, regex: /^\s|\n$/ },
-    T_EOF: { type: T_EOF, regex: /^\$$/ }
+    T_EOP: { type: T_EOP, regex: /^\$$/ }
 };
 var _Main;
 var _Lexer;

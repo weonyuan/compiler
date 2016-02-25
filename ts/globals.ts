@@ -19,7 +19,7 @@ const T_ADD: number = 5;
 const T_EXCLAMATION: number = 6;
 const T_ASSIGN: number = 7;
 const T_WHITESPACE: number = 8;
-const T_EOF: number = 9;
+const T_EOP: number = 9;
 
 const T_EQUAL: number = 10;
 const T_NOTEQUAL: number = 11;
@@ -72,7 +72,7 @@ var tokenPattern = {
     T_EXCLAMATION: { type: T_EXCLAMATION, regex: /^\!$/ },
     T_ASSIGN: { type: T_ASSIGN, regex: /^\=$/ },
     T_WHITESPACE: { type: T_WHITESPACE, regex: /^\s|\n$/ },
-    T_EOF: { type: T_EOF, regex: /^\$$/ }
+    T_EOP: { type: T_EOP, regex: /^\$$/ }
 };
 
 var _Main: COMPILER.Main;

@@ -21,7 +21,7 @@ var COMPILER;
         Parser.parseProgram = function () {
             // console.log('parseProgram()');
             this.parseBlock();
-            this.parseEOF();
+            this.parseEOP();
         };
         // { StatementList }
         Parser.parseBlock = function () {
@@ -319,9 +319,9 @@ var COMPILER;
             }
         };
         // $
-        Parser.parseEOF = function () {
+        Parser.parseEOP = function () {
             // console.log('parseEOF()');
-            if (_CurrentToken.getType() === T_EOF) {
+            if (_CurrentToken.getType() === T_EOP) {
                 this.getNextToken();
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
                     this.parseProgram();

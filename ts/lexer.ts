@@ -88,14 +88,14 @@ module COMPILER {
                 }
 
                 if (_Errors === 0) {
-                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOF) {
+                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOP) {
                         // Send a warning and append a EOP token to the source code
                         _Warnings++;
                         Main.addLog(LOG_WARNING, 'EOP missing. Adding a EOP token.');
 
                         var token = new Token();
                         token.setName('T_EOP');
-                        token.setType(T_EOF);
+                        token.setType(T_EOP);
                         token.setValue('$');
                         token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
 
