@@ -10,9 +10,12 @@ var COMPILER;
     var Parser = (function () {
         function Parser() {
         }
-        // Block $
-        Parser.parseProgram = function (tokens) {
+        Parser.init = function (tokens) {
             _CurrentToken = this.getNextToken();
+            this.parseProgram();
+        };
+        // Block $
+        Parser.parseProgram = function () {
             this.parseBlock();
             this.parseEOF();
         };
@@ -304,6 +307,10 @@ var COMPILER;
             console.log('parseEOF()');
             if (_CurrentToken.getType() === T_EOF) {
                 console.log('found the EOF!');
+                _CurrentToken = this.getNextToken();
+                if (_CurrentToken !== null && _CurrentToken !== undefined) {
+                    this.parseProgram();
+                }
             }
             else {
                 console.log('expected $');

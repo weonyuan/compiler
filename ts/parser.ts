@@ -8,10 +8,13 @@
 
 module COMPILER {
     export class Parser {
+        public static init(tokens): void {
+            _CurrentToken = this.getNextToken();
+            this.parseProgram();
+        }
 
         // Block $
-        public static parseProgram(tokens): void {
-            _CurrentToken = this.getNextToken();
+        public static parseProgram(): void {
             this.parseBlock();
             this.parseEOF();
         }
@@ -320,6 +323,11 @@ module COMPILER {
 
             if (_CurrentToken.getType() === T_EOF) {
                 console.log('found the EOF!');
+                _CurrentToken = this.getNextToken();
+
+                if (_CurrentToken !== null && _CurrentToken !== undefined) {
+                    this.parseProgram();
+                }
             } else {
                 console.log('expected $');
             }

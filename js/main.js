@@ -14,7 +14,7 @@ var COMPILER;
             var sourceCode = document.getElementById('inputText').value;
             _Tokens = COMPILER.Lexer.tokenize(sourceCode);
             if (_Tokens !== null) {
-                COMPILER.Parser.parseProgram(_Tokens);
+                COMPILER.Parser.init(_Tokens);
             }
         };
         Main.updateTokenTable = function (tokens) {

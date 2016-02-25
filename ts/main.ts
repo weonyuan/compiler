@@ -13,7 +13,7 @@ module COMPILER {
             _Tokens = Lexer.tokenize(sourceCode);
             
             if (_Tokens !== null) {
-                Parser.parseProgram(_Tokens);
+                Parser.init(_Tokens);
             }
         }
 
