@@ -27,16 +27,27 @@
         <button id="btnCompile" class="btn btn-primary col-md-1" onclick="COMPILER.Main.compile()">Compile</button>
     </nav>
     <div id="bodyContent">
-        <textarea id="inputText" class="col-md-4" cols="40" rows="10" placeholder="Enter your code here." autofocus></textarea>
-        <div id="logger" class="col-md-8"></div>
-        <table id="tokenTable" class="col-md-3">
-            <tr>
-                <th>Name</th>
-                <th>Value</th>
-            </tr>
-        </table>
+        <div id="sourceCode" class="col-sm-5 col-md-5">
+            <div class="panel-heading"><label>Source Code</label></div>
+            <textarea id="inputText" rows="10" placeholder="Enter your code here." autofocus></textarea>
+        </div>
+
+        <div id="consoleLog" class="col-sm-7 col-md-7">
+            <div class="panel-heading"><label>Console Log</label></div>
+            <div id="logger"></div>
+        </div>
+
+        <div id="tokenDisplay" class="col-sm-12 col-md-12 pull-left">
+            <div class="panel-heading"><label>Token Table</label></div>
+            <table id="tokenTable" class="table table-bordered table-striped">
+                <tr>
+                    <th width="50%">Name</th>
+                    <th width="50%">Value</th>
+                </tr>
+            </table>
+        </div>
     </div>
-    <footer class="col-md-12">Made by Weon. But I'm not a rapper.</footer>
+    <footer class="col-sm-12 col-md-12">Made by Weon. But I'm not a rapper.</footer>
 </body>
 
 </html>
