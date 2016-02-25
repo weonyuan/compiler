@@ -41,7 +41,7 @@ var COMPILER;
                 currentToken = document.getElementById('token-' + ++tokenIndex);
             }
         };
-        Main.addLog = function (log) {
+        Main.addLog = function (status, msg) {
             // Construct the log's DOM
             var divLog = document.createElement('div');
             divLog.className = 'log';
@@ -49,7 +49,7 @@ var COMPILER;
             // Inside the newly created DOM, find the appropriate status
             var divLogStatus = document.createElement('div');
             divLogStatus.className = 'label status';
-            switch (log.status) {
+            switch (status) {
                 case LOG_ERROR:
                     divLogStatus.className += ' label-danger';
                     divLogStatus.innerHTML = 'ERROR';
@@ -76,10 +76,10 @@ var COMPILER;
             // And finally, append the message inside the log
             var divLogMsg = document.createElement('div');
             divLogMsg.className = 'message';
-            divLogMsg.innerHTML = log.msg;
+            divLogMsg.innerHTML = msg;
             lastLog.appendChild(divLogMsg);
         };
-        Main.resetLog = function () {
+        Main.resetLogger = function () {
             document.getElementById('logger').innerHTML = '';
         };
         return Main;

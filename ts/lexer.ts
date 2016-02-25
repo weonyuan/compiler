@@ -11,33 +11,26 @@
 module COMPILER {
     export class Lexer {
         public static tokenize(input): any {
-            Main.resetLog();
-
-            var log = {
-                status: null,
-                msg: null
-            }
-
-            log.status = LOG_INFO;
-            log.msg = 'Performing input tokenization through lexer.';
-            Main.addLog(log);
+            Main.resetLogger();
+            Main.addLog(LOG_INFO, 'Performing input tokenization through lexer.');
 
             var tokens: any = [];
             Main.updateTokenTable(tokens);
 
             var codeChunks: any = this.splitCodeBySpace(input);
             codeChunks = this.splitChunksToChars(codeChunks);
+            console.log(codeChunks);
 
             var eofExists: boolean = false;
+            var _Errors: number = 0;
+            var _Warnings: number = 0;
 
             if (input.length > 0) {
                 var currentIndex: number = 0;
-                var _Errors: number = 0;
-                var _Warnings: number = 0;
                 var stringMode: boolean = false;
 
                 TokenizeLoop:
-                while (currentIndex < codeChunks.length && !eofExists) {
+                while (codeChunks[currentIndex] !== undefined) {
                     // Scan through the chunks
                     var currentChunk: any = codeChunks[currentIndex++];
 
@@ -68,24 +61,14 @@ module COMPILER {
                             case T_WHITESPACE:
                                 if (currentChunk.value.match(/^\n$/)) {
                                     _Errors++;
-
-                                    log.status = LOG_ERROR;
-                                    log.msg = 'Newline is not allowed in strings.';
-                                    Main.addLog(log);
+                                    Main.addLog(LOG_ERROR, 'Invalid newline character in string found at line ' + (currentChunk.lineNum + 1) + '.');
                                     break TokenizeLoop;
                                 }
-                                break;
-                            case T_EOF:
-                                eofExists = true;
                                 break;
                         }
                     } else {
                         _Errors++;
-
-                        log.status = LOG_ERROR;
-                        log.msg = 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum;
-                        Main.addLog(log);
-
+                        Main.addLog(LOG_ERROR, 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum + '.');
                         break;
                     }
 
@@ -102,39 +85,34 @@ module COMPILER {
 
                 if (tokens.length === 0) {
                     _Errors++;
-
-                    log.status = LOG_ERROR;
-                    log.msg = 'No tokens were found in input string.';
-                } else if (_Errors === 0 && !eofExists) {
-                    _Warnings++;
-
-                    log.status = LOG_WARNING;
-                    log.msg = 'EOF missing. Adding a EOF token.';
-
-                    var token = new Token();
-                    token.setName('T_EOF');
-                    token.setType(T_EOF);
-                    token.setValue('$');
-                    token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
-
-                    tokens.push(token);
-                } else {
-                    log.status = LOG_INFO;
-                    log.msg = 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).';
+                    Main.addLog(LOG_ERROR, 'No tokens were found in input string.');
                 }
 
                 if (_Errors === 0) {
+                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOF) {
+                        // Send a warning and append a EOP token to the source code
+                        _Warnings++;
+                        Main.addLog(LOG_WARNING, 'EOP missing. Adding a EOP token.');
+
+                        var token = new Token();
+                        token.setName('T_EOP');
+                        token.setType(T_EOF);
+                        token.setValue('$');
+                        token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
+
+                        tokens.push(token);
+                    }
+
                     Main.updateTokenTable(tokens);
                 }
 
             } else {
                 _Errors++;
-
-                log.status = LOG_ERROR;
-                log.msg = 'No code to compile.';
+                Main.addLog(LOG_ERROR, 'No code to compile!');
             }
 
-            Main.addLog(log);
+            // Main.addLog(log);
+            Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
 
             return tokens;
         }

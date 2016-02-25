@@ -37,9 +37,7 @@ module COMPILER {
                     msg: null
                 };
 
-                log.status = LOG_ERROR;
-                log.msg = 'Expected \'\{\'';
-                Main.addLog(log);
+                Main.addLog(LOG_ERROR, 'Expected \'\{\'');
             }
         }
 
@@ -101,9 +99,7 @@ module COMPILER {
                         msg: null
                     };
 
-                    log.status = LOG_ERROR;
-                    log.msg = 'Invalid syntax.';
-                    Main.addLog(log);
+                    Main.addLog(LOG_ERROR, 'Invalid syntax');
                     break;
             }
         }
@@ -220,7 +216,7 @@ module COMPILER {
             }
         }
 
-        // TODO: " CharList "
+        // " CharList "
         public static parseStringExpr(): void {
             console.log('parseStringExpr()');
             if (_CurrentToken.getType() === T_QUOTE) {
@@ -268,7 +264,6 @@ module COMPILER {
             }
         }
 
-        // TODO
         // char CharList
         // space CharList
         // epsilon
@@ -309,12 +304,6 @@ module COMPILER {
             } else {
                 console.log('expected boolean operator in parsebooleanexpr()');
             }
-        }
-
-        // TODO
-        // +
-        public static parseIntOp(): void {
-
         }
 
         // $

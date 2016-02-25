@@ -37,9 +37,7 @@ var COMPILER;
                     status: null,
                     msg: null
                 };
-                log.status = LOG_ERROR;
-                log.msg = 'Expected \'\{\'';
-                COMPILER.Main.addLog(log);
+                COMPILER.Main.addLog(LOG_ERROR, 'Expected \'\{\'');
             }
         };
         // Statement StatementList
@@ -98,9 +96,7 @@ var COMPILER;
                         status: null,
                         msg: null
                     };
-                    log.status = LOG_ERROR;
-                    log.msg = 'Invalid syntax.';
-                    COMPILER.Main.addLog(log);
+                    COMPILER.Main.addLog(LOG_ERROR, 'Invalid syntax');
                     break;
             }
         };
@@ -209,7 +205,7 @@ var COMPILER;
                 console.log('not a digit: ' + _CurrentToken.getValue());
             }
         };
-        // TODO: " CharList "
+        // " CharList "
         Parser.parseStringExpr = function () {
             console.log('parseStringExpr()');
             if (_CurrentToken.getType() === T_QUOTE) {
@@ -257,7 +253,6 @@ var COMPILER;
                 _CurrentToken = this.getNextToken();
             }
         };
-        // TODO
         // char CharList
         // space CharList
         // epsilon
@@ -297,10 +292,6 @@ var COMPILER;
             else {
                 console.log('expected boolean operator in parsebooleanexpr()');
             }
-        };
-        // TODO
-        // +
-        Parser.parseIntOp = function () {
         };
         // $
         Parser.parseEOF = function () {

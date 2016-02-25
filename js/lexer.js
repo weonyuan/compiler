@@ -12,25 +12,20 @@ var COMPILER;
         function Lexer() {
         }
         Lexer.tokenize = function (input) {
-            COMPILER.Main.resetLog();
-            var log = {
-                status: null,
-                msg: null
-            };
-            log.status = LOG_INFO;
-            log.msg = 'Performing input tokenization through lexer.';
-            COMPILER.Main.addLog(log);
+            COMPILER.Main.resetLogger();
+            COMPILER.Main.addLog(LOG_INFO, 'Performing input tokenization through lexer.');
             var tokens = [];
             COMPILER.Main.updateTokenTable(tokens);
             var codeChunks = this.splitCodeBySpace(input);
             codeChunks = this.splitChunksToChars(codeChunks);
+            console.log(codeChunks);
             var eofExists = false;
+            var _Errors = 0;
+            var _Warnings = 0;
             if (input.length > 0) {
                 var currentIndex = 0;
-                var _Errors = 0;
-                var _Warnings = 0;
                 var stringMode = false;
-                TokenizeLoop: while (currentIndex < codeChunks.length && !eofExists) {
+                TokenizeLoop: while (codeChunks[currentIndex] !== undefined) {
                     // Scan through the chunks
                     var currentChunk = codeChunks[currentIndex++];
                     // Match the chunk with a token pattern
@@ -59,22 +54,15 @@ var COMPILER;
                             case T_WHITESPACE:
                                 if (currentChunk.value.match(/^\n$/)) {
                                     _Errors++;
-                                    log.status = LOG_ERROR;
-                                    log.msg = 'Newline is not allowed in strings.';
-                                    COMPILER.Main.addLog(log);
+                                    COMPILER.Main.addLog(LOG_ERROR, 'Invalid newline character in string found at line ' + (currentChunk.lineNum + 1) + '.');
                                     break TokenizeLoop;
                                 }
-                                break;
-                            case T_EOF:
-                                eofExists = true;
                                 break;
                         }
                     }
                     else {
                         _Errors++;
-                        log.status = LOG_ERROR;
-                        log.msg = 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum;
-                        COMPILER.Main.addLog(log);
+                        COMPILER.Main.addLog(LOG_ERROR, 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum + '.');
                         break;
                     }
                     if (isMatched) {
@@ -88,34 +76,29 @@ var COMPILER;
                 }
                 if (tokens.length === 0) {
                     _Errors++;
-                    log.status = LOG_ERROR;
-                    log.msg = 'No tokens were found in input string.';
-                }
-                else if (_Errors === 0 && !eofExists) {
-                    _Warnings++;
-                    log.status = LOG_WARNING;
-                    log.msg = 'EOF missing. Adding a EOF token.';
-                    var token = new COMPILER.Token();
-                    token.setName('T_EOF');
-                    token.setType(T_EOF);
-                    token.setValue('$');
-                    token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
-                    tokens.push(token);
-                }
-                else {
-                    log.status = LOG_INFO;
-                    log.msg = 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).';
+                    COMPILER.Main.addLog(LOG_ERROR, 'No tokens were found in input string.');
                 }
                 if (_Errors === 0) {
+                    if (tokenPattern[this.matchTokenPattern(codeChunks[codeChunks.length - 1].value)].type !== T_EOF) {
+                        // Send a warning and append a EOP token to the source code
+                        _Warnings++;
+                        COMPILER.Main.addLog(LOG_WARNING, 'EOP missing. Adding a EOP token.');
+                        var token = new COMPILER.Token();
+                        token.setName('T_EOP');
+                        token.setType(T_EOF);
+                        token.setValue('$');
+                        token.setLineNum(codeChunks[codeChunks.length - 1].lineNum);
+                        tokens.push(token);
+                    }
                     COMPILER.Main.updateTokenTable(tokens);
                 }
             }
             else {
                 _Errors++;
-                log.status = LOG_ERROR;
-                log.msg = 'No code to compile.';
+                COMPILER.Main.addLog(LOG_ERROR, 'No code to compile!');
             }
-            COMPILER.Main.addLog(log);
+            // Main.addLog(log);
+            COMPILER.Main.addLog(LOG_INFO, 'Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             return tokens;
         };
         Lexer.matchTokenPattern = function (chunk) {
