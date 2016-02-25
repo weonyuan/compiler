@@ -30,7 +30,7 @@
     border: 1px solid black;
     float: right;
     /*height: 40%;*/
-    height: 150px;
+    height: 200px;
     overflow-x: hidden;
     overflow-y: auto;
     padding: 5px;
@@ -39,6 +39,10 @@
 
 .log {
     margin: 5px 0px 5px 5px;
+}
+
+#tokenDisplay {
+    display: block;
 }
 
 div.status {

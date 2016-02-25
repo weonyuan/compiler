@@ -64,7 +64,6 @@ var tokenPattern = {
     T_WHITESPACE: { type: T_WHITESPACE, regex: /^\s|\n$/ },
     T_EOF: { type: T_EOF, regex: /^\$$/ }
 };
-// why doesn't this work?
 var _Main;
 var _Lexer;
 var _Parser;

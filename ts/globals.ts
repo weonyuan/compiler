@@ -75,7 +75,6 @@ var tokenPattern = {
     T_EOF: { type: T_EOF, regex: /^\$$/ }
 };
 
-// why doesn't this work?
 var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;

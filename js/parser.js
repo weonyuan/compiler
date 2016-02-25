@@ -11,7 +11,7 @@ var COMPILER;
         function Parser() {
         }
         Parser.init = function (tokens) {
-            _CurrentToken = this.getNextToken();
+            this.getNextToken();
             this.parseProgram();
         };
         // Block $
@@ -22,10 +22,10 @@ var COMPILER;
         // { StatementList }
         Parser.parseBlock = function () {
             if (_CurrentToken.getType() === T_LBRACE) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseStatementList();
                 if (_CurrentToken.getType() === T_RBRACE) {
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                 }
                 else {
                     console.log('expecting a right brace');
@@ -104,14 +104,14 @@ var COMPILER;
         Parser.parsePrintStatement = function () {
             console.log('parsePrintStatement()');
             if (_CurrentToken.getType() === T_PRINT) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 console.log(_CurrentToken);
                 if (_CurrentToken.getType() === T_LPAREN) {
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                     this.parseExpr();
                     console.log(_CurrentToken);
                     if (_CurrentToken.getType() === T_RPAREN) {
-                        _CurrentToken = this.getNextToken();
+                        this.getNextToken();
                     }
                     else {
                         console.log('print statement parse error');
@@ -127,7 +127,7 @@ var COMPILER;
             console.log('parseAssignmentStatement()');
             this.parseId();
             if (_CurrentToken.getType() === T_ASSIGN) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseExpr();
             }
             else {
@@ -143,7 +143,7 @@ var COMPILER;
         // while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             if (_CurrentToken.getType() === T_WHILE) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
             }
@@ -154,7 +154,7 @@ var COMPILER;
         // if BooleanExpr block
         Parser.parseIfStatement = function () {
             if (_CurrentToken.getType() === T_IF) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
             }
@@ -193,11 +193,11 @@ var COMPILER;
         Parser.parseIntExpr = function () {
             console.log('parseIntExpr()');
             if (_CurrentToken.getType() === T_DIGIT) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 // Check to see if the new token is + operator
                 if (_CurrentToken.getType() === T_ADD) {
                     // Grab the next token and verify for a digit
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                     this.parseExpr();
                 }
             }
@@ -209,10 +209,10 @@ var COMPILER;
         Parser.parseStringExpr = function () {
             console.log('parseStringExpr()');
             if (_CurrentToken.getType() === T_QUOTE) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseCharList();
                 if (_CurrentToken.getType() === T_QUOTE) {
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                 }
                 else {
                     console.log('parseStringExpr error: expected a quote');
@@ -227,17 +227,17 @@ var COMPILER;
         Parser.parseBooleanExpr = function () {
             console.log('parseBooleanExpr()');
             if (_CurrentToken.getType() === T_LPAREN) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 this.parseExpr();
                 this.parseBoolOp();
                 this.parseExpr();
                 if (_CurrentToken.getType() === T_RPAREN) {
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                 }
             }
             else if (_CurrentToken.getType() === T_TRUE
                 || _CurrentToken.getType() === T_FALSE) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
             }
             else {
                 console.log('error parsing boolean expression');
@@ -250,7 +250,7 @@ var COMPILER;
                 console.log('parseid error');
             }
             else {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
             }
         };
         // char CharList
@@ -260,7 +260,7 @@ var COMPILER;
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                     this.parseCharList();
                     break;
                 default:
@@ -275,19 +275,18 @@ var COMPILER;
                 case T_INT:
                 case T_STRING:
                 case T_BOOLEAN:
-                    _CurrentToken = this.getNextToken();
+                    this.getNextToken();
                     break;
                 default:
                     console.log('expected a valid data type');
                     break;
             }
         };
-        // TODO
         // == | !=
         Parser.parseBoolOp = function () {
             console.log('parseBoolOp()');
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
             }
             else {
                 console.log('expected boolean operator in parsebooleanexpr()');
@@ -298,7 +297,7 @@ var COMPILER;
             console.log('parseEOF()');
             if (_CurrentToken.getType() === T_EOF) {
                 console.log('found the EOF!');
-                _CurrentToken = this.getNextToken();
+                this.getNextToken();
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
                     this.parseProgram();
                 }
@@ -308,7 +307,7 @@ var COMPILER;
             }
         };
         Parser.getNextToken = function () {
-            return _Tokens.shift();
+            _CurrentToken = _Tokens.shift();
         };
         return Parser;
     })();
