@@ -60,9 +60,9 @@ module COMPILER {
                             case T_QUOTE:
                                 stringMode = !stringMode;
                                 break;
-                            case T_CHAR:
-                                if (!stringMode) {
-                                    matchedTokenName = 'T_ID';
+                            case T_ID:
+                                if (stringMode) {
+                                    matchedTokenName = 'T_CHAR';
                                 }
                                 break;
                             case T_WHITESPACE:

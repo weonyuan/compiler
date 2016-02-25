@@ -208,12 +208,19 @@ var COMPILER;
         };
         // TODO: " CharList "
         Parser.parseStringExpr = function () {
+            console.log('parseStringExpr()');
             if (_CurrentToken.getType() === T_QUOTE) {
-                this.parseCharList();
                 _CurrentToken = this.getNextToken();
-                if (_CurrentToken.getType() !== T_QUOTE) {
+                this.parseCharList();
+                if (_CurrentToken.getType() === T_QUOTE) {
+                    _CurrentToken = this.getNextToken();
+                }
+                else {
                     console.log('parseStringExpr error: expected a quote');
                 }
+            }
+            else {
+                console.log('expected a quote');
             }
         };
         // ( Expr boolop Expr )
@@ -229,8 +236,12 @@ var COMPILER;
                     _CurrentToken = this.getNextToken();
                 }
             }
+            else if (_CurrentToken.getType() === T_TRUE
+                || _CurrentToken.getType() === T_FALSE) {
+                _CurrentToken = this.getNextToken();
+            }
             else {
-                console.log('expected (');
+                console.log('error parsing boolean expression');
             }
         };
         // char
@@ -248,13 +259,14 @@ var COMPILER;
         // space CharList
         // epsilon
         Parser.parseCharList = function () {
-            _CurrentToken = this.getNextToken();
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
+                    _CurrentToken = this.getNextToken();
                     this.parseCharList();
                     break;
                 default:
+                    // epsilon
                     break;
             }
         };
