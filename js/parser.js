@@ -141,7 +141,7 @@ var COMPILER;
             this.parseType();
             this.parseId();
         };
-        // TODO: while BooleanExpr Block
+        // while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             if (_CurrentToken.getType() === T_WHILE) {
                 _CurrentToken = this.getNextToken();
@@ -154,14 +154,13 @@ var COMPILER;
         };
         // if BooleanExpr block
         Parser.parseIfStatement = function () {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
-            if (_CurrentToken.getType() === T_LPAREN) {
+            if (_CurrentToken.getType() === T_IF) {
+                _CurrentToken = this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
             }
             else {
-                console.log('expected ( in if statement');
+                console.log('error parsing if statement');
             }
         };
         // IntExpr

@@ -149,7 +149,7 @@ module COMPILER {
             this.parseId();
         }
 
-        // TODO: while BooleanExpr Block
+        // while BooleanExpr Block
         public static parseWhileStatement(): void {
             if (_CurrentToken.getType() === T_WHILE) {
                 _CurrentToken = this.getNextToken();
@@ -162,16 +162,12 @@ module COMPILER {
 
         // if BooleanExpr block
         public static parseIfStatement(): void {
-            _CurrentToken = this.getNextToken();
-            console.log(_CurrentToken);
-
-
-            if (_CurrentToken.getType() === T_LPAREN) {
+            if (_CurrentToken.getType() === T_IF) {
+                _CurrentToken = this.getNextToken();
                 this.parseBooleanExpr();
-
                 this.parseBlock();
             } else {
-                console.log('expected ( in if statement');
+                console.log('error parsing if statement');
             }
         }
 
