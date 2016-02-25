@@ -18,6 +18,17 @@ var COMPILER;
                 COMPILER.Parser.printResults();
             }
         };
+        Main.toggleVerboseMode = function () {
+            _VerboseMode = !_VerboseMode;
+            if (_VerboseMode) {
+                document.getElementById('btnVerbose').innerHTML = 'Verbose On';
+                document.getElementById('btnVerbose').className = 'btn btn-success col-sm-2 col-md-1';
+            }
+            else {
+                document.getElementById('btnVerbose').innerHTML = 'Verbose Off';
+                document.getElementById('btnVerbose').className = 'btn btn-danger col-sm-2 col-md-1';
+            }
+        };
         Main.updateTokenTable = function (tokens) {
             this.resetTokenTable();
             var tokenTable = document.getElementById('tokenTable');

@@ -18,6 +18,18 @@ module COMPILER {
             }
         }
 
+        public static toggleVerboseMode(): void {
+            _VerboseMode = !_VerboseMode;
+
+            if (_VerboseMode) {
+                (<HTMLButtonElement> document.getElementById('btnVerbose')).innerHTML = 'Verbose On';
+                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-success col-sm-2 col-md-1';
+            } else {
+                (<HTMLButtonElement> document.getElementById('btnVerbose')).innerHTML = 'Verbose Off';
+                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-danger col-sm-2 col-md-1';
+            }
+        }
+
         public static updateTokenTable(tokens): void {
             this.resetTokenTable();
             var tokenTable = document.getElementById('tokenTable');
