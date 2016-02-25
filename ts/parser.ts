@@ -113,12 +113,13 @@ module COMPILER {
 
 
                 if (_CurrentToken.getType() === T_LPAREN) {
+                    _CurrentToken = this.getNextToken();
                     this.parseExpr();
                     console.log(_CurrentToken);
-                    _CurrentToken = this.getNextToken();
 
-                    if (_CurrentToken.getType() !== T_RPAREN) {
+                    if (_CurrentToken.getType() === T_RPAREN) {
                         _CurrentToken = this.getNextToken();
+                    } else {
                         console.log('print statement parse error');
                     }
                 } else {
