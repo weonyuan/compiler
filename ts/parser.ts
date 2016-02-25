@@ -11,20 +11,21 @@ module COMPILER {
 
         // Block $
         public static parseProgram(tokens): void {
+            _CurrentToken = this.getNextToken();
             this.parseBlock();
             this.parseEOF();
         }
 
         // { StatementList }
         public static parseBlock(): void {
-            console.log('parseBlock()');
-            _CurrentToken = this.getNextToken();
             if (_CurrentToken.getType() === T_LBRACE) {
                 _CurrentToken = this.getNextToken();
                 this.parseStatementList();
 
-                if (_CurrentToken.getType() !== T_RBRACE) {
-                    console.log('error');
+                if (_CurrentToken.getType() === T_RBRACE) {
+                    _CurrentToken = this.getNextToken();
+                } else {
+                    console.log('expecting a right brace');
                 }
             } else {
                 _Errors++;
@@ -150,8 +151,13 @@ module COMPILER {
 
         // TODO: while BooleanExpr Block
         public static parseWhileStatement(): void {
-            this.parseBooleanExpr();
-            this.parseBlock();
+            if (_CurrentToken.getType() === T_WHILE) {
+                _CurrentToken = this.getNextToken();
+                this.parseBooleanExpr();
+                this.parseBlock();
+            } else {
+                console.log('error parsing while statement');
+            }
         }
 
         // if BooleanExpr block
@@ -231,6 +237,7 @@ module COMPILER {
         // ( Expr boolop Expr )
         // boolval
         public static parseBooleanExpr(): void {
+            console.log('parseBooleanExpr()');
             if (_CurrentToken.getType() === T_LPAREN) {
                 _CurrentToken = this.getNextToken();
                 this.parseExpr();
@@ -240,6 +247,8 @@ module COMPILER {
                 if (_CurrentToken.getType() === T_RPAREN) {
                     _CurrentToken = this.getNextToken();
                 }
+            } else {
+                console.log('expected (');
             }
 
             
@@ -307,7 +316,7 @@ module COMPILER {
 
         // $
         public static parseEOF(): void {
-            _CurrentToken = this.getNextToken();
+            console.log('parseEOF()');
 
             if (_CurrentToken.getType() === T_EOF) {
                 console.log('found the EOF!');
