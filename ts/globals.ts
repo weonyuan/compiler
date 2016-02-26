@@ -76,6 +76,32 @@ var tokenPattern = {
     T_EOP: { type: T_EOP, regex: /^\$$/ }
 };
 
+var testPrograms = [
+  '{} $',
+  '{\n\tint a\n\tboolean b\n\tstring c\n} $',
+  '{\n\tprint(1)\n} $',
+  '{\n\tboolean a\n\ta = true\n\n\tprint (a)\n} $',
+  '{\n\tif true {\n\t\tstring m\n\t\tm = "mike is the mcginndog"\n\t}\n} $',
+  '{\n\tint a\n\tint b\n\n\ta = 1\n\tb = 3\n\tif (a == b) {\n \t\tstring m\n\t\tm = "mike is the mcginndog"\n\t}\n\tif (a != b) {\n\t\tstring m\n\t\tm = "mike is the mcginndogg"\n\t}\n} $',
+  '{\n\tint a\n\ta = 0\n\twhile true {\n\t\ta = a + 1\n \t\tprint(a)\n\t}\n} $',
+  '{\n\tint a\n\ta = 0\n\n\twhile (a != 3) {\n\t\ta = a + 1\n\t\tprint(a)\n\t}\n} $',
+  '{\n\tint a\n\ta = 1 + 1\n} $',
+  '{\n\tint a\n\tint b\n \ta = 4\n\tb = 1\n\tb = 1 + 5 + a + 1 + 2 + 3 + 4 + 9\n} $',
+  '{\n\tstring a\n\ta = ""\n} $',
+  '{\n\tstring b\n\tb = "hi"\n} $',
+  '{\n\tstring c\n\tc = "oh captain my captain"\n} $',
+  '{\n\tboolean b\n\tb = false\n\tb = true\n\tb = false\n\tb = true\n}$',
+  '{\n\tboolean a\n\ta = (false == ((true != true) == (true != false)))\n\n\tprint(a)\n} $',
+  '{\n\tint a\n\tint b\n\n\ta = 1\n\tb = 2\n\n\t{\n\t\tint a\n\t\tint b\n\n\t\ta = 4\n\t\tb = 3\n\n\t\tprint(a)\n\t\tprint(b)\n\t}\n\n\tprint(a)\n\tprint(b)\n} $',
+  '{\n\tint a\n\tint b\n\n\ta = 2\n\tb = 3\n\n\t{\n\t\tint b\n\t\tb = 4\n\t\t{\n\t\t\tint a\n\t\t\ta = 3\n\n\t\t\t{\n \t\t\t\tint c\n\t\t\t\tc = 9\n\n\t\t\t\tprint(a)\n\t\t\t\tprint(b)\n\t\t\t\tprint(c)\n\t\t\t}\n\n\t\t\tprint(a)\n\t\t\tprint(b)\n\t\t}\n\t\tprint(a)\n\t\tprint(b)\n\t}\n\tprint(a)\n\tprint(b)\n} $',
+  '{\n\tint a\n\tint b\n\n\ta = 1\n\tb = 2\n\n\t{\n\t\tint a\n\t\tint b\n\n\t\ta = 4\n\t\tb = 3\n\n\t\tprint(a)\n\t\tprint(b)\n\t}\n\n\tprint(a)\n\tprint(b)\n} $\n\n{\n\tint a\n\tint b\n\n\ta = 2\n\tb = 3\n\n\t{\n\t\tint b\n\t\tb = 4\n\t\t{\n\t\t\tint a\n\t\t\ta = 3\n\n\t\t\t{\n\t\t\t\tint c\n\t\t\t\tc = 9\n\n\t\t\t\tprint(a)\n\t\t\t\tprint(b)\n\t\t\t\tprint(c)\n\t\t\t}\n\n\t\t\tprint(a)\n\t\t\tprint(b)\n\t\t}\n\t\tprint(a)\n\t\tprint(b)\n\t}\n\tprint(a)\n\tprint(b)\n} $',
+  '{\n\tstring a\n\ta = "you smart\n\t\tyou loyal\n\t\tyou grateful\n \t\ti respect that"\n} $',
+  '{\n\tint a\n\tint b\n\n\ta = 8\n\tb = 3\n \n \tif (a < b) {\n \t\t print(b)\n \t}\n} $',
+  '{\nint a int b\t{\na\n\t\t=\n\t\t1\n\t\t\t{\n\t\t\t\tb= 4\n\t\t\t\t{ print (b)\n \t\t\t\t\t{print ( a)\n \t\t\t\t\t\t{\n int d\n\t\t\t\t\t\t\t{\nd =0\n\t\t\t\t\t\t\t\t{\n if (a == b)\n\t\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\t\t{if(c!=d) {print(false)}}\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n} $',
+  '{\n\tstring d\n\td = "Daniel Craig"\n} $',
+  '{\n\tint x\n\tx = 42\n} $'
+];
+
 var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;

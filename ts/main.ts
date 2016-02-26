@@ -18,6 +18,10 @@ module COMPILER {
             }
         }
 
+        public static loadProgram(index): void {
+            (<HTMLTextAreaElement>document.getElementById('inputText')).value = testPrograms[index];
+        }
+
         public static toggleVerboseMode(): void {
             _VerboseMode = !_VerboseMode;
 

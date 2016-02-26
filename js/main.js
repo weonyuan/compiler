@@ -18,6 +18,9 @@ var COMPILER;
                 COMPILER.Parser.printResults();
             }
         };
+        Main.loadProgram = function (index) {
+            document.getElementById('inputText').value = testPrograms[index];
+        };
         Main.toggleVerboseMode = function () {
             _VerboseMode = !_VerboseMode;
             if (_VerboseMode) {
