@@ -24,30 +24,33 @@
 <body>
     <nav id="header" class="navbar-default">
         <div class="container-fluid">
-            <div id="logo" class="col-sm-3 col-md-5">aBasicCompiler</div>
-            <div class="dropdown col-sm-7">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Programs<span class="caret"></span></a>
+            <div id="logo" class="col-sm-3 col-md-3">aBasicCompiler</div>
+            <div class="dropdown col-sm-2 col-md-2">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    Programs
+                    <span class="caret"></span>
+                </button>
                 <ul class="dropdown-menu">
                     <li class="dropdown-header"><strong>So Basic</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(0)">Bare</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(1)">Variable declarations</a></li>
-                    <li class="dropdown-header"><strong>Print</strong></li>
+                    <li class="dropdown-header"><strong>Print Statement</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(2)">Print 1</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(3)">Another one...</a></li>
-                    <li class="dropdown-header"><strong>If</strong></li>
+                    <li class="dropdown-header"><strong>If Statement</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(4)">If boolop</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(5)" >If expression</a></li>
-                    <li class="dropdown-header"><strong>While</strong></li>
+                    <li class="dropdown-header"><strong>While Statement</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(6)">While true</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(7)">While expression...</a></li>
-                    <li class="dropdown-header"><strong>Integer</strong></li>
+                    <li class="dropdown-header"><strong>Integer Expression</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(8)">Basic a + b</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(9)">+ + + + + + +</a></li>
-                    <li class="dropdown-header"><strong>String</strong></li>
+                    <li class="dropdown-header"><strong>String Expression</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(10)">Empty (just like my feelings)</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(11)">hi</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(12)">oh captain my captain</a></li>
-                    <li class="dropdown-header"><strong>Boolean</strong></li>
+                    <li class="dropdown-header"><strong>Boolean Expression</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(13)">truth</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(14)">Sandwiched booleans</a></li>
                     <li class="dropdown-header"><strong>Scope</strong></li>
@@ -57,13 +60,15 @@
                     <li class="dropdown-header"><strong>Software Dev Bad Practices (SDBP)</strong></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(18)">I'm not a one-liner</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(19)">But I love math!</a></li>
-                    <li><a href="#" onclick="COMPILER.Main.loadProgram(20)">Not for the OCD...</a></li>
+                    <li><a href="#" onclick="COMPILER.Main.loadProgram(20)">Not for the OCD conscious...</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(21)">Daniel Craig</a></li>
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(22)">Sometimes 42 is not the answer</a></li>
                 </ul>
             </div>
-            <button id="btnVerbose" class="btn btn-danger col-sm-2 col-md-1" onclick="COMPILER.Main.toggleVerboseMode()">Verbose Off</button>
-            <button id="btnCompile" class="btn btn-primary col-sm-2 col-md-1" onclick="COMPILER.Main.compile()">Compile</button>
+            <div class="col-sm-4 col-md-3 pull-right">
+                <button id="btnCompile" class="btn btn-primary" onclick="COMPILER.Main.compile()">Compile</button>
+                <button id="btnVerbose" class="btn btn-danger" onclick="COMPILER.Main.toggleVerboseMode()">Verbose Off</button>
+            </div>
         </div>
     </nav>
     <div id="bodyContent">

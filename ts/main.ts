@@ -12,7 +12,7 @@ module COMPILER {
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
             _Tokens = Lexer.tokenize(sourceCode);
             
-            if (_Tokens !== null && _Tokens !== undefined) {
+            if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
                 Parser.init(_Tokens);
                 Parser.printResults();
             }
@@ -27,10 +27,10 @@ module COMPILER {
 
             if (_VerboseMode) {
                 (<HTMLButtonElement> document.getElementById('btnVerbose')).innerHTML = 'Verbose On';
-                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-success col-sm-2 col-md-1';
+                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-success';
             } else {
                 (<HTMLButtonElement> document.getElementById('btnVerbose')).innerHTML = 'Verbose Off';
-                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-danger col-sm-2 col-md-1';
+                (<HTMLButtonElement>document.getElementById('btnVerbose')).className = 'btn btn-danger';
             }
         }
 

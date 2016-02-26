@@ -13,7 +13,7 @@ var COMPILER;
         Main.compile = function () {
             var sourceCode = document.getElementById('inputText').value;
             _Tokens = COMPILER.Lexer.tokenize(sourceCode);
-            if (_Tokens !== null && _Tokens !== undefined) {
+            if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
                 COMPILER.Parser.init(_Tokens);
                 COMPILER.Parser.printResults();
             }
@@ -25,11 +25,11 @@ var COMPILER;
             _VerboseMode = !_VerboseMode;
             if (_VerboseMode) {
                 document.getElementById('btnVerbose').innerHTML = 'Verbose On';
-                document.getElementById('btnVerbose').className = 'btn btn-success col-sm-2 col-md-1';
+                document.getElementById('btnVerbose').className = 'btn btn-success';
             }
             else {
                 document.getElementById('btnVerbose').innerHTML = 'Verbose Off';
-                document.getElementById('btnVerbose').className = 'btn btn-danger col-sm-2 col-md-1';
+                document.getElementById('btnVerbose').className = 'btn btn-danger';
             }
         };
         Main.updateTokenTable = function (tokens) {

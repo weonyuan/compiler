@@ -9,11 +9,15 @@
     font-size: 18pt;
 }
 
-#btnCompile {
+#btnVerbose, #btnCompile {
     float: right;
+    margin-right: 10px;
 }
 
 /* Body */
+body {
+    overflow-y: scroll;
+}
 #bodyContent {
     margin: 0px auto;
     padding-bottom: 15px;
@@ -29,9 +33,10 @@
 
 #logger {
     border: 1px solid black;
+    display: block;
     float: right;
     /*height: 40%;*/
-    height: 200px;
+    height: 222px;
     overflow-x: hidden;
     overflow-y: auto;
     padding: 5px;
