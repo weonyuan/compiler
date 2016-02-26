@@ -65,6 +65,7 @@ var tokenPattern = {
     T_WHITESPACE: { type: T_WHITESPACE, regex: /^\s|\n$/ },
     T_EOP: { type: T_EOP, regex: /^\$$/ }
 };
+// Used for loading a program into the textarea
 var testPrograms = [
     '{} $',
     '{\n\tint a\n\tboolean b\n\tstring c\n} $',
@@ -94,6 +95,7 @@ var _Main;
 var _Lexer;
 var _Parser;
 var _Token;
+// Global variables used for lexer and parser
 var _VerboseMode = false;
 var _Errors = 0;
 var _Warnings = 0;

@@ -10,17 +10,21 @@ var COMPILER;
     var Main = (function () {
         function Main() {
         }
+        // What more can I say? It is called after hitting the Compile button
         Main.compile = function () {
             var sourceCode = document.getElementById('inputText').value;
             _Tokens = COMPILER.Lexer.tokenize(sourceCode);
+            // Only parse when we actually have tokens!
             if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
                 COMPILER.Parser.init(_Tokens);
                 COMPILER.Parser.printResults();
             }
         };
+        // Load the source code from the testPrograms array into the textarea
         Main.loadProgram = function (index) {
             document.getElementById('inputText').value = testPrograms[index];
         };
+        // Changes the verbose mode button value and color
         Main.toggleVerboseMode = function () {
             _VerboseMode = !_VerboseMode;
             if (_VerboseMode) {
@@ -32,6 +36,7 @@ var COMPILER;
                 document.getElementById('btnVerbose').className = 'btn btn-danger';
             }
         };
+        // Used for listing all tokens after lexical analysis
         Main.updateTokenTable = function (tokens) {
             this.resetTokenTable();
             var tokenTable = document.getElementById('tokenTable');
@@ -47,6 +52,7 @@ var COMPILER;
                 token.appendChild(tokenValue);
             }
         };
+        // Enough said
         Main.resetTokenTable = function () {
             var tokenTable = document.getElementById('tokenTable');
             var tokenIndex = 0;
@@ -56,6 +62,7 @@ var COMPILER;
                 currentToken = document.getElementById('token-' + ++tokenIndex);
             }
         };
+        // Appends a log in logger based on status
         Main.addLog = function (status, msg) {
             // Construct the log's DOM
             var divLog = document.createElement('div');
@@ -97,6 +104,7 @@ var COMPILER;
             divLogMsg.innerHTML = msg;
             lastLog.appendChild(divLogMsg);
         };
+        // Do I need to say more?
         Main.resetLogger = function () {
             document.getElementById('logger').innerHTML = '';
         };

@@ -76,6 +76,7 @@ var tokenPattern = {
     T_EOP: { type: T_EOP, regex: /^\$$/ }
 };
 
+// Used for loading a program into the textarea
 var testPrograms = [
   '{} $',
   '{\n\tint a\n\tboolean b\n\tstring c\n} $',
@@ -107,6 +108,7 @@ var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
 
+// Global variables used for lexer and parser
 var _VerboseMode: boolean = false;
 var _Errors: number = 0;
 var _Warnings: number = 0;

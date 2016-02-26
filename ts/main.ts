@@ -8,20 +8,24 @@
 
 module COMPILER {
     export class Main {
+        // What more can I say? It is called after hitting the Compile button
         public static compile(): void {
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
             _Tokens = Lexer.tokenize(sourceCode);
             
+            // Only parse when we actually have tokens!
             if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
                 Parser.init(_Tokens);
                 Parser.printResults();
             }
         }
 
+        // Load the source code from the testPrograms array into the textarea
         public static loadProgram(index): void {
             (<HTMLTextAreaElement>document.getElementById('inputText')).value = testPrograms[index];
         }
 
+        // Changes the verbose mode button value and color
         public static toggleVerboseMode(): void {
             _VerboseMode = !_VerboseMode;
 
@@ -34,6 +38,7 @@ module COMPILER {
             }
         }
 
+        // Used for listing all tokens after lexical analysis
         public static updateTokenTable(tokens): void {
             this.resetTokenTable();
             var tokenTable = document.getElementById('tokenTable');
@@ -53,6 +58,7 @@ module COMPILER {
             }
         }
 
+        // Enough said
         public static resetTokenTable(): void {
             var tokenTable = document.getElementById('tokenTable');
             var tokenIndex = 0;
@@ -64,6 +70,7 @@ module COMPILER {
             }
         }
 
+        // Appends a log in logger based on status
         public static addLog(status, msg): void {
             // Construct the log's DOM
             var divLog = document.createElement('div');
@@ -110,6 +117,7 @@ module COMPILER {
             lastLog.appendChild(divLogMsg);
         }
 
+        // Do I need to say more?
         public static resetLogger(): void {
             document.getElementById('logger').innerHTML = '';
         }

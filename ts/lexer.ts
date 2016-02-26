@@ -16,12 +16,9 @@ module COMPILER {
             var tokens: any = [];
             Main.updateTokenTable(tokens);
 
+            // Delimiters
             var codeChunks: any = this.splitCodeBySpace(input);
             codeChunks = this.splitChunksToChars(codeChunks);
-            console.log(codeChunks);
-
-            var _Errors: number = 0;
-            var _Warnings: number = 0;
 
             if (input.length > 0) {
                 var currentIndex: number = 0;
@@ -59,14 +56,14 @@ module COMPILER {
                             case T_WHITESPACE:
                                 if (currentChunk.value.match(/^\n$/)) {
                                     _Errors++;
-                                    Main.addLog(LOG_ERROR, 'Invalid newline character in string found at line ' + (currentChunk.lineNum + 1) + '.');
+                                    Main.addLog(LOG_ERROR, 'Line ' + (currentChunk.lineNum + 1) + ': Invalid newline character in string found.');
                                     break TokenizeLoop;
                                 }
                                 break;
                         }
                     } else {
                         _Errors++;
-                        Main.addLog(LOG_ERROR, 'Invalid lexeme ' + currentChunk.value + ' found at line ' + currentChunk.lineNum + '.');
+                        Main.addLog(LOG_ERROR, 'Line ' + currentChunk.lineNum + ': Invalid lexeme ' + currentChunk.value + ' found.');
                         break;
                     }
 
@@ -112,12 +109,15 @@ module COMPILER {
             }
 
             Main.addLog(LOG_INFO, 'Tokenizing complete. Lexer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+
+            // Reset the warnings and errors for parser
             _Warnings = 0;
             _Errors = 0;
 
             return tokens;
         }
 
+        // Validate the token with every possible pattern then return a matched token name
         public static matchTokenPattern(chunk): string {
             var tokenName: string = null;
             for (name in tokenPattern) {
@@ -130,6 +130,7 @@ module COMPILER {
             return tokenName;
         }
 
+        // Delimit the source code by whitespaces (except for whitespaces in strings)
         public static splitCodeBySpace(input): string[] {
             var buffer: string = '';
             var codeChunks = [];
@@ -143,29 +144,36 @@ module COMPILER {
                     lineNum: null
                 };
 
+                // Toggle string mode when T_QUOTE is detected
                 if (input.charAt(i).match('\"')) {
                     stringMode = !stringMode;
                 }
-                
 
+                // If char is a whitespace/newline and stringMode is off
+                // push the buffer into the new delimited array then clear it
                 if (input.charAt(i).match(splitRegex) && !stringMode) {
                     chunk.value = buffer;
                     chunk.lineNum = currentLineNum;
                     codeChunks.push(chunk);
+
+                    // Reset buffer
                     buffer = '';
 
                     if (input.charAt(i).match(/^\n$/)) {
                         currentLineNum++;
                     }
                 } else if (i === input.length - 1) {
+                    // Last chunk should be pushed whatever is stored in buffer (no wasting!)
                     buffer += input.charAt(i);
                     chunk.value = buffer;
                     chunk.lineNum = currentLineNum;
                     codeChunks.push(chunk);
                 } else {
+                    // Otherwise build the buffer - char by char
                     buffer += input.charAt(i);
                 }
 
+                // Push every char into the array if stringMode is on
                 if (stringMode) {
                     chunk.value = buffer;
                     chunk.lineNum = currentLineNum;
@@ -177,6 +185,7 @@ module COMPILER {
             return codeChunks;
         }
 
+        // Delimit the chunks by operators and encapsulators defined in splitRegex
         public static splitChunksToChars(codeChunks): string[] {
             var buffer: string = '';
             var newCodeChunks: any[] = [];
@@ -187,6 +196,7 @@ module COMPILER {
 
                 for (var j = 0; j < currentChunk.value.length; j++) {
                     if (currentChunk.value.charAt(j).match(splitRegex)) {
+                        // Push the buffer first before pushing the symbol/operator
                         if (buffer.length > 0) {
                             var bufferChunk = {
                                 value: null,
@@ -195,6 +205,8 @@ module COMPILER {
 
                             bufferChunk.value = buffer;
                             newCodeChunks.push(bufferChunk);
+
+                            // Remember to empty the buffer after pushing!
                             buffer = '';
                         }
                         
@@ -206,8 +218,10 @@ module COMPILER {
                         charChunk.value = currentChunk.value.charAt(j);
                         newCodeChunks.push(charChunk);    
                     } else {
+                        // Otherwise build buffer with char
                         buffer += currentChunk.value.charAt(j);
 
+                        // Last chunk should be pushed with whatever buffer we already have
                         if (j === currentChunk.value.length - 1) {
                             var bufferChunk = {
                                 value: null,
@@ -216,6 +230,8 @@ module COMPILER {
 
                             bufferChunk.value = buffer;
                             newCodeChunks.push(bufferChunk);
+
+                            // Reset buffer
                             buffer = '';
                         }
                     }
