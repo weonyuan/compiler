@@ -89,7 +89,7 @@ var testPrograms = [
     '{\n\tint a\n\tint b\n\n\ta = 8\n\tb = 3\n \n \tif (a < b) {\n \t\t print(b)\n \t}\n} $',
     '{\nint a int b\t{\na\n\t\t=\n\t\t1\n\t\t\t{\n\t\t\t\tb= 4\n\t\t\t\t{ print (b)\n \t\t\t\t\t{print ( a)\n \t\t\t\t\t\t{\n int d\n\t\t\t\t\t\t\t{\nd =0\n\t\t\t\t\t\t\t\t{\n if (a == b)\n\t\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\t\t{if(c!=d) {print(false)}}\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n} $',
     '{\n\tstring d\n\td = "Daniel Craig"\n} $',
-    '{\n\tint x\n\tx = 42\n} $'
+    '{\n\tint x\n\tx 4\n} $'
 ];
 var _Main;
 var _Lexer;

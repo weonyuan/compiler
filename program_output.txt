@@ -1,0 +1,25 @@
+All programs under So Basic should lex and parse successfully.
+
+All programs under Print Statement should lex and parse successfully.
+
+All programs under If Statement should lex and parse successfully.
+
+All programs under While Statement should lex and parse successfully.
+
+All programs under Integer Expression should lex and parse successfully.
+
+All programs under String Expression should lex and parse successfully.
+
+All programs under Boolean Expression should lex and parse successfully.
+
+All programs under Scope should lex and parse successfully.
+
+Under SDBP, the "I'm not a one-liner" program will fail during the tokenizing process, due to invalid newline character in string.
+
+Under SDBP, the "But I love math!" program will fail during the tokenizing process, due to an invalid lexeme "<" being found.
+
+Under SDBP, the "Not for the OCD conscious..." program should lex and parse successfully despite the badly-formatted code. Sorry for pissing you off, Alan...
+
+Under SDBP, the "Daniel Craig" program will fail during the tokenizing process, due to an invalid lexeme "D" being found and for being Daniel Craig.
+
+Under SDBP, the "X 4" program will fail during the parsing process, since the parser will expect an assign token but received a digit token.
