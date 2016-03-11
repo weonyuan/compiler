@@ -109,7 +109,7 @@ var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
 
 // Global variables used for lexer and parser
-var _VerboseMode: boolean = false;
+var _VerboseMode: boolean = true;
 var _Errors: number = 0;
 var _Warnings: number = 0;
 var _Tokens: any = [];

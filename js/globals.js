@@ -96,7 +96,7 @@ var _Lexer;
 var _Parser;
 var _Token;
 // Global variables used for lexer and parser
-var _VerboseMode = false;
+var _VerboseMode = true;
 var _Errors = 0;
 var _Warnings = 0;
 var _Tokens = [];
