@@ -167,22 +167,52 @@ var COMPILER;
         Lexer.splitChunksToChars = function (codeChunks) {
             var buffer = '';
             var newCodeChunks = [];
-            var splitRegex = /^[\{ \ }\(\)\!\=\+]$/;
+            var splitRegex = /^[\{ \ }\(\)\!\=\+\"]$/;
+            var possibleKeyword = false;
+            var possibleKeywordRegex = /^p.*|w.*|i.*|s.*|b.*|t.*|f.*$/;
+            var keywordRegex = /^print$|^while$|^if$|^int$|^string$|^boolean$|^true$|^false$/;
+            var valueRegex = /^[a-z0-9]$/;
             for (var i = 0; i < codeChunks.length; i++) {
                 var currentChunk = codeChunks[i];
                 for (var j = 0; j < currentChunk.value.length; j++) {
+                    // Keep on the lookout for a possible keyword
+                    if (currentChunk.value.charAt(j).match(possibleKeywordRegex)) {
+                        possibleKeyword = true;
+                    }
+                    // Push the char if it satisfies split regex
                     if (currentChunk.value.charAt(j).match(splitRegex)) {
-                        // Push the buffer first before pushing the symbol/operator
-                        if (buffer.length > 0) {
-                            var bufferChunk = {
-                                value: null,
-                                lineNum: currentChunk.lineNum
-                            };
-                            bufferChunk.value = buffer;
-                            newCodeChunks.push(bufferChunk);
-                            // Remember to empty the buffer after pushing!
+                        var charChunk = {
+                            value: null,
+                            lineNum: currentChunk.lineNum
+                        };
+                        // But first, push whatever you have in the buffer first
+                        // Buffer is built up from it being a possible keyword
+                        if (possibleKeyword) {
+                            for (var k = 0; k < buffer.length; k++) {
+                                var bufferChunk = {
+                                    value: null,
+                                    lineNum: currentChunk.lineNum
+                                };
+                                // This will likely happen if there are preceding characters that do
+                                // not belong to the keyword
+                                if (buffer.slice(k).match(keywordRegex)) {
+                                    bufferChunk.value = buffer.slice(k);
+                                    buffer = '';
+                                }
+                                else {
+                                    // Otherwise, just set the new chunk - char by char
+                                    bufferChunk.value = buffer.charAt(k);
+                                }
+                                newCodeChunks.push(bufferChunk);
+                            }
                             buffer = '';
+                            possibleKeyword = false;
                         }
+                        charChunk.value = currentChunk.value.charAt(j);
+                        newCodeChunks.push(charChunk);
+                    }
+                    else if (currentChunk.value.charAt(j).match(valueRegex) && !possibleKeyword) {
+                        // Just push by char if it is not a possible keyword
                         var charChunk = {
                             value: null,
                             lineNum: currentChunk.lineNum
@@ -204,6 +234,18 @@ var COMPILER;
                             // Reset buffer
                             buffer = '';
                         }
+                    }
+                    // Push keyword and clear buffer
+                    if (buffer.match(keywordRegex)) {
+                        var bufferChunk = {
+                            value: null,
+                            lineNum: currentChunk.lineNum
+                        };
+                        bufferChunk.value = buffer;
+                        newCodeChunks.push(bufferChunk);
+                        // Remember to empty the buffer after pushing!
+                        buffer = '';
+                        possibleKeyword = false;
                     }
                 }
             }
