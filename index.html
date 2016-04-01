@@ -19,6 +19,14 @@
     <script type="text/javascript" src="js/token.js"></script>
     <script type="text/javascript" src="js/lexer.js"></script>
     <script type="text/javascript" src="js/parser.js"></script>
+    <script type="text/javascript" src="js/tree.js"></script>
+
+    <script type="text/javascript">
+        $('#tokenDisplay a').click(function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    </script>
 </head>
 
 <body>
@@ -74,7 +82,7 @@
     <div id="bodyContent">
         <div id="sourceCode" class="col-sm-5 col-md-5">
             <div class="panel-heading"><label>Source Code</label></div>
-            <textarea id="inputText" rows="10" placeholder="Enter your code here." wrap="off" autofocus></textarea>
+            <textarea id="inputText" rows="9" placeholder="Enter your code here." wrap="off" autofocus></textarea>
         </div>
 
         <div id="consoleLog" class="col-sm-7 col-md-7">
@@ -82,14 +90,34 @@
             <div id="logger"></div>
         </div>
 
-        <div id="tokenDisplay" class="col-sm-12 col-md-12 pull-left">
-            <div class="panel-heading"><label>Token Table</label></div>
-            <table id="tokenTable" class="table table-bordered table-striped">
-                <tr>
-                    <th width="50%">Name</th>
-                    <th width="50%">Value</th>
-                </tr>
-            </table>
+        <div id="tableDisplay" class="col-sm-5 col-md-5">
+            <ul id="tableNav" class="nav nav-tabs" role="tablist">
+                <li class="panel-heading active"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token Table</a></li>
+                <li class="panel-heading"><a href="#symbolTable" aria-controls="symbolTable" role="tab" data-toggle="tab">Symbol Table</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="token" class="tab-pane active" role="tabpanel">
+                    <table id="tokenTable" class="table table-bordered table-striped">
+                        <tr>
+                            <th width="50%">Name</th>
+                            <th width="50%">Value</th>
+                        </tr>
+                    </table>
+                </div>
+                <div id="symbolTable" class="tab-pane" role="tabpanel"></div>
+            </div>
+        </div>
+
+        <div id="miscDisplay" class="col-sm-7 col-md-7">
+            <ul id="miscNav" class="nav nav-tabs col-sm-7 col-md-7 pull-left" role="tablist">
+                <li class="panel-heading active"><a href="#cst" aria-controls="cst" role="tab" data-toggle="tab">CST</a></li>
+                <li class="panel-heading"><a href="#ast" aria-controls="ast" role="tab" data-toggle="tab">AST</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="cst" class="tab-pane active" role="tabpanel">CST</div>
+                <div id="ast" class="tab-pane" role="tabpanel">AST</div>
+            </div>
         </div>
     </div>
     <footer class="col-sm-12 col-md-12">Made by Weon. But I'm not a rapper.</footer>

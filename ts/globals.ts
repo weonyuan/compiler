@@ -107,6 +107,7 @@ var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
+var _CST: COMPILER.CST;
 
 // Global variables used for lexer and parser
 var _VerboseMode: boolean = true;

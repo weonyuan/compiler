@@ -18,11 +18,16 @@
 body {
     overflow-y: scroll;
 }
+
 #bodyContent {
     margin: 0px auto;
     padding-bottom: 15px;
     padding-top: 15px;
     width: 90%;
+}
+
+#bodyContent > div {
+    margin-bottom: 10px;
 }
 
 #inputText {
@@ -35,8 +40,7 @@ body {
     border: 1px solid black;
     display: block;
     float: right;
-    /*height: 40%;*/
-    height: 222px;
+    height: 208px;
     overflow-x: hidden;
     overflow-y: auto;
     padding: 5px;
@@ -45,10 +49,6 @@ body {
 
 .log {
     margin: 5px 0px 5px 5px;
-}
-
-#tokenDisplay {
-    display: block;
 }
 
 div.status {
@@ -68,8 +68,10 @@ div.message {
     width: 73%;
 }
 
-#tokenTable {
-    width: 39%;
+.tab-content {
+    height: 200px;
+    overflow-x: none;
+    overflow-y: auto;
 }
 
 #tokenTable td {

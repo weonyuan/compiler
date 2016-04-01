@@ -95,6 +95,7 @@ var _Main;
 var _Lexer;
 var _Parser;
 var _Token;
+var _CST;
 // Global variables used for lexer and parser
 var _VerboseMode = true;
 var _Errors = 0;
