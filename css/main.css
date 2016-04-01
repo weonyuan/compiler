@@ -69,9 +69,17 @@ div.message {
 }
 
 .tab-content {
-    height: 200px;
+    height: 350px;
     overflow-x: none;
     overflow-y: auto;
+}
+
+ul > li.active {
+    font-weight: bold;
+}
+
+.table {
+    margin-bottom: 0px;
 }
 
 #tokenTable td {

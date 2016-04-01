@@ -22,7 +22,7 @@
     <script type="text/javascript" src="js/tree.js"></script>
 
     <script type="text/javascript">
-        $('#tokenDisplay a').click(function(e) {
+        $('#tableNav a, #miscNav a').click(function(e) {
             e.preventDefault();
             $(this).tab('show');
         });
@@ -110,7 +110,7 @@
         </div>
 
         <div id="miscDisplay" class="col-sm-7 col-md-7">
-            <ul id="miscNav" class="nav nav-tabs col-sm-7 col-md-7 pull-left" role="tablist">
+            <ul id="miscNav" class="nav nav-tabs" role="tablist">
                 <li class="panel-heading active"><a href="#cst" aria-controls="cst" role="tab" data-toggle="tab">CST</a></li>
                 <li class="panel-heading"><a href="#ast" aria-controls="ast" role="tab" data-toggle="tab">AST</a></li>
             </ul>
