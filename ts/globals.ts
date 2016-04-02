@@ -47,6 +47,10 @@ const LOG_INFO: number = 1;
 const LOG_SUCCESS: number = 2;
 const LOG_VERBOSE: number = 3;
 
+// Used for building a tree
+const BRANCH_NODE: string = 'branch';
+const LEAF_NODE: string = 'leaf';
+
 var tokenPattern = {
     // Reserved keywords
     T_PRINT: { type: T_PRINT, regex: /^print$/ },
@@ -107,7 +111,6 @@ var _Main: COMPILER.Main;
 var _Lexer: COMPILER.Lexer;
 var _Parser: COMPILER.Parser;
 var _Token: COMPILER.Token;
-var _CST: COMPILER.CST;
 
 // Global variables used for lexer and parser
 var _VerboseMode: boolean = true;

@@ -12,7 +12,6 @@ var COMPILER;
         function Lexer() {
         }
         Lexer.tokenize = function (input) {
-            COMPILER.Main.resetLogger();
             COMPILER.Main.addLog(LOG_INFO, 'Performing input tokenization through lexer.');
             var tokens = [];
             COMPILER.Main.updateTokenTable(tokens);

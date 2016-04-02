@@ -37,6 +37,9 @@ var LOG_WARNING = 0;
 var LOG_INFO = 1;
 var LOG_SUCCESS = 2;
 var LOG_VERBOSE = 3;
+// Used for building a tree
+var BRANCH_NODE = 'branch';
+var LEAF_NODE = 'leaf';
 var tokenPattern = {
     // Reserved keywords
     T_PRINT: { type: T_PRINT, regex: /^print$/ },
@@ -95,7 +98,6 @@ var _Main;
 var _Lexer;
 var _Parser;
 var _Token;
-var _CST;
 // Global variables used for lexer and parser
 var _VerboseMode = true;
 var _Errors = 0;

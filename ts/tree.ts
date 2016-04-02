@@ -14,6 +14,8 @@ module COMPILER {
             public current: any = {}
         ) {}
 
+        private treeString: string = '';
+
         public createNode(name): any {
             var node = {
                 name: name,
@@ -35,7 +37,7 @@ module COMPILER {
                 this.current.children.push(node);
             }
 
-            if (type === "branch") {
+            if (type === BRANCH_NODE) {
                 this.current = node;
             }
         }
@@ -50,33 +52,36 @@ module COMPILER {
 
 
         public expand(node, depth): string {
-            var result: string = '';
+            this.treeString += '<div>';
 
             // Space out based on the current depth
             for (var i = 0; i < depth; i++) {
-                result += '-';
+                // this.treeString += '&emsp;';
+                this.treeString += '-';
             }
 
             if (!node.children || node.children.length === 0) {
-                result += '[' + node.name + ']';
-                result += '\n';
+                // Encapsulate in square brackets if node has no children
+                this.treeString += '[ ' + node.name + ' ]</div>';
+                this.treeString += '\n';
             } else {
-                result += '<' + node.name + '>'
-                result += '\n';
+                // Otherwise, encapsulate in angle brackets
+                this.treeString += '&lt;' + node.name + '&gt;</div>'
+                this.treeString += '\n';
 
+                // Recursively traverse through the children nodes
                 for (var i = 0; i < node.children.length; i++) {
-                    this.expand(node.children[i], depth++);
+                    this.expand(node.children[i], depth + 1);
                 }
             }
 
-            return result;
+            return this.treeString;
         }
 
-        public toString(): string {
-            var treeString: string = '';
-            treeString = this.expand(this.root, 0);
-
-            return treeString;
+        public printTreeString(location): void {
+            this.treeString = this.expand(this.root, 0);
+            console.log(location);
+            document.getElementById(location).innerHTML = this.treeString;
         }
     }
 }

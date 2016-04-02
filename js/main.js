@@ -12,6 +12,7 @@ var COMPILER;
         }
         // What more can I say? It is called after hitting the Compile button
         Main.compile = function () {
+            Main.resetLogger();
             var sourceCode = document.getElementById('inputText').value;
             _Tokens = COMPILER.Lexer.tokenize(sourceCode);
             // Only parse when we actually have tokens!
@@ -64,11 +65,7 @@ var COMPILER;
         };
         // Appends a log in logger based on status
         Main.addLog = function (status, msg) {
-            // Construct the log's DOM
-            var divLog = document.createElement('div');
-            divLog.className = 'log';
-            document.getElementById('logger').appendChild(divLog);
-            // Inside the newly created DOM, find the appropriate status
+            // Inside the soon to be created log, find the appropriate status
             var divLogStatus = document.createElement('div');
             divLogStatus.className = 'label status';
             switch (status) {
@@ -96,13 +93,19 @@ var COMPILER;
             if (status === LOG_VERBOSE && !_VerboseMode) {
                 return;
             }
-            var lastLog = document.getElementsByClassName('log')[document.getElementsByClassName('log').length - 1];
-            lastLog.appendChild(divLogStatus);
-            // And finally, append the message inside the log
-            var divLogMsg = document.createElement('div');
-            divLogMsg.className = 'message';
-            divLogMsg.innerHTML = msg;
-            lastLog.appendChild(divLogMsg);
+            if (divLogStatus.innerHTML.length > 0) {
+                // Construct the log's DOM
+                var divLog = document.createElement('div');
+                divLog.className = 'log';
+                document.getElementById('logger').appendChild(divLog);
+                var lastLog = document.getElementsByClassName('log')[document.getElementsByClassName('log').length - 1];
+                lastLog.appendChild(divLogStatus);
+                // And finally, append the message inside the log
+                var divLogMsg = document.createElement('div');
+                divLogMsg.className = 'message';
+                divLogMsg.innerHTML = msg;
+                lastLog.appendChild(divLogMsg);
+            }
         };
         // Do I need to say more?
         Main.resetLogger = function () {

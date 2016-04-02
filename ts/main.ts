@@ -10,6 +10,7 @@ module COMPILER {
     export class Main {
         // What more can I say? It is called after hitting the Compile button
         public static compile(): void {
+            Main.resetLogger();
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
             _Tokens = Lexer.tokenize(sourceCode);
             
@@ -72,12 +73,7 @@ module COMPILER {
 
         // Appends a log in logger based on status
         public static addLog(status, msg): void {
-            // Construct the log's DOM
-            var divLog = document.createElement('div');
-            divLog.className = 'log';
-            document.getElementById('logger').appendChild(divLog);
-
-            // Inside the newly created DOM, find the appropriate status
+            // Inside the soon to be created log, find the appropriate status
             var divLogStatus = document.createElement('div');
             divLogStatus.className = 'label status';
             switch (status) {
@@ -107,14 +103,21 @@ module COMPILER {
                 return;
             }
 
-            var lastLog = document.getElementsByClassName('log')[document.getElementsByClassName('log').length - 1];
-            lastLog.appendChild(divLogStatus);
-            
-            // And finally, append the message inside the log
-            var divLogMsg = document.createElement('div');
-            divLogMsg.className = 'message';
-            divLogMsg.innerHTML = msg;
-            lastLog.appendChild(divLogMsg);
+            if (divLogStatus.innerHTML.length > 0) {
+                // Construct the log's DOM
+                var divLog = document.createElement('div');
+                divLog.className = 'log';
+                document.getElementById('logger').appendChild(divLog);
+
+                var lastLog = document.getElementsByClassName('log')[document.getElementsByClassName('log').length - 1];
+                lastLog.appendChild(divLogStatus);
+                
+                // And finally, append the message inside the log
+                var divLogMsg = document.createElement('div');
+                divLogMsg.className = 'message';
+                divLogMsg.innerHTML = msg;
+                lastLog.appendChild(divLogMsg);
+            }
         }
 
         // Do I need to say more?

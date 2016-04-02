@@ -10,7 +10,6 @@
 module COMPILER {
     export class Lexer {
         public static tokenize(input): any {
-            Main.resetLogger();
             Main.addLog(LOG_INFO, 'Performing input tokenization through lexer.');
 
             var tokens: any = [];
