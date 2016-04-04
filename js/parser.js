@@ -1,4 +1,5 @@
 ///<reference path="tree.ts" />
+///<reference path="token.ts" />
 ///<reference path="globals.ts" />
 /*
     parser.ts
@@ -13,6 +14,7 @@ var COMPILER;
         }
         Parser.init = function (tokens) {
             this.cst = new COMPILER.Tree();
+            this.ast = new COMPILER.Tree();
             COMPILER.Main.addLog(LOG_INFO, 'Performing parsing.');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Initializing verbose mode!');
             // Load up the first token and let's get parsing!
@@ -32,6 +34,7 @@ var COMPILER;
         Parser.parseBlock = function () {
             // console.log('parseBlock()');
             this.cst.addNode('Block', BRANCH_NODE);
+            this.ast.addNode('Block', BRANCH_NODE);
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a left brace.');
             if (_CurrentToken.getType() === T_LBRACE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left brace!');
@@ -122,6 +125,7 @@ var COMPILER;
         Parser.parsePrintStatement = function () {
             // console.log('parsePrintStatement()');
             this.cst.addNode('Print Statement', BRANCH_NODE);
+            this.ast.addNode('Print Statement', BRANCH_NODE);
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a print.');
             if (_CurrentToken.getType() === T_PRINT) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a print!');
@@ -152,11 +156,13 @@ var COMPILER;
                 }
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // Id = Expr
         Parser.parseAssignmentStatement = function () {
             // console.log('parseAssignmentStatement()');
             this.cst.addNode('Assignment Statement', BRANCH_NODE);
+            this.ast.addNode('Assignment Statement', BRANCH_NODE);
             this.parseId();
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an equal sign.');
             if (_CurrentToken.getType() === T_ASSIGN) {
@@ -171,19 +177,23 @@ var COMPILER;
                     ': Expected T_ASSIGN but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // type Id
         Parser.parseVarDecl = function () {
             // console.log('parseVarDecl()');
             this.cst.addNode('Var Declaration', BRANCH_NODE);
+            this.ast.addNode('Var Declaration', BRANCH_NODE);
             this.parseType();
             this.parseId();
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             // console.log('parseWhileStatement()');
             this.cst.addNode('While Statement', BRANCH_NODE);
+            this.ast.addNode('While Statement', BRANCH_NODE);
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a while.');
             if (_CurrentToken.getType() === T_WHILE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a while!');
@@ -198,11 +208,13 @@ var COMPILER;
                     ': Expected T_WHILE but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // if BooleanExpr block
         Parser.parseIfStatement = function () {
             // console.log('parseIfStatement()');
-            this.cst.addNode('If Expression', BRANCH_NODE);
+            this.cst.addNode('If Statement', BRANCH_NODE);
+            this.ast.addNode('If Statement', BRANCH_NODE);
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an if.');
             if (_CurrentToken.getType() === T_IF) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an if!');
@@ -217,6 +229,7 @@ var COMPILER;
                     ': Expected T_IF but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // IntExpr
         // StringExpr
@@ -252,20 +265,27 @@ var COMPILER;
         // digit
         Parser.parseIntExpr = function () {
             // console.log('parseIntExpr()');
+            var tempToken;
             this.cst.addNode('Integer Expression', BRANCH_NODE);
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a digit.');
             if (_CurrentToken.getType() === T_DIGIT) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a digit!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                tempToken = _CurrentToken;
                 this.getNextToken();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a plus sign.');
                 // Check to see if the new token is + operator
                 if (_CurrentToken.getType() === T_ADD) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                    this.ast.addNode('Addition', BRANCH_NODE);
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE);
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
+                }
+                else {
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE);
                 }
             }
             else {
@@ -273,6 +293,7 @@ var COMPILER;
                     ': Expected T_DIGIT but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // " CharList "
         Parser.parseStringExpr = function () {
@@ -343,6 +364,7 @@ var COMPILER;
             if (_CurrentToken.getType() === T_ID) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an id!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
                 this.getNextToken();
             }
             else {
@@ -384,6 +406,7 @@ var COMPILER;
                 case T_BOOLEAN:
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
                     this.getNextToken();
                     break;
                 default:
@@ -436,6 +459,8 @@ var COMPILER;
         Parser.printResults = function () {
             COMPILER.Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             this.cst.printTreeString('cst');
+            // This is temporary. WE SHOULD DISPLAY THE AST AFTER SEMANTIC ANALYSIS
+            this.ast.printTreeString('ast');
             // Reset the warnings and errors for the next process
             _Warnings = 0;
             _Errors = 0;
