@@ -33,8 +33,8 @@
 <body>
     <nav id="header" class="navbar-default">
         <div class="container-fluid">
-            <div id="logo" class="col-sm-3 col-md-3">aBasicCompiler</div>
-            <div class="dropdown col-sm-2 col-md-2">
+            <div id="logo" class="col-xs-4 col-sm-3 col-md-3">aBasicCompiler</div>
+            <div class="dropdown col-xs-2 col-sm-2 col-md-2">
                 <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Programs
                     <span class="caret"></span>
@@ -74,24 +74,24 @@
                     <li><a href="#" onclick="COMPILER.Main.loadProgram(22)">X 4</a></li>
                 </ul>
             </div>
-            <div class="col-sm-4 col-md-3 pull-right">
+            <div class="col-xs-6 col-sm-4 col-md-3 pull-right">
                 <button id="btnCompile" class="btn btn-primary" onclick="COMPILER.Main.compile()">Compile</button>
                 <button id="btnVerbose" class="btn btn-success" onclick="COMPILER.Main.toggleVerboseMode()">Verbose On</button>
             </div>
         </div>
     </nav>
     <div id="bodyContent">
-        <div id="sourceCode" class="col-sm-5 col-md-5">
+        <div id="sourceCode" class="col-xs-6 col-sm-5 col-md-5">
             <div class="panel-heading"><label>Source Code</label></div>
             <textarea id="inputText" rows="9" placeholder="Enter your code here." wrap="off" autofocus></textarea>
         </div>
 
-        <div id="consoleLog" class="col-sm-7 col-md-7">
+        <div id="consoleLog" class="col-xs-6 col-sm-7 col-md-7">
             <div class="panel-heading"><label>Console Log</label></div>
             <div id="logger"></div>
         </div>
 
-        <div id="tableDisplay" class="col-sm-5 col-md-5">
+        <div id="tableDisplay" class="col-xs-6 col-sm-5 col-md-5">
             <ul id="tableNav" class="nav nav-tabs" role="tablist">
                 <li class="active"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token Table</a></li>
                 <li><a href="#symbolTable" aria-controls="symbolTable" role="tab" data-toggle="tab">Symbol Table</a></li>
@@ -110,7 +110,7 @@
             </div>
         </div>
 
-        <div id="miscDisplay" class="col-sm-7 col-md-7">
+        <div id="miscDisplay" class="col-xs-6 col-sm-7 col-md-7">
             <ul id="miscNav" class="nav nav-tabs" role="tablist">
                 <li class="active"><a href="#cst" aria-controls="cst" role="tab" data-toggle="tab">CST</a></li>
                 <li><a href="#ast" aria-controls="ast" role="tab" data-toggle="tab">AST</a></li>
