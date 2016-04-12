@@ -70,7 +70,6 @@ var COMPILER;
         };
         Tree.prototype.printTreeString = function (location) {
             this.treeString = this.expand(this.root, 0);
-            console.log(location);
             document.getElementById(location).innerHTML = this.treeString;
         };
         return Tree;

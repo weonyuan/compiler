@@ -16,8 +16,12 @@ module COMPILER {
             
             // Only parse when we actually have tokens!
             if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
-                Parser.init(_Tokens);
-                Parser.printResults();
+                _CST = Parser.init(_Tokens);
+            }
+
+            // Only analyse when we have a CST!
+            if (_CST !== null && _AST !== null) {
+                _AST = SemanticAnalyzer.init();
             }
         }
 

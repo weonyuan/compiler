@@ -105,3 +105,8 @@ var _Warnings = 0;
 var _Tokens = [];
 var _PreviousToken = null;
 var _CurrentToken = null;
+// Globals for semantic analysis
+var _CST = null;
+var _AST = null;
+var _Symbols = 0;
+var _SymbolTable = null;

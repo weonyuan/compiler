@@ -21,6 +21,8 @@ var COMPILER;
             this.getNextToken();
             _PreviousToken = _CurrentToken;
             this.parseProgram();
+            this.printResults();
+            _AST = this.cst;
             return this.cst;
         };
         // Block $
@@ -118,6 +120,13 @@ var COMPILER;
                     COMPILER.Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
                         ': ' + _CurrentToken.getName() + ' is not a valid statement.');
                     break;
+            }
+            console.log(this.ast.current);
+            if (this.bufferArray.length > 0) {
+                this.bufferArray[this.bufferArray.length - 1].children = [];
+                for (var i = 0; i < this.bufferArray.length - 1; i++) {
+                    this.bufferArray[this.bufferArray.length - 1].children.push(this.bufferArray[i]);
+                }
             }
             this.cst.levelUp();
         };
@@ -278,7 +287,7 @@ var COMPILER;
                 if (_CurrentToken.getType() === T_ADD) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
-                    this.ast.addNode('Addition', BRANCH_NODE);
+                    this.ast.addNode('Add', BRANCH_NODE);
                     this.ast.addNode(tempToken.getValue(), LEAF_NODE);
                     // Grab the next token and verify for a digit
                     this.getNextToken();
@@ -335,8 +344,20 @@ var COMPILER;
                 this.cst.addNode('(', LEAF_NODE);
                 this.getNextToken();
                 this.parseExpr();
+                // TODO: this needs some serious work
+                if (this.ast.current.children.length > 0) {
+                    this.buffer = this.ast.current.children[this.ast.current.children.length - 1].name;
+                    this.ast.current.children.splice(this.ast.current.children.length - 1, 1);
+                }
+                else {
+                    this.buffer = this.ast.current.name;
+                }
                 this.parseBoolOp();
                 this.parseExpr();
+                // it is probably not this.ast.current
+                this.bufferArray.push(this.ast.current);
+                console.log(this.bufferArray);
+                this.ast.levelUp();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                 if (_CurrentToken.getType() === T_RPAREN) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
@@ -348,6 +369,7 @@ var COMPILER;
                 || _CurrentToken.getType() === T_FALSE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
                 this.getNextToken();
             }
             else {
@@ -386,11 +408,13 @@ var COMPILER;
                 case T_WHITESPACE:
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a character!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                    this.buffer += _CurrentToken.getValue();
                     this.getNextToken();
                     this.parseCharList();
                     break;
                 default:
-                    // epsilon
+                    this.ast.addNode(this.buffer, LEAF_NODE);
+                    this.buffer = '';
                     break;
             }
             this.cst.levelUp();
@@ -425,6 +449,15 @@ var COMPILER;
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                if (_CurrentToken.getType() === T_EQUAL) {
+                    this.ast.addNode('CompareEqual', BRANCH_NODE);
+                }
+                else if (_CurrentToken.getType() === T_NOTEQUAL) {
+                    this.ast.addNode('CompareNotEqual', BRANCH_NODE);
+                }
+                // Add the expression under the boolean operator
+                this.ast.addNode(this.buffer, LEAF_NODE);
+                this.buffer = '';
                 this.getNextToken();
             }
             else {
@@ -459,12 +492,12 @@ var COMPILER;
         Parser.printResults = function () {
             COMPILER.Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             this.cst.printTreeString('cst');
-            // This is temporary. WE SHOULD DISPLAY THE AST AFTER SEMANTIC ANALYSIS
-            this.ast.printTreeString('ast');
             // Reset the warnings and errors for the next process
             _Warnings = 0;
             _Errors = 0;
         };
+        Parser.buffer = '';
+        Parser.bufferArray = [];
         return Parser;
     })();
     COMPILER.Parser = Parser;

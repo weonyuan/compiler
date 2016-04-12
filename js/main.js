@@ -17,8 +17,11 @@ var COMPILER;
             _Tokens = COMPILER.Lexer.tokenize(sourceCode);
             // Only parse when we actually have tokens!
             if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
-                COMPILER.Parser.init(_Tokens);
-                COMPILER.Parser.printResults();
+                _CST = COMPILER.Parser.init(_Tokens);
+            }
+            // Only analyse when we have a CST!
+            if (_CST !== null && _AST !== null) {
+                _AST = COMPILER.SemanticAnalyzer.init();
             }
         };
         // Load the source code from the testPrograms array into the textarea

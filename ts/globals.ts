@@ -119,3 +119,9 @@ var _Warnings: number = 0;
 var _Tokens: any = [];
 var _PreviousToken: any = null;
 var _CurrentToken: any = null;
+
+// Globals for semantic analysis
+var _CST: COMPILER.Tree = null;
+var _AST: COMPILER.Tree = null;
+var _Symbols: number = 0;
+var _SymbolTable: COMPILER.SymbolTableEntry = null;

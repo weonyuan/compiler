@@ -80,7 +80,6 @@ module COMPILER {
 
         public printTreeString(location): void {
             this.treeString = this.expand(this.root, 0);
-            console.log(location);
             document.getElementById(location).innerHTML = this.treeString;
         }
     }
