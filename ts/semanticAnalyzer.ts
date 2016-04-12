@@ -18,6 +18,8 @@ module COMPILER {
             this.generateAST();
             this.typeCheck();
             this.scopeCheck();
+
+            this.printResults();
         }
 
         public static generateAST(): void {
@@ -30,6 +32,15 @@ module COMPILER {
 
         public static scopeCheck(): void {
 
+        }
+
+        public static printResults(): void {
+            Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
+            _AST.printTreeString('ast');
+
+            // Reset the warnings and errors for the next process
+            _Warnings = 0;
+            _Errors = 0;
         }
     }
 }

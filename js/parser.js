@@ -22,8 +22,8 @@ var COMPILER;
             _PreviousToken = _CurrentToken;
             this.parseProgram();
             this.printResults();
-            _AST = this.cst;
-            return this.cst;
+            _CST = this.cst;
+            _AST = this.ast;
         };
         // Block $
         Parser.parseProgram = function () {

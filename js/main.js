@@ -12,17 +12,19 @@ var COMPILER;
         }
         // What more can I say? It is called after hitting the Compile button
         Main.compile = function () {
-            Main.resetLogger();
+            this.resetLogger();
             var sourceCode = document.getElementById('inputText').value;
-            _Tokens = COMPILER.Lexer.tokenize(sourceCode);
-            // Only parse when we actually have tokens!
-            if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
-                _CST = COMPILER.Parser.init(_Tokens);
-            }
-            // Only analyse when we have a CST!
-            if (_CST !== null && _AST !== null) {
-                _AST = COMPILER.SemanticAnalyzer.init();
-            }
+            setTimeout(function () {
+                _Tokens = COMPILER.Lexer.tokenize(sourceCode);
+                // Only parse when we actually have tokens!
+                if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
+                    COMPILER.Parser.init(_Tokens);
+                }
+                // Only analyse when we have a CST!
+                if (_CST !== null && _AST !== null) {
+                    COMPILER.SemanticAnalyzer.init();
+                }
+            }, 50);
         };
         // Load the source code from the testPrograms array into the textarea
         Main.loadProgram = function (index) {

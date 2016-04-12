@@ -10,19 +10,23 @@ module COMPILER {
     export class Main {
         // What more can I say? It is called after hitting the Compile button
         public static compile(): void {
-            Main.resetLogger();
-            var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
-            _Tokens = Lexer.tokenize(sourceCode);
-            
-            // Only parse when we actually have tokens!
-            if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
-                _CST = Parser.init(_Tokens);
-            }
+            this.resetLogger();
 
-            // Only analyse when we have a CST!
-            if (_CST !== null && _AST !== null) {
-                _AST = SemanticAnalyzer.init();
-            }
+            var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
+
+            setTimeout(function() {
+                _Tokens = Lexer.tokenize(sourceCode);
+
+                // Only parse when we actually have tokens!
+                if (_Tokens !== null && _Tokens !== undefined && _Tokens.length > 0) {
+                    Parser.init(_Tokens);
+                }
+
+                // Only analyse when we have a CST!
+                if (_CST !== null && _AST !== null) {
+                    SemanticAnalyzer.init();
+                }
+            }, 50)            
         }
 
         // Load the source code from the testPrograms array into the textarea

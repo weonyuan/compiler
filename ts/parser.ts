@@ -15,7 +15,7 @@ module COMPILER {
         private static buffer: string = '';
         private static bufferArray: any[] = [];
 
-        public static init(tokens): any {
+        public static init(tokens): void {
             this.cst = new Tree();
             this.ast = new Tree();
 
@@ -28,9 +28,8 @@ module COMPILER {
             this.parseProgram();
             this.printResults();
 
-            _AST = this.cst;
-
-            return this.cst;
+            _CST = this.cst;
+            _AST = this.ast;
         }
 
         // Block $
