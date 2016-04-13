@@ -40,7 +40,7 @@ body {
 #logger {
     border: 1px solid black;
     display: block;
-    float: right;
+    float: left;
     height: 208px;
     overflow-x: hidden;
     overflow-y: auto;
