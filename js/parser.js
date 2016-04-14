@@ -121,7 +121,7 @@ var COMPILER;
                         ': ' + _CurrentToken.getName() + ' is not a valid statement.');
                     break;
             }
-            console.log(this.ast.current);
+            // console.log(this.ast.current);
             if (this.bufferArray.length > 0) {
                 this.bufferArray[this.bufferArray.length - 1].children = [];
                 for (var i = 0; i < this.bufferArray.length - 1; i++) {

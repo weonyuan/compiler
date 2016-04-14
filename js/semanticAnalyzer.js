@@ -13,6 +13,7 @@ var COMPILER;
         function SemanticAnalyzer() {
         }
         SemanticAnalyzer.init = function () {
+            this.currentScope = new COMPILER.SymbolTable();
             this.nextScopeNum = 1;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
             this.generateAST();
@@ -175,7 +176,7 @@ var COMPILER;
             _Warnings = 0;
             _Errors = 0;
         };
-        SemanticAnalyzer.currentScope = new COMPILER.SymbolTable();
+        SemanticAnalyzer.currentScope = null;
         SemanticAnalyzer.nextScopeNum = 1;
         return SemanticAnalyzer;
     })();

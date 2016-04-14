@@ -11,10 +11,11 @@
 module COMPILER {
     export class SemanticAnalyzer {
 
-        public static currentScope: SymbolTable = new SymbolTable();
+        public static currentScope: SymbolTable = null;
         public static nextScopeNum: number = 1;
 
         public static init(): any {
+            this.currentScope = new SymbolTable();
             this.nextScopeNum = 1;
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
