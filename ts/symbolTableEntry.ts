@@ -10,15 +10,20 @@ module COMPILER {
         constructor(
             public id: number = _Symbols++,
             public name: string = '',
+            public type: string = '',
             public lineNum: number = 0,
             public scopeNum: number = 0) {}
 
-        public getId(): number {
+        public getID(): number {
             return this.id;
         }
 
         public getName(): string {
             return this.name;
+        }
+
+        public getType(): string {
+            return this.type;
         }
 
         public getLineNum(): number {
@@ -29,12 +34,12 @@ module COMPILER {
             return this.scopeNum;
         }
 
-        public setId(id): void {
-            this.id = id;
-        }
-
         public setName(name): void {
             this.name = name;
+        }
+
+        public setType(type): void {
+            this.type = type;
         }
 
         public setLineNum(lineNum): void {

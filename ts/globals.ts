@@ -124,4 +124,4 @@ var _CurrentToken: any = null;
 var _CST: COMPILER.Tree = null;
 var _AST: COMPILER.Tree = null;
 var _Symbols: number = 0;
-var _SymbolTable: COMPILER.SymbolTableEntry = null;
+var _SymbolTable: COMPILER.SymbolTable = null;

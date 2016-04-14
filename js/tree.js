@@ -1,3 +1,4 @@
+///<reference path="token.ts" />
 ///<reference path="globals.ts" />
 /*
     tree.ts
@@ -19,13 +20,19 @@ var COMPILER;
         Tree.prototype.createNode = function (name) {
             var node = {
                 name: name,
+                type: null,
+                lineNum: null,
                 parent: {},
                 children: []
             };
             return node;
         };
-        Tree.prototype.addNode = function (name, type) {
+        Tree.prototype.addNode = function (name, nodeType, token) {
             var node = this.createNode(name);
+            if (nodeType === LEAF_NODE) {
+                node.type = token.getType();
+                node.lineNum = token.getLineNum();
+            }
             // Check to see if the node is a root node
             if (this.root === null || !this.root) {
                 this.root = node;
@@ -34,7 +41,7 @@ var COMPILER;
                 node.parent = this.current;
                 this.current.children.push(node);
             }
-            if (type === BRANCH_NODE) {
+            if (nodeType === BRANCH_NODE) {
                 this.current = node;
             }
         };

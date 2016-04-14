@@ -23,8 +23,8 @@ module COMPILER {
                 }
 
                 // Only analyse when we have a CST!
-                if (_CST !== null && _AST !== null) {
-                    SemanticAnalyzer.init();
+                if (_CST !== null) {
+                    _SymbolTable = SemanticAnalyzer.init();
                 }
             }, 50)            
         }
@@ -76,6 +76,43 @@ module COMPILER {
             while (currentToken !== null) {
                 tokenTable.removeChild(currentToken);
                 currentToken = document.getElementById('token-' + ++tokenIndex);
+            }
+        }
+
+        // Used for listing all tokens after lexical analysis
+        public static addSymbol(id, name, dataType, lineNum, scopeNum): void {
+            var symbolTable = document.getElementById('symbolTable');
+
+            var symbol = document.createElement('tr');
+            symbol.id = 'symbol';
+            symbolTable.appendChild(symbol);
+
+            var symbolLineNum = document.createElement('td');
+            symbolLineNum.innerHTML = lineNum;
+            symbol.appendChild(symbolLineNum);
+
+            var symbolName = document.createElement('td');
+            symbolName.innerHTML = name;
+            symbol.appendChild(symbolName);
+
+            var symbolType = document.createElement('td');
+            symbolType.innerHTML = dataType;
+            symbol.appendChild(symbolType);
+
+            var symbolScope = document.createElement('td');
+            symbolScope.innerHTML = scopeNum;
+            symbol.appendChild(symbolScope);
+        }
+
+        // Enough said
+        public static resetSymbolTable(): void {
+            var symbolTable = document.getElementById('symbolTable');
+            var symbolIndex = 0;
+            var currentSymbol = document.getElementById('symbol-' + symbolIndex);
+
+            while (currentSymbol !== null) {
+                symbolTable.removeChild(currentSymbol);
+                currentSymbol = document.getElementById('symbol-' + ++symbolIndex);
             }
         }
 

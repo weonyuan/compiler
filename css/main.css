@@ -83,11 +83,10 @@ ul > li.active {
     margin-bottom: 0px;
 }
 
-#tokenTable td {
+#tokenTable td, #symbolTable td {
     border-bottom: 1px solid #e1e1e8;
     padding: 5px;
 }
-
 /* Footer */
 footer {
     font-size: 9pt;

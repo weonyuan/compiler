@@ -20,9 +20,9 @@
     <script type="text/javascript" src="js/lexer.js"></script>
     <script type="text/javascript" src="js/parser.js"></script>
     <script type="text/javascript" src="js/tree.js"></script>
-    <script type="text/javascript" src="js/semanticAnalyzer.js"></script>
+    <script type="text/javascript" src="js/symbolTable.js"></script>
     <script type="text/javascript" src="js/symbolTableEntry.js"></script>
-    <script type="text/javascript" src="js/symbolTableService.js"></script>
+    <script type="text/javascript" src="js/semanticAnalyzer.js"></script>
 
     <script type="text/javascript">
         $('#tableNav a, #miscNav a').click(function(e) {
@@ -96,7 +96,7 @@
         <div id="tableDisplay" class="col-xs-12 col-sm-5 col-md-5">
             <ul id="tableNav" class="nav nav-tabs" role="tablist">
                 <li class="active"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token Table</a></li>
-                <li><a href="#symbolTable" aria-controls="symbolTable" role="tab" data-toggle="tab">Symbol Table</a></li>
+                <li><a href="#symbols" aria-controls="symbols" role="tab" data-toggle="tab">Symbol Table</a></li>
             </ul>
 
             <div class="tab-content">
@@ -108,13 +108,13 @@
                         </tr>
                     </table>
                 </div>
-                <div id="symbolTable" class="tab-pane" role="tabpanel">
+                <div id="symbols" class="tab-pane" role="tabpanel">
                     <table id="symbolTable" class="table table-hover table-striped">
                         <tr>
-                            <th width="19%">Line #</th>
-                            <th width="27%">Name</th>
-                            <th width="27%">Type</th>
-                            <th width="27%">Scope</th>
+                            <th width="25%">Line #</th>
+                            <th width="25%">Name</th>
+                            <th width="25%">Type</th>
+                            <th width="25%">Scope</th>
                         </tr>
                     </table>
                 </div>

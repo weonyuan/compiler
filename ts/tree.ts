@@ -1,3 +1,4 @@
+///<reference path="token.ts" />
 ///<reference path="globals.ts" />
 /*
     tree.ts
@@ -19,6 +20,8 @@ module COMPILER {
         public createNode(name): any {
             var node = {
                 name: name,
+                type: null,
+                lineNum: null,
                 parent: {},
                 children: []
             };
@@ -26,8 +29,13 @@ module COMPILER {
             return node;
         }
 
-        public addNode(name, type): void {
+        public addNode(name, nodeType, token): void {
             var node: any = this.createNode(name);
+
+            if (nodeType === LEAF_NODE) {
+                node.type = token.getType();
+                node.lineNum = token.getLineNum();
+            }
 
             // Check to see if the node is a root node
             if (this.root === null || !this.root) {
@@ -37,7 +45,7 @@ module COMPILER {
                 this.current.children.push(node);
             }
 
-            if (type === BRANCH_NODE) {
+            if (nodeType === BRANCH_NODE) {
                 this.current = node;
             }
         }

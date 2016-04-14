@@ -28,25 +28,25 @@ var COMPILER;
         // Block $
         Parser.parseProgram = function () {
             // console.log('parseProgram()');
-            this.cst.addNode('Program', BRANCH_NODE);
+            this.cst.addNode('Program', BRANCH_NODE, '');
             this.parseBlock();
             this.parseEOP();
         };
         // { StatementList }
         Parser.parseBlock = function () {
             // console.log('parseBlock()');
-            this.cst.addNode('Block', BRANCH_NODE);
-            this.ast.addNode('Block', BRANCH_NODE);
+            this.cst.addNode('Block', BRANCH_NODE, '');
+            this.ast.addNode('Block', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a left brace.');
             if (_CurrentToken.getType() === T_LBRACE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left brace!');
-                this.cst.addNode('{', LEAF_NODE);
+                this.cst.addNode('{', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseStatementList();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right brace.');
                 if (_CurrentToken.getType() === T_RBRACE) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right brace!');
-                    this.cst.addNode('}', LEAF_NODE);
+                    this.cst.addNode('}', LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                 }
                 else {
@@ -66,7 +66,7 @@ var COMPILER;
         // epsilon
         Parser.parseStatementList = function () {
             // console.log('parseStatementList()');
-            this.cst.addNode('Statement List', BRANCH_NODE);
+            this.cst.addNode('Statement List', BRANCH_NODE, '');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                 case T_WHILE:
@@ -93,7 +93,7 @@ var COMPILER;
         // Block
         Parser.parseStatement = function () {
             // console.log('parseStatement()');
-            this.cst.addNode('Statement', BRANCH_NODE);
+            this.cst.addNode('Statement', BRANCH_NODE, '');
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
                     this.parsePrintStatement();
@@ -133,23 +133,23 @@ var COMPILER;
         // print ( Expr )
         Parser.parsePrintStatement = function () {
             // console.log('parsePrintStatement()');
-            this.cst.addNode('Print Statement', BRANCH_NODE);
-            this.ast.addNode('Print Statement', BRANCH_NODE);
+            this.cst.addNode('Print Statement', BRANCH_NODE, '');
+            this.ast.addNode('Print Statement', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a print.');
             if (_CurrentToken.getType() === T_PRINT) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a print!');
-                this.cst.addNode('print', LEAF_NODE);
+                this.cst.addNode('print', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a left parenthese.');
                 if (_CurrentToken.getType() === T_LPAREN) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
-                    this.cst.addNode('(', LEAF_NODE);
+                    this.cst.addNode('(', LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                     this.parseExpr();
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                     if (_CurrentToken.getType() === T_RPAREN) {
                         COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
-                        this.cst.addNode(')', LEAF_NODE);
+                        this.cst.addNode(')', LEAF_NODE, _CurrentToken);
                         this.getNextToken();
                     }
                     else {
@@ -170,13 +170,13 @@ var COMPILER;
         // Id = Expr
         Parser.parseAssignmentStatement = function () {
             // console.log('parseAssignmentStatement()');
-            this.cst.addNode('Assignment Statement', BRANCH_NODE);
-            this.ast.addNode('Assignment Statement', BRANCH_NODE);
+            this.cst.addNode('Assignment Statement', BRANCH_NODE, '');
+            this.ast.addNode('Assignment Statement', BRANCH_NODE, '');
             this.parseId();
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an equal sign.');
             if (_CurrentToken.getType() === T_ASSIGN) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an equal sign!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseExpr();
             }
@@ -191,8 +191,8 @@ var COMPILER;
         // type Id
         Parser.parseVarDecl = function () {
             // console.log('parseVarDecl()');
-            this.cst.addNode('Var Declaration', BRANCH_NODE);
-            this.ast.addNode('Var Declaration', BRANCH_NODE);
+            this.cst.addNode('Var Declaration', BRANCH_NODE, '');
+            this.ast.addNode('Var Declaration', BRANCH_NODE, '');
             this.parseType();
             this.parseId();
             this.cst.levelUp();
@@ -201,12 +201,12 @@ var COMPILER;
         // while BooleanExpr Block
         Parser.parseWhileStatement = function () {
             // console.log('parseWhileStatement()');
-            this.cst.addNode('While Statement', BRANCH_NODE);
-            this.ast.addNode('While Statement', BRANCH_NODE);
+            this.cst.addNode('While Statement', BRANCH_NODE, '');
+            this.ast.addNode('While Statement', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a while.');
             if (_CurrentToken.getType() === T_WHILE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a while!');
-                this.cst.addNode('while', LEAF_NODE);
+                this.cst.addNode('while', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -222,12 +222,12 @@ var COMPILER;
         // if BooleanExpr block
         Parser.parseIfStatement = function () {
             // console.log('parseIfStatement()');
-            this.cst.addNode('If Statement', BRANCH_NODE);
-            this.ast.addNode('If Statement', BRANCH_NODE);
+            this.cst.addNode('If Statement', BRANCH_NODE, '');
+            this.ast.addNode('If Statement', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an if.');
             if (_CurrentToken.getType() === T_IF) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an if!');
-                this.cst.addNode('if', LEAF_NODE);
+                this.cst.addNode('if', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseBooleanExpr();
                 this.parseBlock();
@@ -246,7 +246,7 @@ var COMPILER;
         // Id
         Parser.parseExpr = function () {
             // console.log('parseExpr()');
-            this.cst.addNode('Expression', BRANCH_NODE);
+            this.cst.addNode('Expression', BRANCH_NODE, '');
             switch (_CurrentToken.getType()) {
                 case T_DIGIT:
                     this.parseIntExpr();
@@ -275,26 +275,26 @@ var COMPILER;
         Parser.parseIntExpr = function () {
             // console.log('parseIntExpr()');
             var tempToken;
-            this.cst.addNode('Integer Expression', BRANCH_NODE);
+            this.cst.addNode('Integer Expression', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a digit.');
             if (_CurrentToken.getType() === T_DIGIT) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a digit!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 tempToken = _CurrentToken;
                 this.getNextToken();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a plus sign.');
                 // Check to see if the new token is + operator
                 if (_CurrentToken.getType() === T_ADD) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
-                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
-                    this.ast.addNode('Add', BRANCH_NODE);
-                    this.ast.addNode(tempToken.getValue(), LEAF_NODE);
+                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                    this.ast.addNode('Add', BRANCH_NODE, '');
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, _CurrentToken);
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
                 }
                 else {
-                    this.ast.addNode(tempToken.getValue(), LEAF_NODE);
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, _CurrentToken);
                 }
             }
             else {
@@ -307,17 +307,17 @@ var COMPILER;
         // " CharList "
         Parser.parseStringExpr = function () {
             // console.log('parseStringExpr()');
-            this.cst.addNode('String Expression', BRANCH_NODE);
+            this.cst.addNode('String Expression', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
             if (_CurrentToken.getType() === T_QUOTE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a quote!');
-                this.cst.addNode('"', LEAF_NODE);
+                this.cst.addNode('"', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseCharList();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
                 if (_CurrentToken.getType() === T_QUOTE) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a quote!');
-                    this.cst.addNode('"', LEAF_NODE);
+                    this.cst.addNode('"', LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                 }
                 else {
@@ -337,11 +337,11 @@ var COMPILER;
         // boolval
         Parser.parseBooleanExpr = function () {
             // console.log('parseBooleanExpr()');
-            this.cst.addNode('Boolean Expression', BRANCH_NODE);
+            this.cst.addNode('Boolean Expression', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting either a left parenthese or a boolean.');
             if (_CurrentToken.getType() === T_LPAREN) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
-                this.cst.addNode('(', LEAF_NODE);
+                this.cst.addNode('(', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 this.parseExpr();
                 // TODO: this needs some serious work
@@ -361,15 +361,15 @@ var COMPILER;
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                 if (_CurrentToken.getType() === T_RPAREN) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
-                    this.cst.addNode(')', LEAF_NODE);
+                    this.cst.addNode(')', LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                 }
             }
             else if (_CurrentToken.getType() === T_TRUE
                 || _CurrentToken.getType() === T_FALSE) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
-                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 this.getNextToken();
             }
             else {
@@ -381,12 +381,12 @@ var COMPILER;
         // char
         Parser.parseId = function () {
             // console.log('parseId()');
-            this.cst.addNode('Id', BRANCH_NODE);
+            this.cst.addNode('Id', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an id.');
             if (_CurrentToken.getType() === T_ID) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an id!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
-                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 this.getNextToken();
             }
             else {
@@ -401,19 +401,19 @@ var COMPILER;
         // epsilon
         Parser.parseCharList = function () {
             // console.log('parseCharList()');
-            this.cst.addNode('CharList', BRANCH_NODE);
+            this.cst.addNode('CharList', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a character.');
             switch (_CurrentToken.getType()) {
                 case T_CHAR:
                 case T_WHITESPACE:
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a character!');
-                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                     this.buffer += _CurrentToken.getValue();
                     this.getNextToken();
                     this.parseCharList();
                     break;
                 default:
-                    this.ast.addNode(this.buffer, LEAF_NODE);
+                    this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
                     this.buffer = '';
                     break;
             }
@@ -422,15 +422,15 @@ var COMPILER;
         // int | string | boolean
         Parser.parseType = function () {
             // console.log('parseType()');
-            this.cst.addNode('Type', BRANCH_NODE);
+            this.cst.addNode('Type', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a valid data type.');
             switch (_CurrentToken.getType()) {
                 case T_INT:
                 case T_STRING:
                 case T_BOOLEAN:
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
-                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
-                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                     break;
                 default:
@@ -444,19 +444,19 @@ var COMPILER;
         // == | !=
         Parser.parseBoolOp = function () {
             // console.log('parseBoolOp()');
-            this.cst.addNode('Boolean Operator', BRANCH_NODE);
+            this.cst.addNode('Boolean Operator', BRANCH_NODE, '');
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE);
+                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 if (_CurrentToken.getType() === T_EQUAL) {
-                    this.ast.addNode('CompareEqual', BRANCH_NODE);
+                    this.ast.addNode('CompareEqual', BRANCH_NODE, '');
                 }
                 else if (_CurrentToken.getType() === T_NOTEQUAL) {
-                    this.ast.addNode('CompareNotEqual', BRANCH_NODE);
+                    this.ast.addNode('CompareNotEqual', BRANCH_NODE, '');
                 }
                 // Add the expression under the boolean operator
-                this.ast.addNode(this.buffer, LEAF_NODE);
+                this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
                 this.buffer = '';
                 this.getNextToken();
             }
@@ -473,7 +473,7 @@ var COMPILER;
             COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting an end of program character.');
             if (_CurrentToken.getType() === T_EOP) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received an end of program character!');
-                this.cst.addNode('$', LEAF_NODE);
+                this.cst.addNode('$', LEAF_NODE, _CurrentToken);
                 this.getNextToken();
                 if (_CurrentToken !== null && _CurrentToken !== undefined) {
                     this.parseProgram();
