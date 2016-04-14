@@ -10,7 +10,10 @@ module COMPILER {
     export class Main {
         // What more can I say? It is called after hitting the Compile button
         public static compile(): void {
+            // Reset everything first
+            _Symbols = 0;
             this.resetLogger();
+            this.resetSymbolTable();
 
             var sourceCode: string = (<HTMLTextAreaElement> document.getElementById('inputText')).value;
 
@@ -84,7 +87,7 @@ module COMPILER {
             var symbolTable = document.getElementById('symbolTable');
 
             var symbol = document.createElement('tr');
-            symbol.id = 'symbol';
+            symbol.id = 'symbol-' + id;
             symbolTable.appendChild(symbol);
 
             var symbolLineNum = document.createElement('td');

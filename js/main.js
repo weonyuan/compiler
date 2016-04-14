@@ -12,7 +12,10 @@ var COMPILER;
         }
         // What more can I say? It is called after hitting the Compile button
         Main.compile = function () {
+            // Reset everything first
+            _Symbols = 0;
             this.resetLogger();
+            this.resetSymbolTable();
             var sourceCode = document.getElementById('inputText').value;
             setTimeout(function () {
                 _Tokens = COMPILER.Lexer.tokenize(sourceCode);
@@ -72,7 +75,7 @@ var COMPILER;
         Main.addSymbol = function (id, name, dataType, lineNum, scopeNum) {
             var symbolTable = document.getElementById('symbolTable');
             var symbol = document.createElement('tr');
-            symbol.id = 'symbol';
+            symbol.id = 'symbol-' + id;
             symbolTable.appendChild(symbol);
             var symbolLineNum = document.createElement('td');
             symbolLineNum.innerHTML = lineNum;
