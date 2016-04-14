@@ -14,6 +14,8 @@ var COMPILER;
         Main.compile = function () {
             // Reset everything first
             _Symbols = 0;
+            _CST = null;
+            _AST = null;
             this.resetLogger();
             this.resetSymbolTable();
             var sourceCode = document.getElementById('inputText').value;

@@ -12,6 +12,8 @@ module COMPILER {
         public static compile(): void {
             // Reset everything first
             _Symbols = 0;
+            _CST = null;
+            _AST = null;
             this.resetLogger();
             this.resetSymbolTable();
 

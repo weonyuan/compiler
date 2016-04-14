@@ -27,7 +27,7 @@ var COMPILER;
             return hashID;
         };
         SymbolTable.prototype.insertEntry = function (name, type, lineNum) {
-            var symbolID = -1;
+            var symbolID = null;
             var entry = new COMPILER.SymbolTableEntry();
             entry.setName(name);
             entry.setType(type);
@@ -35,10 +35,41 @@ var COMPILER;
             entry.setScopeNum(this.scopeNum);
             var hashID = this.assignHashID(entry.getName());
             if (this.entryList[hashID] === null) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Inserting identifier ' + name + ' in line ' +
+                    lineNum + ' to the symbol table under scope level ' + entry.getScopeNum() + '.');
                 this.entryList[hashID] = entry;
+                symbolID = entry.getID();
             }
-            symbolID = entry.getID();
             return symbolID;
+        };
+        SymbolTable.prototype.checkEntry = function (name, node, miscParam) {
+            var entryExists = false;
+            var currentScope = this;
+            var hashID = this.assignHashID(name);
+            // Traverse through the entire symbol table for the entry
+            while (currentScope !== null && !entryExists) {
+                if (currentScope.entryList[hashID] === null) {
+                    // Look at the parent scope for a possible entry
+                    currentScope = currentScope.getParent();
+                }
+                else {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Identifier ' + name + ' in scope level ' +
+                        currentScope.getScopeNum() + ' is in the symbol table.');
+                    // Entry exists. Increment reference by 1
+                    var entry = currentScope.entryList[hashID];
+                    entry.incrementReference();
+                    entryExists = true;
+                    if (miscParam === 'Assignment Statement') {
+                        entry.setInitialized();
+                    }
+                    if (miscParam !== 'Var Declaration') {
+                        _Errors++;
+                        COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                            ' was assigned before being declared.');
+                    }
+                }
+            }
+            return entryExists;
         };
         SymbolTable.prototype.addChild = function (child) {
             this.childrenList.push(child);

@@ -29,7 +29,7 @@ module COMPILER {
         }
 
         public insertEntry(name, type, lineNum): number {
-            var symbolID: number = -1;
+            var symbolID: number = null;
             var entry: SymbolTableEntry = new SymbolTableEntry();
             entry.setName(name);
             entry.setType(type);
@@ -39,12 +39,47 @@ module COMPILER {
             var hashID: number = this.assignHashID(entry.getName());
 
             if (this.entryList[hashID] === null) {
+                Main.addLog(LOG_VERBOSE, 'Inserting identifier ' + name + ' in line ' +
+                    lineNum + ' to the symbol table under scope level ' + entry.getScopeNum() + '.');
                 this.entryList[hashID] = entry;
+                symbolID = entry.getID();
             }
 
-            symbolID = entry.getID();
-
             return symbolID;
+        }
+
+        public checkEntry(name, node, miscParam): boolean {
+            var entryExists: boolean = false;
+            var currentScope: SymbolTable = this;
+            var hashID: number = this.assignHashID(name);
+
+            // Traverse through the entire symbol table for the entry
+            while (currentScope !== null && !entryExists) {
+                if (currentScope.entryList[hashID] === null) {
+                    // Look at the parent scope for a possible entry
+                    currentScope = currentScope.getParent();
+                } else {
+                    Main.addLog(LOG_VERBOSE, 'Identifier ' + name + ' in scope level ' +
+                        currentScope.getScopeNum() + ' is in the symbol table.');
+
+                    // Entry exists. Increment reference by 1
+                    var entry: SymbolTableEntry = currentScope.entryList[hashID];
+                    entry.incrementReference();
+                    entryExists = true;
+
+                    if (miscParam === 'Assignment Statement') {
+                        entry.setInitialized();
+                    }
+
+                    if (miscParam !== 'Var Declaration') {
+                        _Errors++;
+                        Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                            ' was assigned before being declared.');
+                    }
+                }
+            }
+
+            return entryExists;
         }
 
         public addChild(child): void {

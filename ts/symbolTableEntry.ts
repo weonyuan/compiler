@@ -12,7 +12,9 @@ module COMPILER {
             public name: string = '',
             public type: string = '',
             public lineNum: number = 0,
-            public scopeNum: number = 0) {}
+            public scopeNum: number = 0,
+            public timesReferred: number = 0,
+            public initialized: boolean = false) {}
 
         public getID(): number {
             return this.id;
@@ -34,6 +36,14 @@ module COMPILER {
             return this.scopeNum;
         }
 
+        public getTimesReferred(): number {
+            return this.timesReferred;
+        }
+
+        public getInitalized(): boolean {
+            return this.initialized;
+        }
+
         public setName(name): void {
             this.name = name;
         }
@@ -48,6 +58,14 @@ module COMPILER {
 
         public setScopeNum(scopeNum): void {
             this.scopeNum = scopeNum;
+        }
+
+        public incrementReference(): void {
+            this.timesReferred++;
+        }
+
+        public setInitialized(): void {
+            this.initialized = true;
         }
     }
 }

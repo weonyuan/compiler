@@ -13,6 +13,7 @@ var COMPILER;
         function SemanticAnalyzer() {
         }
         SemanticAnalyzer.init = function () {
+            this.nextScopeNum = 1;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
             this.generateAST();
             this.scopeCheck(_CST.root, this.currentScope);
@@ -25,7 +26,6 @@ var COMPILER;
         };
         SemanticAnalyzer.scopeCheck = function (node, symbolTable) {
             if (node.name !== null || node.name !== undefined) {
-                console.log(node.name);
                 var newScope = false;
                 switch (node.name) {
                     case 'Block':
@@ -35,17 +35,40 @@ var COMPILER;
                         }
                         break;
                     case 'Var Declaration':
-                        var varName = node.children[1].children[0].name;
+                        var name = node.children[1].children[0].name;
                         var lineNum = node.children[1].children[0].lineNum;
                         var dataType = node.children[0].children[0].name;
-                        var id = symbolTable.insertEntry(varName, dataType, lineNum);
-                        COMPILER.Main.addSymbol(id, varName, dataType, lineNum, this.currentScope.scopeNum);
+                        var id = symbolTable.insertEntry(name, dataType, lineNum);
+                        // Error: The variable is already declared
+                        if (id !== null) {
+                            COMPILER.Main.addSymbol(id, name, dataType, lineNum, this.currentScope.getScopeNum());
+                        }
+                        else {
+                            _Errors++;
+                            COMPILER.Main.addLog(LOG_ERROR, 'Attempted to declare identifier ' + name +
+                                ' on line ' + lineNum + ' which already exists.');
+                        }
                         break;
                     case 'Assignment Statement':
+                        var name = node.children[0].children[0].name;
+                        var lineNum = node.children[0].children[0].lineNum;
+                        var entryExists = symbolTable.checkEntry(name, node, 'Assignment Statement');
+                        if (!entryExists) {
+                            _Errors++;
+                            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + lineNum +
+                                ' was assigned before being declared.');
+                        }
                         break;
-                }
-                if (node.type === T_ID) {
-                    console.log(node.name);
+                    case 'Id':
+                        var name = node.children[0].name;
+                        var lineNum = node.children[0].lineNum;
+                        var entryExists = symbolTable.checkEntry(name, node, '');
+                        if (!entryExists) {
+                            _Errors++;
+                            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + lineNum +
+                                ' was assigned before being declared.');
+                        }
+                        break;
                 }
                 // Traverse through the child nodes
                 for (var i = 0; i < node.children.length; i++) {
@@ -57,12 +80,36 @@ var COMPILER;
             }
         };
         SemanticAnalyzer.typeCheck = function (node) {
+            // We only care if the node is a leaf node
+            if (node.children || node.children.length === 0) {
+                var parentNode = node.parent;
+                switch (node.type) {
+                    case T_INT:
+                    case T_STRING:
+                    case T_BOOLEAN:
+                        break;
+                    case T_TRUE:
+                    case T_FALSE:
+                        break;
+                    case T_DIGIT:
+                        break;
+                    case T_ID:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // Traverse through the child nodes
+            for (var i = 0; i < node.children.length; i++) {
+                this.typeCheck(node.children[i]);
+            }
         };
         SemanticAnalyzer.openScope = function () {
             var newScope = new COMPILER.SymbolTable();
             newScope.setParent(this.currentScope);
             newScope.setScopeNum(this.nextScopeNum++);
             this.currentScope.addChild(newScope);
+            this.currentScope = newScope;
         };
         SemanticAnalyzer.closeScope = function () {
             if (this.currentScope.parent !== null) {
