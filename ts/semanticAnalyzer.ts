@@ -19,19 +19,20 @@ module COMPILER {
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
             this.generateAST();
-            this.scopeCheck(_CST.root, this.currentScope);
-            this.typeCheck(_CST.root);
+            this.scopeCheck(_CST.root);
+            // this.typeCheck(_CST.root, this.currentScope);
 
             this.printResults();
 
             return this.currentScope;
         }
 
+        // TODO
         public static generateAST(): void {
-            console.log(_AST);
+
         }
 
-        public static scopeCheck(node, symbolTable): void {
+        public static scopeCheck(node): void {
             if (node.name !== null || node.name !== undefined) {
                 var newScope: boolean = false;
 
@@ -49,7 +50,7 @@ module COMPILER {
 
                         var dataType: string = node.children[0].children[0].name;
 
-                        var id: number = symbolTable.insertEntry(name, dataType, lineNum);
+                        var id: number = this.currentScope.insertEntry(name, dataType, lineNum);
                         
                         // Error: The variable is already declared
                         if (id !== null) {
@@ -65,7 +66,7 @@ module COMPILER {
                     case 'Assignment Statement':
                         var name: string = node.children[0].children[0].name;
                         var lineNum: number = node.children[0].children[0].lineNum;
-                        var entryExists: boolean = symbolTable.checkEntry(name, node, 'Assignment Statement');
+                        var entryExists: boolean = this.currentScope.checkEntry(name, node, 'Assignment Statement');
 
                         if (!entryExists) {
                             _Errors++;
@@ -74,7 +75,7 @@ module COMPILER {
                         }
 
                         break;
-                    case 'Id':
+                    /*case 'Id':
                         var name: string = node.children[0].name;
                         var lineNum: number = node.children[0].lineNum;
                         var entryExists: boolean = symbolTable.checkEntry(name, node, '');
@@ -85,12 +86,12 @@ module COMPILER {
                                 ' was assigned before being declared.');
                         }
 
-                        break;
+                        break;*/
                 }
 
                 // Traverse through the child nodes
                 for (var i = 0; i < node.children.length; i++) {
-                    this.scopeCheck(node.children[i], symbolTable);
+                    this.scopeCheck(node.children[i]);
                 }
 
                 if (newScope) {
@@ -99,35 +100,94 @@ module COMPILER {
             }
         }
 
-        public static typeCheck(node): void {
+        public static typeCheck(node, symbolTable): void {
             // We only care if the node is a leaf node
-            if (node.children || node.children.length === 0) {
-                var parentNode = node.parent;
+            if (!node.children || node.children.length === 0) {
+                console.log('leaf node: ' + node.name);
+                // CST: Type -> Var Declaration
+                var parentNode = node.parent.parent;
 
                 switch (node.type) {
                     case T_INT:
                     case T_STRING:
                     case T_BOOLEAN:
+                        this.establishTypeComparable(parentNode, node.type);
                         break;
 
                     case T_TRUE:
                     case T_FALSE:
+                        this.establishTypeComparable(parentNode, dataTypes.BOOLEAN);
                         break;
 
                     case T_DIGIT:
+                        this.establishTypeComparable(parentNode, dataTypes.INT);
                         break;
 
                     case T_ID:
+                        var hashID: number = symbolTable.assignHashID(node.name);
+                        var type: string = symbolTable.getEntry(hashID).getType();
+                        console.log('var type check');
+                        console.log('hashID: ' + hashID + '; type: ' + type);
+                        this.establishTypeComparable(parentNode, type);
                         break;
-                        
+
                     default:
+                        // epsilon
                         break;
                 }
             }
 
             // Traverse through the child nodes
             for (var i = 0; i < node.children.length; i++) {
-                this.typeCheck(node.children[i]);
+                this.typeCheck(node.children[i], symbolTable);
+            }
+
+            if (node.children && node.name !== 'Block') {
+                var parentNode = node.parent;
+                var leftChild = node.children[0];
+                var rightChild = node.children[1];
+
+                if (leftChild.type.length !== 0 && rightChild.type.length !== 0) {
+                    Main.addLog(LOG_VERBOSE, 'Determining whether ' + leftChild.type + ' is type compatible ' +
+                        'with ' + rightChild.type + ' on line ' + node.children.lineNum + '.');
+                    
+                    if (leftChild.type === rightChild.type) {
+                        if (parentNode.name !== 'Block') {
+                            // Left...right...doesn't matter here
+                            var propagateType = leftChild.type;
+
+                            if (node.name === '==' || node.name === '!=') {
+                                propagateType = dataTypes.BOOLEAN;
+                            }
+
+                            this.establishTypeComparable(parentNode, propagateType);
+                        }
+                    } else {
+                        _Errors++;
+                        Main.addLog(LOG_ERROR, 'Type mismatch found on line ' + node.leftChild.lineNum +
+                            '. The left side of the expression (' + node.leftChild.name + ':' + node.leftChild.type +
+                            ' doesn\'t match up with the right side (' + node.rightChild.name + ':' + node.rightChild.type + '.');
+                    }
+                } else if (leftChild.type.length === 0 && rightChild.type.length !== 0) {
+                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
+                        ' to ' + rightChild.type);
+                } else if (leftChild.type.length !== 0 && rightChild.type.length === 0) {
+                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
+                        ' to ' + leftChild.type);
+                }
+            }
+        }
+
+        public static establishTypeComparable(parentNode, childType): void {
+            // CST: Var Declaration -> Type / Id -> <datatype> / <id>
+            if (parentNode.children[0].children[0].type.length === 0) {
+                parentNode.children[0].children[0].type = childType;
+            } else if (parentNode.children[1].children[0].type.length === 0) {
+                parentNode.children[1].children[0].type = childType;
+            } else {
+                _Errors++;
+                Main.addLog(LOG_ERROR, 'Attempted to establish a type comparable with the ' +
+                    'parent node\'s left and right types.');
             }
         }
 

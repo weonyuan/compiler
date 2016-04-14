@@ -94,6 +94,11 @@ var testPrograms = [
     '{\n\tstring d\n\td = "Daniel Craig"\n} $',
     '{\n\tint x\n\tx 4\n} $'
 ];
+var dataTypes = {
+    STRING: 'string',
+    INT: 'int',
+    BOOLEAN: 'boolean'
+};
 var _Main;
 var _Lexer;
 var _Parser;
