@@ -51,6 +51,9 @@ module COMPILER {
         public checkEntry(name, node, miscParam): boolean {
             var entryExists: boolean = false;
             var currentScope: SymbolTable = this;
+
+            Main.addLog(LOG_VERBOSE, 'Checking if identifier ' + name + ' is stored in the symbol table.');
+
             var hashID: number = this.assignHashID(name);
 
             // Traverse through the entire symbol table for the entry
@@ -71,10 +74,12 @@ module COMPILER {
                         entry.setInitialized();
                     }
 
-                    if (miscParam !== 'Var Declaration') {
-                        _Errors++;
-                        Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
-                            ' was assigned before being declared.');
+                    if (node.parent.name !== 'Var Declaration' && miscParam !== 'Var Declaration') {
+                        if (!entry.getInitialized()) {
+                            _Errors++;
+                            Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                                ' was assigned before being declared.');
+                        }
                     }
                 }
             }

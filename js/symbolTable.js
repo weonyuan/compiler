@@ -45,6 +45,7 @@ var COMPILER;
         SymbolTable.prototype.checkEntry = function (name, node, miscParam) {
             var entryExists = false;
             var currentScope = this;
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Checking if identifier ' + name + ' is stored in the symbol table.');
             var hashID = this.assignHashID(name);
             // Traverse through the entire symbol table for the entry
             while (currentScope !== null && !entryExists) {
@@ -62,10 +63,12 @@ var COMPILER;
                     if (miscParam === 'Assignment Statement') {
                         entry.setInitialized();
                     }
-                    if (miscParam !== 'Var Declaration') {
-                        _Errors++;
-                        COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
-                            ' was assigned before being declared.');
+                    if (node.parent.name !== 'Var Declaration' && miscParam !== 'Var Declaration') {
+                        if (!entry.getInitialized()) {
+                            _Errors++;
+                            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                                ' was assigned before being declared.');
+                        }
                     }
                 }
             }

@@ -41,7 +41,7 @@ var COMPILER;
         SymbolTableEntry.prototype.getTimesReferred = function () {
             return this.timesReferred;
         };
-        SymbolTableEntry.prototype.getInitalized = function () {
+        SymbolTableEntry.prototype.getInitialized = function () {
             return this.initialized;
         };
         SymbolTableEntry.prototype.setName = function (name) {

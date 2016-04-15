@@ -40,7 +40,7 @@ module COMPILER {
             return this.timesReferred;
         }
 
-        public getInitalized(): boolean {
+        public getInitialized(): boolean {
             return this.initialized;
         }
 
