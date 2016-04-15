@@ -15,6 +15,7 @@ module COMPILER {
         private static buffer: string = '';
         private static tempToken: Token = null;
         private static currentLayer: number = 0;
+        private static boolOpExists: boolean = false;
         private static bufferArray: any[] = [];
 
         public static init(tokens): void {
@@ -409,13 +410,18 @@ module COMPILER {
                     this.currentLayer--;
                     this.getNextToken();
                 }
+
+                this.boolOpExists = false;
             } else if (   _CurrentToken.getType() === T_TRUE
                        || _CurrentToken.getType() === T_FALSE) {
                 Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-
+                
                 this.tempToken = _CurrentToken;
+
+                if (_PreviousToken.getType() !== T_LPAREN) {
+                    this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                }
 
                 this.getNextToken();
             } else {
@@ -510,6 +516,8 @@ module COMPILER {
             Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
 
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
+                this.boolOpExists = true;
+
                 Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
 
@@ -518,6 +526,8 @@ module COMPILER {
                 } else if (_CurrentToken.getType() === T_NOTEQUAL) {
                     this.ast.addNode('CompareNotEqual', BRANCH_NODE, _CurrentToken);
                 }
+
+                this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
 
                 this.getNextToken();
             } else {
