@@ -76,9 +76,9 @@ module COMPILER {
 
                     if (node.parent.name !== 'Var Declaration' && miscParam !== 'Var Declaration') {
                         if (!entry.getInitialized()) {
-                            _Errors++;
-                            Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
-                                ' was assigned before being declared.');
+                            _Warnings++;
+                            Main.addLog(LOG_WARNING, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                                ' was assigned before being initialized.');
                         }
                     }
                 }
@@ -118,7 +118,5 @@ module COMPILER {
         public setParent(parent): void {
             this.parent = parent;
         }
-
-        //TODO: provide warnings
     }
 }

@@ -1,5 +1,6 @@
 ///<reference path="tree.ts" />
 ///<reference path="symbolTable.ts" />
+///<reference path="symbolTableEntry.ts" />
 ///<reference path="globals.ts" />
 /*
     semanticAnalyzer.ts
@@ -23,6 +24,7 @@ module COMPILER {
             // this.generateAST(this.tempASTTree.root);
             this.scopeCheck(_CST.root);
             this.typeCheck(_AST.root);
+            this.detectWarnings();
 
             this.printResults();
 
@@ -192,6 +194,26 @@ module COMPILER {
                     Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + leftChild.lineNum +
                         ' to ' + rightChild.dataType);
                     node.dataType = leftChild.dataType;
+                }
+            }
+        }
+
+        public static detectWarnings(): void {
+            for (var i = 0; i < this.currentScope.entryList.length; i++) {
+                if (this.currentScope.entryList[i] !== null) {
+                    var entry: SymbolTableEntry = this.currentScope.entryList[i];
+
+                    if (entry.getTimesReferred() === 1) {
+                        _Warnings++;
+                        Main.addLog(LOG_WARNING, 'Identifier ' + entry.getName() + ' on line ' + entry.getLineNum() +
+                            ' was initialized but never used.');
+                    }
+
+                    if (!entry.getInitialized()) {
+                        _Warnings++;
+                        Main.addLog(LOG_WARNING, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                            ' was assigned before being initialized.');
+                    }
                 }
             }
         }

@@ -65,9 +65,9 @@ var COMPILER;
                     }
                     if (node.parent.name !== 'Var Declaration' && miscParam !== 'Var Declaration') {
                         if (!entry.getInitialized()) {
-                            _Errors++;
-                            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
-                                ' was assigned before being declared.');
+                            _Warnings++;
+                            COMPILER.Main.addLog(LOG_WARNING, 'Identifier ' + name + ' on line ' + entry.getLineNum() +
+                                ' was assigned before being initialized.');
                         }
                     }
                 }
