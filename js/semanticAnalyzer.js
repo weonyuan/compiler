@@ -14,16 +14,21 @@ var COMPILER;
         }
         SemanticAnalyzer.init = function () {
             this.currentScope = new COMPILER.SymbolTable();
+            this.tempASTTree = _AST;
             this.nextScopeNum = 1;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
-            this.generateAST();
+            // this.generateAST(this.tempASTTree.root);
             this.scopeCheck(_CST.root);
             this.typeCheck(_AST.root);
             this.printResults();
             return this.currentScope;
         };
         // TODO
-        SemanticAnalyzer.generateAST = function () {
+        SemanticAnalyzer.generateAST = function (node) {
+            // Fixing the boolean expressions placement
+            if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
+                node.parent = node;
+            }
         };
         SemanticAnalyzer.scopeCheck = function (node) {
             if (node.name !== null || node.name !== undefined) {
@@ -73,7 +78,6 @@ var COMPILER;
         SemanticAnalyzer.typeCheck = function (node) {
             // We only care if the node is a leaf node
             if (!node.children || node.children.length === 0) {
-                console.log('leaf node: ' + node.name);
                 // CST: Type -> Var Declaration
                 var parentNode = node.parent;
                 switch (node.tokenType) {
@@ -188,6 +192,7 @@ var COMPILER;
             _Errors = 0;
         };
         SemanticAnalyzer.currentScope = null;
+        SemanticAnalyzer.tempASTTree = null;
         SemanticAnalyzer.nextScopeNum = 1;
         return SemanticAnalyzer;
     })();

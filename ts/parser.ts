@@ -13,6 +13,8 @@ module COMPILER {
         private static cst: Tree;
         private static ast: Tree;
         private static buffer: string = '';
+        private static tempToken: Token = null;
+        private static currentLayer: number = 0;
         private static bufferArray: any[] = [];
 
         public static init(tokens): void {
@@ -138,19 +140,6 @@ module COMPILER {
                     Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
                                            ': ' + _CurrentToken.getName() + ' is not a valid statement.');
                     break;
-            }
-
-            // console.log(this.ast.current);
-            if (this.bufferArray.length > 0) { 
-                this.bufferArray[this.bufferArray.length - 1].children = [];
-
-                for (var i = 0; i < this.bufferArray.length - 1; i++) {
-                    this.bufferArray[this.bufferArray.length - 1].children.push(this.bufferArray[i]);
-                }
-
-                // Refactor
-                // this.ast.current.children[this.ast.current.children.length - 1].children[this.ast.current.children[this.ast.current.children.length - 1].children.length - 1] = this.bufferArray[this.bufferArray.length - 1];
-                // this.bufferArray = [];
             }
 
             this.cst.levelUp();
@@ -401,23 +390,15 @@ module COMPILER {
             if (_CurrentToken.getType() === T_LPAREN) {
                 Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                 this.cst.addNode('(', LEAF_NODE, _CurrentToken);
+                this.currentLayer++;
+
+                console.log(this.currentLayer);
+
                 this.getNextToken();
                 this.parseExpr();
-
-                // TODO: this needs some serious work
-                if (this.ast.current.children.length > 0) {
-                    this.buffer = this.ast.current.children[this.ast.current.children.length - 1].name;
-                    this.ast.current.children.splice(this.ast.current.children.length - 1, 1);
-                } else {
-                    this.buffer = this.ast.current.name;
-                }
-
                 this.parseBoolOp();
                 this.parseExpr();
-                
-                // it is probably not this.ast.current
-                this.bufferArray.push(this.ast.current);
-                console.log(this.bufferArray);
+
                 this.ast.levelUp();
 
                 Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
@@ -425,6 +406,7 @@ module COMPILER {
                 if (_CurrentToken.getType() === T_RPAREN) {
                     Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                     this.cst.addNode(')', LEAF_NODE, _CurrentToken);
+                    this.currentLayer--;
                     this.getNextToken();
                 }
             } else if (   _CurrentToken.getType() === T_TRUE
@@ -432,6 +414,9 @@ module COMPILER {
                 Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+
+                this.tempToken = _CurrentToken;
+
                 this.getNextToken();
             } else {
                 Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
@@ -533,10 +518,6 @@ module COMPILER {
                 } else if (_CurrentToken.getType() === T_NOTEQUAL) {
                     this.ast.addNode('CompareNotEqual', BRANCH_NODE, _CurrentToken);
                 }
-
-                // Add the expression under the boolean operator
-                this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
-                this.buffer = '';
 
                 this.getNextToken();
             } else {

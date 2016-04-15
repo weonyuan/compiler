@@ -10,16 +10,17 @@
 
 module COMPILER {
     export class SemanticAnalyzer {
-
         public static currentScope: SymbolTable = null;
+        public static tempASTTree: Tree = null;
         public static nextScopeNum: number = 1;
 
         public static init(): any {
             this.currentScope = new SymbolTable();
+            this.tempASTTree = _AST;
             this.nextScopeNum = 1;
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
-            this.generateAST();
+            // this.generateAST(this.tempASTTree.root);
             this.scopeCheck(_CST.root);
             this.typeCheck(_AST.root);
 
@@ -29,8 +30,12 @@ module COMPILER {
         }
 
         // TODO
-        public static generateAST(): void {
+        public static generateAST(node): void {
+            // Fixing the boolean expressions placement
 
+            if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
+                node.parent = node;
+            }
         }
 
         public static scopeCheck(node): void {
@@ -105,7 +110,6 @@ module COMPILER {
         public static typeCheck(node): void {
             // We only care if the node is a leaf node
             if (!node.children || node.children.length === 0) {
-                console.log('leaf node: ' + node.name);
                 // CST: Type -> Var Declaration
                 var parentNode = node.parent;
 

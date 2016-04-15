@@ -121,13 +121,6 @@ var COMPILER;
                         ': ' + _CurrentToken.getName() + ' is not a valid statement.');
                     break;
             }
-            // console.log(this.ast.current);
-            if (this.bufferArray.length > 0) {
-                this.bufferArray[this.bufferArray.length - 1].children = [];
-                for (var i = 0; i < this.bufferArray.length - 1; i++) {
-                    this.bufferArray[this.bufferArray.length - 1].children.push(this.bufferArray[i]);
-                }
-            }
             this.cst.levelUp();
         };
         // print ( Expr )
@@ -342,26 +335,18 @@ var COMPILER;
             if (_CurrentToken.getType() === T_LPAREN) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                 this.cst.addNode('(', LEAF_NODE, _CurrentToken);
+                this.currentLayer++;
+                console.log(this.currentLayer);
                 this.getNextToken();
                 this.parseExpr();
-                // TODO: this needs some serious work
-                if (this.ast.current.children.length > 0) {
-                    this.buffer = this.ast.current.children[this.ast.current.children.length - 1].name;
-                    this.ast.current.children.splice(this.ast.current.children.length - 1, 1);
-                }
-                else {
-                    this.buffer = this.ast.current.name;
-                }
                 this.parseBoolOp();
                 this.parseExpr();
-                // it is probably not this.ast.current
-                this.bufferArray.push(this.ast.current);
-                console.log(this.bufferArray);
                 this.ast.levelUp();
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Expecting a right parenthese.');
                 if (_CurrentToken.getType() === T_RPAREN) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a right parenthese!');
                     this.cst.addNode(')', LEAF_NODE, _CurrentToken);
+                    this.currentLayer--;
                     this.getNextToken();
                 }
             }
@@ -370,6 +355,7 @@ var COMPILER;
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                this.tempToken = _CurrentToken;
                 this.getNextToken();
             }
             else {
@@ -455,9 +441,6 @@ var COMPILER;
                 else if (_CurrentToken.getType() === T_NOTEQUAL) {
                     this.ast.addNode('CompareNotEqual', BRANCH_NODE, _CurrentToken);
                 }
-                // Add the expression under the boolean operator
-                this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
-                this.buffer = '';
                 this.getNextToken();
             }
             else {
@@ -497,6 +480,8 @@ var COMPILER;
             _Errors = 0;
         };
         Parser.buffer = '';
+        Parser.tempToken = null;
+        Parser.currentLayer = 0;
         Parser.bufferArray = [];
         return Parser;
     })();
