@@ -20,7 +20,8 @@ module COMPILER {
         public createNode(name): any {
             var node = {
                 name: name,
-                type: null,
+                tokenType: null,
+                dataType: null,
                 lineNum: null,
                 parent: {},
                 children: []
@@ -33,7 +34,7 @@ module COMPILER {
             var node: any = this.createNode(name);
 
             if (nodeType === LEAF_NODE) {
-                node.type = token.getType();
+                node.tokenType = token.getType();
                 node.lineNum = token.getLineNum();
             }
 

@@ -21,7 +21,7 @@ module COMPILER {
 
             this.generateAST();
             this.scopeCheck(_CST.root);
-            // this.typeCheck(_CST.root, this.currentScope);
+            this.typeCheck(_AST.root);
 
             this.printResults();
 
@@ -78,8 +78,9 @@ module COMPILER {
                         break;
                     /*case 'Id':
                         var name: string = node.children[0].name;
+                        console.log('Id: ' + name);
                         var lineNum: number = node.children[0].lineNum;
-                        var entryExists: boolean = symbolTable.checkEntry(name, node, '');
+                        var entryExists: boolean = this.currentScope.checkEntry(name, node, '');
 
                         if (!entryExists) {
                             _Errors++;
@@ -101,35 +102,42 @@ module COMPILER {
             }
         }
 
-        public static typeCheck(node, symbolTable): void {
+        public static typeCheck(node): void {
             // We only care if the node is a leaf node
             if (!node.children || node.children.length === 0) {
                 console.log('leaf node: ' + node.name);
                 // CST: Type -> Var Declaration
-                var parentNode = node.parent.parent;
+                var parentNode = node.parent;
 
-                switch (node.type) {
+                switch (node.tokenType) {
                     case T_INT:
                     case T_STRING:
                     case T_BOOLEAN:
-                        this.establishTypeComparable(parentNode, node.type);
+                        this.establishTypeComparable(parentNode, node.name);
+                        node.dataType = node.name;
                         break;
 
                     case T_TRUE:
                     case T_FALSE:
                         this.establishTypeComparable(parentNode, dataTypes.BOOLEAN);
+                        node.dataType = dataTypes.BOOLEAN;
+                        break;
+
+                    case T_QUOTE:
+                        this.establishTypeComparable(parentNode, dataTypes.STRING);
+                        node.dataType = dataTypes.STRING;
                         break;
 
                     case T_DIGIT:
                         this.establishTypeComparable(parentNode, dataTypes.INT);
+                        node.dataType = dataTypes.INT;
                         break;
 
                     case T_ID:
-                        var hashID: number = symbolTable.assignHashID(node.name);
-                        var type: string = symbolTable.getEntry(hashID).getType();
-                        console.log('var type check');
-                        console.log('hashID: ' + hashID + '; type: ' + type);
+                        var hashID: number = this.currentScope.assignHashID(node.name);
+                        var type: string = this.currentScope.getEntry(hashID).getType();
                         this.establishTypeComparable(parentNode, type);
+                        node.dataType = type;
                         break;
 
                     default:
@@ -140,22 +148,23 @@ module COMPILER {
 
             // Traverse through the child nodes
             for (var i = 0; i < node.children.length; i++) {
-                this.typeCheck(node.children[i], symbolTable);
+                this.typeCheck(node.children[i]);
             }
 
-            if (node.children && node.name !== 'Block') {
+            if ((node.children && node.children.length > 0) && node.name !== 'Block') {
                 var parentNode = node.parent;
                 var leftChild = node.children[0];
                 var rightChild = node.children[1];
 
-                if (leftChild.type.length !== 0 && rightChild.type.length !== 0) {
-                    Main.addLog(LOG_VERBOSE, 'Determining whether ' + leftChild.type + ' is type compatible ' +
-                        'with ' + rightChild.type + ' on line ' + node.children.lineNum + '.');
+                if ((leftChild !== undefined && leftChild.dataType !== null)
+                    && (rightChild !== undefined && rightChild.dataType !== null)) {
+                    Main.addLog(LOG_VERBOSE, 'Determining whether ' + leftChild.dataType + ' is type compatible ' +
+                        'with ' + rightChild.dataType + ' on line ' + leftChild.lineNum + '.');
                     
-                    if (leftChild.type === rightChild.type) {
+                    if (leftChild.dataType === rightChild.dataType) {
                         if (parentNode.name !== 'Block') {
                             // Left...right...doesn't matter here
-                            var propagateType = leftChild.type;
+                            var propagateType = leftChild.dataType;
 
                             if (node.name === '==' || node.name === '!=') {
                                 propagateType = dataTypes.BOOLEAN;
@@ -165,26 +174,30 @@ module COMPILER {
                         }
                     } else {
                         _Errors++;
-                        Main.addLog(LOG_ERROR, 'Type mismatch found on line ' + node.leftChild.lineNum +
-                            '. The left side of the expression (' + node.leftChild.name + ':' + node.leftChild.type +
-                            ' doesn\'t match up with the right side (' + node.rightChild.name + ':' + node.rightChild.type + '.');
+                        Main.addLog(LOG_ERROR, 'Type mismatch found on line ' + leftChild.lineNum +
+                            '. The left side of the expression (' + leftChild.name + ':' + leftChild.dataType +
+                            ') doesn\'t match up with the right side (' + rightChild.name + ':' + rightChild.dataType + ').');
                     }
-                } else if (leftChild.type.length === 0 && rightChild.type.length !== 0) {
-                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
-                        ' to ' + rightChild.type);
-                } else if (leftChild.type.length !== 0 && rightChild.type.length === 0) {
-                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
-                        ' to ' + leftChild.type);
+                } else if ((leftChild !== undefined && leftChild.dataType === null)
+                        && (rightChild !== undefined && rightChild.dataType !== null)) {
+                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + leftChild.lineNum +
+                        ' to ' + rightChild.dataType);
+                    node.dataType = rightChild.dataType;
+                } else if ((leftChild !== undefined && leftChild.dataType !== null)
+                        && (rightChild !== undefined && rightChild.dataType === null)) {
+                    Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + leftChild.lineNum +
+                        ' to ' + rightChild.dataType);
+                    node.dataType = leftChild.dataType;
                 }
             }
         }
 
         public static establishTypeComparable(parentNode, childType): void {
             // CST: Var Declaration -> Type / Id -> <datatype> / <id>
-            if (parentNode.children[0].children[0].type.length === 0) {
-                parentNode.children[0].children[0].type = childType;
-            } else if (parentNode.children[1].children[0].type.length === 0) {
-                parentNode.children[1].children[0].type = childType;
+            if (parentNode.children[0].dataType === null) {
+                parentNode.children[0].dataType = childType;
+            } else if (parentNode.children[1].dataType === null) {
+                parentNode.children[1].dataType = childType;
             } else {
                 _Errors++;
                 Main.addLog(LOG_ERROR, 'Attempted to establish a type comparable with the ' +

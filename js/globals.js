@@ -31,6 +31,7 @@ var T_PRINT = 20;
 var T_WHILE = 21;
 var T_IF = 22;
 var T_ID = 23;
+var T_STRING_EXPR = 24;
 // Logger constants
 var LOG_ERROR = -1;
 var LOG_WARNING = 0;

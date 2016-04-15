@@ -287,14 +287,14 @@ var COMPILER;
                 if (_CurrentToken.getType() === T_ADD) {
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a plus sign!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                    this.ast.addNode('Add', BRANCH_NODE, '');
-                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, _CurrentToken);
+                    this.ast.addNode('Add', BRANCH_NODE, _CurrentToken);
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, tempToken);
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
                 }
                 else {
-                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, _CurrentToken);
+                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, tempToken);
                 }
             }
             else {
@@ -450,10 +450,10 @@ var COMPILER;
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                 if (_CurrentToken.getType() === T_EQUAL) {
-                    this.ast.addNode('CompareEqual', BRANCH_NODE, '');
+                    this.ast.addNode('CompareEqual', BRANCH_NODE, _CurrentToken);
                 }
                 else if (_CurrentToken.getType() === T_NOTEQUAL) {
-                    this.ast.addNode('CompareNotEqual', BRANCH_NODE, '');
+                    this.ast.addNode('CompareNotEqual', BRANCH_NODE, _CurrentToken);
                 }
                 // Add the expression under the boolean operator
                 this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);

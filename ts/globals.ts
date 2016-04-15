@@ -40,6 +40,8 @@ const T_IF: number = 22;
 
 const T_ID: number = 23;
 
+const T_STRING_EXPR: number = 24;
+
 // Logger constants
 const LOG_ERROR: number = -1;
 const LOG_WARNING: number = 0;

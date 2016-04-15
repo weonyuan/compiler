@@ -20,7 +20,8 @@ var COMPILER;
         Tree.prototype.createNode = function (name) {
             var node = {
                 name: name,
-                type: null,
+                tokenType: null,
+                dataType: null,
                 lineNum: null,
                 parent: {},
                 children: []
@@ -30,7 +31,7 @@ var COMPILER;
         Tree.prototype.addNode = function (name, nodeType, token) {
             var node = this.createNode(name);
             if (nodeType === LEAF_NODE) {
-                node.type = token.getType();
+                node.tokenType = token.getType();
                 node.lineNum = token.getLineNum();
             }
             // Check to see if the node is a root node

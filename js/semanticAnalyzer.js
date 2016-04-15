@@ -18,7 +18,7 @@ var COMPILER;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
             this.generateAST();
             this.scopeCheck(_CST.root);
-            // this.typeCheck(_CST.root, this.currentScope);
+            this.typeCheck(_AST.root);
             this.printResults();
             return this.currentScope;
         };
@@ -70,31 +70,37 @@ var COMPILER;
                 }
             }
         };
-        SemanticAnalyzer.typeCheck = function (node, symbolTable) {
+        SemanticAnalyzer.typeCheck = function (node) {
             // We only care if the node is a leaf node
             if (!node.children || node.children.length === 0) {
                 console.log('leaf node: ' + node.name);
                 // CST: Type -> Var Declaration
-                var parentNode = node.parent.parent;
-                switch (node.type) {
+                var parentNode = node.parent;
+                switch (node.tokenType) {
                     case T_INT:
                     case T_STRING:
                     case T_BOOLEAN:
-                        this.establishTypeComparable(parentNode, node.type);
+                        this.establishTypeComparable(parentNode, node.name);
+                        node.dataType = node.name;
                         break;
                     case T_TRUE:
                     case T_FALSE:
                         this.establishTypeComparable(parentNode, dataTypes.BOOLEAN);
+                        node.dataType = dataTypes.BOOLEAN;
+                        break;
+                    case T_QUOTE:
+                        this.establishTypeComparable(parentNode, dataTypes.STRING);
+                        node.dataType = dataTypes.STRING;
                         break;
                     case T_DIGIT:
                         this.establishTypeComparable(parentNode, dataTypes.INT);
+                        node.dataType = dataTypes.INT;
                         break;
                     case T_ID:
-                        var hashID = symbolTable.assignHashID(node.name);
-                        var type = symbolTable.getEntry(hashID).getType();
-                        console.log('var type check');
-                        console.log('hashID: ' + hashID + '; type: ' + type);
+                        var hashID = this.currentScope.assignHashID(node.name);
+                        var type = this.currentScope.getEntry(hashID).getType();
                         this.establishTypeComparable(parentNode, type);
+                        node.dataType = type;
                         break;
                     default:
                         // epsilon
@@ -103,19 +109,20 @@ var COMPILER;
             }
             // Traverse through the child nodes
             for (var i = 0; i < node.children.length; i++) {
-                this.typeCheck(node.children[i], symbolTable);
+                this.typeCheck(node.children[i]);
             }
-            if (node.children && node.name !== 'Block') {
+            if ((node.children && node.children.length > 0) && node.name !== 'Block') {
                 var parentNode = node.parent;
                 var leftChild = node.children[0];
                 var rightChild = node.children[1];
-                if (leftChild.type.length !== 0 && rightChild.type.length !== 0) {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Determining whether ' + leftChild.type + ' is type compatible ' +
-                        'with ' + rightChild.type + ' on line ' + node.children.lineNum + '.');
-                    if (leftChild.type === rightChild.type) {
+                if ((leftChild !== undefined && leftChild.dataType !== null)
+                    && (rightChild !== undefined && rightChild.dataType !== null)) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Determining whether ' + leftChild.dataType + ' is type compatible ' +
+                        'with ' + rightChild.dataType + ' on line ' + leftChild.lineNum + '.');
+                    if (leftChild.dataType === rightChild.dataType) {
                         if (parentNode.name !== 'Block') {
                             // Left...right...doesn't matter here
-                            var propagateType = leftChild.type;
+                            var propagateType = leftChild.dataType;
                             if (node.name === '==' || node.name === '!=') {
                                 propagateType = dataTypes.BOOLEAN;
                             }
@@ -124,28 +131,32 @@ var COMPILER;
                     }
                     else {
                         _Errors++;
-                        COMPILER.Main.addLog(LOG_ERROR, 'Type mismatch found on line ' + node.leftChild.lineNum +
-                            '. The left side of the expression (' + node.leftChild.name + ':' + node.leftChild.type +
-                            ' doesn\'t match up with the right side (' + node.rightChild.name + ':' + node.rightChild.type + '.');
+                        COMPILER.Main.addLog(LOG_ERROR, 'Type mismatch found on line ' + leftChild.lineNum +
+                            '. The left side of the expression (' + leftChild.name + ':' + leftChild.dataType +
+                            ') doesn\'t match up with the right side (' + rightChild.name + ':' + rightChild.dataType + ').');
                     }
                 }
-                else if (leftChild.type.length === 0 && rightChild.type.length !== 0) {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
-                        ' to ' + rightChild.type);
+                else if ((leftChild !== undefined && leftChild.dataType === null)
+                    && (rightChild !== undefined && rightChild.dataType !== null)) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + leftChild.lineNum +
+                        ' to ' + rightChild.dataType);
+                    node.dataType = rightChild.dataType;
                 }
-                else if (leftChild.type.length !== 0 && rightChild.type.length === 0) {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + node.lineNum +
-                        ' to ' + leftChild.type);
+                else if ((leftChild !== undefined && leftChild.dataType !== null)
+                    && (rightChild !== undefined && rightChild.dataType === null)) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Setting the type of ' + node.name + ' on line ' + leftChild.lineNum +
+                        ' to ' + rightChild.dataType);
+                    node.dataType = leftChild.dataType;
                 }
             }
         };
         SemanticAnalyzer.establishTypeComparable = function (parentNode, childType) {
             // CST: Var Declaration -> Type / Id -> <datatype> / <id>
-            if (parentNode.children[0].children[0].type.length === 0) {
-                parentNode.children[0].children[0].type = childType;
+            if (parentNode.children[0].dataType === null) {
+                parentNode.children[0].dataType = childType;
             }
-            else if (parentNode.children[1].children[0].type.length === 0) {
-                parentNode.children[1].children[0].type = childType;
+            else if (parentNode.children[1].dataType === null) {
+                parentNode.children[1].dataType = childType;
             }
             else {
                 _Errors++;
