@@ -104,9 +104,12 @@ var COMPILER;
                         break;
                     case T_ID:
                         var hashID = this.currentScope.assignHashID(node.name);
-                        var type = this.currentScope.getEntry(hashID).getType();
+                        var entry = this.currentScope.getEntry(this.currentScope, hashID);
+                        // if (entry !== null) {
+                        var type = entry.getType();
                         this.establishTypeComparable(parentNode, type);
                         node.dataType = type;
+                        // }
                         break;
                     default:
                         // epsilon

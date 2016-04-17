@@ -141,9 +141,13 @@ module COMPILER {
 
                     case T_ID:
                         var hashID: number = this.currentScope.assignHashID(node.name);
-                        var type: string = this.currentScope.getEntry(hashID).getType();
-                        this.establishTypeComparable(parentNode, type);
-                        node.dataType = type;
+                        var entry: SymbolTableEntry = this.currentScope.getEntry(this.currentScope, hashID);
+                        
+                        // if (entry !== null) {
+                            var type: string = entry.getType();
+                            this.establishTypeComparable(parentNode, type);
+                            node.dataType = type;
+                        // }
                         break;
 
                     default:

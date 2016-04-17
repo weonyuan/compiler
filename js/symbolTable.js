@@ -77,8 +77,23 @@ var COMPILER;
         SymbolTable.prototype.addChild = function (child) {
             this.childrenList.push(child);
         };
-        SymbolTable.prototype.getEntry = function (entryNum) {
-            return this.entryList[entryNum];
+        SymbolTable.prototype.getEntry = function (scope, hashID) {
+            var entry = null;
+            // Traverse through the entire symbol table for the entry
+            if (scope !== null) {
+                if (scope.entryList[hashID] === null) {
+                    // Look at the parent scope for a possible entry
+                    for (var i = 0; i < scope.childrenList.length; i++) {
+                        entry = this.getEntry(scope.childrenList[i], hashID);
+                    }
+                }
+                else {
+                    // Entry exists. Increment reference by 1
+                    entry = scope.entryList[hashID];
+                    entry.incrementReference();
+                }
+            }
+            return entry;
         };
         SymbolTable.prototype.getSize = function () {
             return _Symbols;
