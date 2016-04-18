@@ -16,6 +16,7 @@ var COMPILER;
             // Reset the warnings and errors
             _Warnings = 0;
             _Errors = 0;
+            this.tempToken = null;
             this.cst = new COMPILER.Tree();
             this.ast = new COMPILER.Tree();
             COMPILER.Main.addLog(LOG_INFO, 'Performing parsing.');
@@ -64,6 +65,7 @@ var COMPILER;
                     ': Expected T_LBRACE but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            this.ast.levelUp();
         };
         // Statement StatementList
         // epsilon
@@ -298,7 +300,6 @@ var COMPILER;
                     ': Expected T_DIGIT but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
-            this.ast.levelUp();
         };
         // " CharList "
         Parser.parseStringExpr = function () {
@@ -354,19 +355,21 @@ var COMPILER;
                 }
                 this.boolOpExists = false;
             }
-            else if (_CurrentToken.getType() === T_TRUE
-                || _CurrentToken.getType() === T_FALSE) {
-                COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
-                this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                this.tempToken = _CurrentToken;
-                if (_PreviousToken.getType() !== T_LPAREN) {
-                    this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
-                }
-                this.getNextToken();
-            }
             else {
-                COMPILER.Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
-                    ': ' + _CurrentToken.getName() + ' is not a valid boolean expression.');
+                if (_CurrentToken.getType() === T_TRUE
+                    || _CurrentToken.getType() === T_FALSE) {
+                    this.tempToken = _CurrentToken;
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
+                    this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                    if (_PreviousToken.getType() !== T_LPAREN) {
+                        this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                    }
+                    this.getNextToken();
+                }
+                else {
+                    COMPILER.Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
+                        ': ' + _CurrentToken.getName() + ' is not a valid boolean expression.');
+                }
             }
             this.cst.levelUp();
         };

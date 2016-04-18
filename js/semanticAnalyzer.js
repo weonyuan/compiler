@@ -21,18 +21,17 @@ var COMPILER;
             this.tempASTTree = _AST;
             this.nextScopeNum = 0;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
-            // this.generateAST(this.tempASTTree.root);
+            this.generateAST(_AST.root);
             this.scopeCheck(_AST.root);
             this.typeCheck(_AST.root);
-            this.detectWarnings();
+            this.detectWarnings(this.currentScope.childrenList[0]);
             if (_Errors === 0) {
                 this.printResults();
             }
             return this.currentScope;
         };
-        // TODO
         SemanticAnalyzer.generateAST = function (node) {
-            // Fixing the boolean expressions placement
+            // Fix the boolean expressions placement
             if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
                 node.parent = node;
             }
@@ -42,10 +41,8 @@ var COMPILER;
                 var newScope = false;
                 switch (node.name) {
                     case 'Block':
-                        if (node.parent.name !== 'Program') {
-                            newScope = true;
-                            this.openScope();
-                        }
+                        newScope = true;
+                        this.openScope();
                         break;
                     case 'Var Declaration':
                         var name = node.children[1].name;
@@ -164,11 +161,11 @@ var COMPILER;
                 }
             }
         };
-        SemanticAnalyzer.detectWarnings = function () {
-            for (var i = 0; i < this.currentScope.entryList.length; i++) {
-                if (this.currentScope.entryList[i] !== null) {
-                    var entry = this.currentScope.entryList[i];
-                    if (entry.getTimesReferred() === 1) {
+        SemanticAnalyzer.detectWarnings = function (scope) {
+            for (var i = 0; i < scope.entryList.length; i++) {
+                if (scope.entryList[i] !== null) {
+                    var entry = scope.entryList[i];
+                    if (entry.getTimesReferred() <= 1) {
                         _Warnings++;
                         COMPILER.Main.addLog(LOG_WARNING, 'Identifier ' + entry.getName() + ' on line ' + entry.getLineNum() +
                             ' was initialized but never used.');
@@ -179,6 +176,9 @@ var COMPILER;
                             ' was assigned before being initialized.');
                     }
                 }
+            }
+            for (var j = 0; j < scope.childrenList.length; j++) {
+                this.detectWarnings(scope.childrenList[j]);
             }
         };
         SemanticAnalyzer.establishTypeComparable = function (parentNode, childType) {
@@ -205,7 +205,6 @@ var COMPILER;
         SemanticAnalyzer.closeScope = function () {
             if (this.currentScope.parent !== null) {
                 this.currentScope = this.currentScope.parent;
-                this.nextScopeNum--;
             }
             else {
                 _Errors++;

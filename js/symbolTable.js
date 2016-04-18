@@ -8,7 +8,7 @@ var COMPILER;
     var SymbolTable = (function () {
         function SymbolTable(entryList, scopeNum, parent, childrenList) {
             if (entryList === void 0) { entryList = new Array(26); }
-            if (scopeNum === void 0) { scopeNum = 0; }
+            if (scopeNum === void 0) { scopeNum = -1; }
             if (parent === void 0) { parent = null; }
             if (childrenList === void 0) { childrenList = new Array(); }
             this.entryList = entryList;

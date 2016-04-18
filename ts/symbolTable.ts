@@ -9,7 +9,7 @@ module COMPILER {
 
         constructor(
             public entryList: Array<SymbolTableEntry> = new Array(26),
-            public scopeNum: number = 0,
+            public scopeNum: number = -1,
             public parent: SymbolTable = null,
             public childrenList: Array<SymbolTableEntry> = new Array()) {
 

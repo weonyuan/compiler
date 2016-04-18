@@ -25,10 +25,10 @@ module COMPILER {
             this.nextScopeNum = 0;
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
-            // this.generateAST(this.tempASTTree.root);
+            this.generateAST(_AST.root);
             this.scopeCheck(_AST.root);
             this.typeCheck(_AST.root);
-            this.detectWarnings();
+            this.detectWarnings(this.currentScope.childrenList[0]);
 
             if (_Errors === 0) {
                 this.printResults();
@@ -37,10 +37,8 @@ module COMPILER {
             return this.currentScope;
         }
 
-        // TODO
         public static generateAST(node): void {
-            // Fixing the boolean expressions placement
-
+            // Fix the boolean expressions placement
             if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
                 node.parent = node;
             }
@@ -52,11 +50,9 @@ module COMPILER {
 
                 switch (node.name) {
                     case 'Block':
-                        if (node.parent.name !== 'Program') {
-                            newScope = true;
-                            this.openScope();
-                        }
-
+                        newScope = true;
+                        this.openScope();
+                        
                         break;
                     case 'Var Declaration':
                         var name: string = node.children[1].name;
@@ -208,12 +204,12 @@ module COMPILER {
             }
         }
 
-        public static detectWarnings(): void {
-            for (var i = 0; i < this.currentScope.entryList.length; i++) {
-                if (this.currentScope.entryList[i] !== null) {
-                    var entry: SymbolTableEntry = this.currentScope.entryList[i];
+        public static detectWarnings(scope): void {
+            for (var i = 0; i < scope.entryList.length; i++) {
+                if (scope.entryList[i] !== null) {
+                    var entry: SymbolTableEntry = scope.entryList[i];
 
-                    if (entry.getTimesReferred() === 1) {
+                    if (entry.getTimesReferred() <= 1) {
                         _Warnings++;
                         Main.addLog(LOG_WARNING, 'Identifier ' + entry.getName() + ' on line ' + entry.getLineNum() +
                             ' was initialized but never used.');
@@ -225,6 +221,10 @@ module COMPILER {
                             ' was assigned before being initialized.');
                     }
                 }
+            }
+
+            for (var j = 0; j < scope.childrenList.length; j++) {
+                this.detectWarnings(scope.childrenList[j]);
             }
         }
 
@@ -253,7 +253,6 @@ module COMPILER {
         public static closeScope(): void {
             if (this.currentScope.parent !== null) {
                 this.currentScope = this.currentScope.parent;
-                this.nextScopeNum--;
             } else {
                 _Errors++;
                 Main.addLog(LOG_ERROR, 'Attempted to access a nonexistant parent scope.');
