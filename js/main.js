@@ -29,7 +29,7 @@ var COMPILER;
                 if (_CST !== null) {
                     _SymbolTable = COMPILER.SemanticAnalyzer.init();
                 }
-            }, 50);
+            }, 90);
         };
         // Load the source code from the testPrograms array into the textarea
         Main.loadProgram = function (index) {

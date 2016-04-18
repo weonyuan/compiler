@@ -14,15 +14,20 @@ var COMPILER;
         function SemanticAnalyzer() {
         }
         SemanticAnalyzer.init = function () {
+            // Reset the warnings and errors
+            _Warnings = 0;
+            _Errors = 0;
             this.currentScope = new COMPILER.SymbolTable();
             this.tempASTTree = _AST;
-            this.nextScopeNum = 1;
+            this.nextScopeNum = 0;
             COMPILER.Main.addLog(LOG_INFO, 'Performing semantic analysis.');
             // this.generateAST(this.tempASTTree.root);
-            this.scopeCheck(_CST.root);
+            this.scopeCheck(_AST.root);
             this.typeCheck(_AST.root);
             this.detectWarnings();
-            this.printResults();
+            if (_Errors === 0) {
+                this.printResults();
+            }
             return this.currentScope;
         };
         // TODO
@@ -43,9 +48,9 @@ var COMPILER;
                         }
                         break;
                     case 'Var Declaration':
-                        var name = node.children[1].children[0].name;
-                        var lineNum = node.children[1].children[0].lineNum;
-                        var dataType = node.children[0].children[0].name;
+                        var name = node.children[1].name;
+                        var lineNum = node.children[1].lineNum;
+                        var dataType = node.children[0].name;
                         var id = this.currentScope.insertEntry(name, dataType, lineNum);
                         // Error: The variable is already declared
                         if (id !== null) {
@@ -58,8 +63,8 @@ var COMPILER;
                         }
                         break;
                     case 'Assignment Statement':
-                        var name = node.children[0].children[0].name;
-                        var lineNum = node.children[0].children[0].lineNum;
+                        var name = node.children[0].name;
+                        var lineNum = node.children[0].lineNum;
                         var entryExists = this.currentScope.checkEntry(name, node, 'Assignment Statement');
                         if (!entryExists) {
                             _Errors++;
@@ -200,6 +205,7 @@ var COMPILER;
         SemanticAnalyzer.closeScope = function () {
             if (this.currentScope.parent !== null) {
                 this.currentScope = this.currentScope.parent;
+                this.nextScopeNum--;
             }
             else {
                 _Errors++;
@@ -209,13 +215,10 @@ var COMPILER;
         SemanticAnalyzer.printResults = function () {
             COMPILER.Main.addLog(LOG_INFO, 'Semantic analysis complete. Analyzer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _AST.printTreeString('ast');
-            // Reset the warnings and errors for the next process
-            _Warnings = 0;
-            _Errors = 0;
         };
         SemanticAnalyzer.currentScope = null;
         SemanticAnalyzer.tempASTTree = null;
-        SemanticAnalyzer.nextScopeNum = 1;
+        SemanticAnalyzer.nextScopeNum = 0;
         return SemanticAnalyzer;
     })();
     COMPILER.SemanticAnalyzer = SemanticAnalyzer;

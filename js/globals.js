@@ -4,7 +4,7 @@
   Global constants and variables.
 */
 var APP_NAME = 'aBasicCompiler';
-var APP_VERSION = '2.0';
+var APP_VERSION = '2.1';
 // Token constants
 var T_NOMATCH = -1;
 var T_LBRACE = 0;

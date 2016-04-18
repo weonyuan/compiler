@@ -19,6 +19,10 @@ module COMPILER {
         private static bufferArray: any[] = [];
 
         public static init(tokens): void {
+            // Reset the warnings and errors
+            _Warnings = 0;
+            _Errors = 0;
+
             this.cst = new Tree();
             this.ast = new Tree();
 
@@ -29,10 +33,10 @@ module COMPILER {
             this.getNextToken();
             _PreviousToken = _CurrentToken;
             this.parseProgram();
-            this.printResults();
 
-            _CST = this.cst;
-            _AST = this.ast;
+            if (_Errors === 0) {
+                this.printResults();
+            }
         }
 
         // Block $
@@ -568,9 +572,8 @@ module COMPILER {
             Main.addLog(LOG_INFO, 'Parsing complete. Parser found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             this.cst.printTreeString('cst');
 
-            // Reset the warnings and errors for the next process
-            _Warnings = 0;
-            _Errors = 0;
+            _CST = this.cst;
+            _AST = this.ast;
         }
     }
 }

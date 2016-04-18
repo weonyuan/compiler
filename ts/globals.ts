@@ -5,7 +5,7 @@
 */
 
 const APP_NAME: string = 'aBasicCompiler';
-const APP_VERSION: string = '2.0';
+const APP_VERSION: string = '2.1';
 
 // Token constants
 const T_NOMATCH: number = -1;

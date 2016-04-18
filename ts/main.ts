@@ -31,7 +31,7 @@ module COMPILER {
                 if (_CST !== null) {
                     _SymbolTable = SemanticAnalyzer.init();
                 }
-            }, 50)            
+            }, 90)            
         }
 
         // Load the source code from the testPrograms array into the textarea

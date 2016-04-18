@@ -13,20 +13,26 @@ module COMPILER {
     export class SemanticAnalyzer {
         public static currentScope: SymbolTable = null;
         public static tempASTTree: Tree = null;
-        public static nextScopeNum: number = 1;
+        public static nextScopeNum: number = 0;
 
         public static init(): any {
+            // Reset the warnings and errors
+            _Warnings = 0;
+            _Errors = 0;
+
             this.currentScope = new SymbolTable();
             this.tempASTTree = _AST;
-            this.nextScopeNum = 1;
+            this.nextScopeNum = 0;
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
             // this.generateAST(this.tempASTTree.root);
-            this.scopeCheck(_CST.root);
+            this.scopeCheck(_AST.root);
             this.typeCheck(_AST.root);
             this.detectWarnings();
 
-            this.printResults();
+            if (_Errors === 0) {
+                this.printResults();
+            }
 
             return this.currentScope;
         }
@@ -53,10 +59,10 @@ module COMPILER {
 
                         break;
                     case 'Var Declaration':
-                        var name: string = node.children[1].children[0].name;
-                        var lineNum: number = node.children[1].children[0].lineNum;
+                        var name: string = node.children[1].name;
+                        var lineNum: number = node.children[1].lineNum;
 
-                        var dataType: string = node.children[0].children[0].name;
+                        var dataType: string = node.children[0].name;
 
                         var id: number = this.currentScope.insertEntry(name, dataType, lineNum);
                         
@@ -72,8 +78,8 @@ module COMPILER {
 
                         break;
                     case 'Assignment Statement':
-                        var name: string = node.children[0].children[0].name;
-                        var lineNum: number = node.children[0].children[0].lineNum;
+                        var name: string = node.children[0].name;
+                        var lineNum: number = node.children[0].lineNum;
                         var entryExists: boolean = this.currentScope.checkEntry(name, node, 'Assignment Statement');
 
                         if (!entryExists) {
@@ -247,6 +253,7 @@ module COMPILER {
         public static closeScope(): void {
             if (this.currentScope.parent !== null) {
                 this.currentScope = this.currentScope.parent;
+                this.nextScopeNum--;
             } else {
                 _Errors++;
                 Main.addLog(LOG_ERROR, 'Attempted to access a nonexistant parent scope.');
@@ -256,10 +263,6 @@ module COMPILER {
         public static printResults(): void {
             Main.addLog(LOG_INFO, 'Semantic analysis complete. Analyzer found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             _AST.printTreeString('ast');
-
-            // Reset the warnings and errors for the next process
-            _Warnings = 0;
-            _Errors = 0;
         }
     }
 }

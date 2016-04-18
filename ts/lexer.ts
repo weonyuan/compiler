@@ -10,6 +10,10 @@
 module COMPILER {
     export class Lexer {
         public static tokenize(input): any {
+            // Reset the warnings and errors
+            _Warnings = 0;
+            _Errors = 0;
+            
             Main.addLog(LOG_INFO, 'Performing input tokenization through lexer.');
 
             var tokens: any = [];
