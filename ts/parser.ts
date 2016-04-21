@@ -402,8 +402,9 @@ module COMPILER {
                 console.log(this.currentLayer);
 
                 this.getNextToken();
-                this.parseExpr();
+                this.tempToken = _CurrentToken;
 
+                this.parseExpr();
                 this.parseBoolOp();
                 this.parseExpr();
 
@@ -420,8 +421,7 @@ module COMPILER {
 
                 this.boolOpExists = false;
             } else {
-
-                if (_CurrentToken.getType() === T_TRUE
+                if (   _CurrentToken.getType() === T_TRUE
                     || _CurrentToken.getType() === T_FALSE) {
                     this.tempToken = _CurrentToken;
 

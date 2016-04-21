@@ -342,6 +342,7 @@ var COMPILER;
                 this.currentLayer++;
                 console.log(this.currentLayer);
                 this.getNextToken();
+                this.tempToken = _CurrentToken;
                 this.parseExpr();
                 this.parseBoolOp();
                 this.parseExpr();

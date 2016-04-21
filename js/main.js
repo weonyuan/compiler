@@ -29,6 +29,9 @@ var COMPILER;
                 if (_CST !== null) {
                     _SymbolTable = COMPILER.SemanticAnalyzer.init();
                 }
+                if (_SymbolTable !== null) {
+                    COMPILER.CodeGenerator.build();
+                }
             }, 90);
         };
         // Load the source code from the testPrograms array into the textarea

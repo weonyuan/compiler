@@ -49,6 +49,8 @@ const LOG_INFO: number = 1;
 const LOG_SUCCESS: number = 2;
 const LOG_VERBOSE: number = 3;
 
+const PROGRAM_SIZE: number = 256;
+
 // Used for building a tree
 const BRANCH_NODE: string = 'branch';
 const LEAF_NODE: string = 'leaf';

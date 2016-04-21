@@ -38,6 +38,7 @@ var LOG_WARNING = 0;
 var LOG_INFO = 1;
 var LOG_SUCCESS = 2;
 var LOG_VERBOSE = 3;
+var PROGRAM_SIZE = 256;
 // Used for building a tree
 var BRANCH_NODE = 'branch';
 var LEAF_NODE = 'leaf';
