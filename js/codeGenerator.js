@@ -30,6 +30,7 @@ var COMPILER;
             this.setCode('00');
             this.backpatch();
             console.log(this.codeTable);
+            this.printResults();
         };
         CodeGenerator.generateCode = function (node) {
             console.log(node);
@@ -108,6 +109,19 @@ var COMPILER;
                     this.injectCode('00', i);
                 }
             }
+        };
+        CodeGenerator.printResults = function () {
+            var content = '';
+            for (var i = 0; i < this.codeTable.length; i++) {
+                content += this.codeTable[i];
+                if ((i + 1) % 8 === 0) {
+                    content += '<br/>';
+                }
+                else {
+                    content += ' ';
+                }
+            }
+            document.getElementById('code-gen').innerHTML = content;
         };
         CodeGenerator.codeTable = [];
         CodeGenerator.staticTable = [];

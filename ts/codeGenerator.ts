@@ -38,6 +38,8 @@ module COMPILER {
 
             this.backpatch();
             console.log(this.codeTable);
+
+            this.printResults();
         }
 
         public static generateCode(node): void {
@@ -139,6 +141,22 @@ module COMPILER {
                     this.injectCode('00', i);
                 }
             }
+        }
+
+        public static printResults(): void {
+            var content: string = '';
+
+            for (var i = 0; i < this.codeTable.length; i++) {
+                content += this.codeTable[i];
+
+                if ((i + 1) % 8 === 0) {
+                    content += '<br/>';
+                } else {
+                    content += ' ';
+                }
+            }
+
+            document.getElementById('code-gen').innerHTML = content;
         }
     }
 }
