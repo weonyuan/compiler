@@ -58,6 +58,7 @@ var COMPILER;
                 if (opcode.length === 1) {
                     opcode = '0' + opcode;
                 }
+                opcode = opcode.toUpperCase();
                 this.codeTable[this.currentIndex] = opcode;
                 this.currentIndex++;
             }
@@ -68,6 +69,7 @@ var COMPILER;
             if (opcode.length === 1) {
                 opcode = '0' + opcode;
             }
+            opcode = opcode.toUpperCase();
             this.codeTable[index] = opcode;
         };
         CodeGenerator.handleVarDecl = function (node) {
@@ -103,7 +105,7 @@ var COMPILER;
                 // Handle id assignment
                 var secondIdEntry = this.getEntry(node.children[1].name);
                 if (secondIdEntry !== null) {
-                    this.setCode('A9');
+                    this.setCode('AD');
                     this.setCode(secondIdEntry.name);
                     this.setCode('XX');
                     // Store the accumulator value at the id's address

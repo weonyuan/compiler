@@ -74,6 +74,8 @@ module COMPILER {
                     opcode = '0' + opcode;
                 }
 
+                opcode = opcode.toUpperCase();
+
                 this.codeTable[this.currentIndex] = opcode;
                 this.currentIndex++;
             }
@@ -85,6 +87,8 @@ module COMPILER {
             if (opcode.length === 1) {
                 opcode = '0' + opcode;
             }
+
+            opcode = opcode.toUpperCase();
 
             this.codeTable[index] = opcode;
         }
@@ -129,7 +133,7 @@ module COMPILER {
                 var secondIdEntry: any = this.getEntry(node.children[1].name);
 
                 if (secondIdEntry !== null) {
-                    this.setCode('A9');
+                    this.setCode('AD');
                     this.setCode(secondIdEntry.name);
                     this.setCode('XX');
 
