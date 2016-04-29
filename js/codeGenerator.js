@@ -55,12 +55,19 @@ var COMPILER;
         CodeGenerator.setCode = function (opcode) {
             // Set the opcode on the next available block
             if (this.codeTable[this.currentIndex] === '00') {
+                if (opcode.length === 1) {
+                    opcode = '0' + opcode;
+                }
                 this.codeTable[this.currentIndex] = opcode;
                 this.currentIndex++;
             }
         };
+        // Set the opcode on the target index of the code table
         CodeGenerator.injectCode = function (opcode, index) {
-            // Set the opcode on the target index of the code table
+            // Pad the opcode
+            if (opcode.length === 1) {
+                opcode = '0' + opcode;
+            }
             this.codeTable[index] = opcode;
         };
         CodeGenerator.handleVarDecl = function (node) {
@@ -80,8 +87,57 @@ var COMPILER;
             this.setCode('XX');
         };
         CodeGenerator.handleAssignmentStmt = function (node) {
+            var id = node.children[0].name;
+            var firstIdEntry = this.getEntry(id);
+            if (node.children[1].tokenType === T_DIGIT) {
+                // Handle integer assignment
+                var value = parseInt(node.children[1].name);
+                console.log(id + ': ' + value);
+                this.setCode('A9');
+                this.setCode(value.toString(16));
+                this.setCode('8D');
+                this.setCode(firstIdEntry.name);
+                this.setCode('XX');
+            }
+            else if (node.children[1].tokenType === T_ID) {
+                // Handle id assignment
+                var secondIdEntry = this.getEntry(node.children[1].name);
+                if (secondIdEntry !== null) {
+                    this.setCode('A9');
+                    this.setCode(secondIdEntry.name);
+                    this.setCode('XX');
+                    // Store the accumulator value at the id's address
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
+                }
+                else {
+                }
+            }
         };
         CodeGenerator.handlePrintStmt = function (node) {
+            if (node.children[0].tokenType === T_INT) {
+                // Load the Y reg with the constant
+                this.setCode('A0');
+                this.setCode(node.children[0].name);
+                // Load the X reg with a 1 to prep for integer print
+                this.setCode('A2');
+                this.setCode('01');
+                // System call
+                this.setCode('FF');
+            }
+            else if (node.children[0].tokenType === T_ID) {
+                // Load the Y reg with the constant
+                this.setCode('AC');
+                var idEntry = this.getEntry(node.children[0].name);
+                this.setCode(idEntry.name);
+                this.setCode('XX');
+                // Load the X reg with a 1 to prep for integer print
+                this.setCode('A2');
+                this.setCode('01');
+                // System call
+                this.setCode('FF');
+            }
         };
         CodeGenerator.createTempEntry = function () {
             var tempEntry = {
@@ -92,6 +148,17 @@ var COMPILER;
             };
             this.staticTable.push(tempEntry);
             return tempEntry;
+        };
+        // TODO: support different scopes
+        CodeGenerator.getEntry = function (id /*, scope */) {
+            var entry = null;
+            for (var i = 0; i < this.staticTable.length; i++) {
+                if (id === this.staticTable[i].id) {
+                    entry = this.staticTable[i];
+                    break;
+                }
+            }
+            return entry;
         };
         CodeGenerator.backpatch = function () {
             COMPILER.Main.addLog(LOG_VERBOSE, 'Backpatching the code.');
@@ -111,7 +178,7 @@ var COMPILER;
             }
         };
         CodeGenerator.printResults = function () {
-            var content = '';
+            var content = '<div id="code">';
             for (var i = 0; i < this.codeTable.length; i++) {
                 content += this.codeTable[i];
                 if ((i + 1) % 8 === 0) {
@@ -121,6 +188,7 @@ var COMPILER;
                     content += ' ';
                 }
             }
+            content += '</div>';
             document.getElementById('code-gen').innerHTML = content;
         };
         CodeGenerator.codeTable = [];

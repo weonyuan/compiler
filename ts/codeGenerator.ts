@@ -70,13 +70,22 @@ module COMPILER {
         public static setCode(opcode): void {
             // Set the opcode on the next available block
             if (this.codeTable[this.currentIndex] === '00') {
+                if (opcode.length === 1) {
+                    opcode = '0' + opcode;
+                }
+
                 this.codeTable[this.currentIndex] = opcode;
                 this.currentIndex++;
             }
         }
 
+        // Set the opcode on the target index of the code table
         public static injectCode(opcode, index): void {
-            // Set the opcode on the target index of the code table
+            // Pad the opcode
+            if (opcode.length === 1) {
+                opcode = '0' + opcode;
+            }
+
             this.codeTable[index] = opcode;
         }
 
@@ -101,11 +110,66 @@ module COMPILER {
         }
 
         public static handleAssignmentStmt(node): void {
+            var id: string = node.children[0].name;
+            var firstIdEntry: any = this.getEntry(id);
 
+            if (node.children[1].tokenType === T_DIGIT) {
+                // Handle integer assignment
+                var value: number = parseInt(node.children[1].name);
+
+                console.log(id + ': ' + value);
+                this.setCode('A9');
+                this.setCode(value.toString(16));
+
+                this.setCode('8D');
+                this.setCode(firstIdEntry.name);
+                this.setCode('XX');
+            } else if (node.children[1].tokenType === T_ID) {
+                // Handle id assignment
+                var secondIdEntry: any = this.getEntry(node.children[1].name);
+
+                if (secondIdEntry !== null) {
+                    this.setCode('A9');
+                    this.setCode(secondIdEntry.name);
+                    this.setCode('XX');
+
+                    // Store the accumulator value at the id's address
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
+                } else {
+                    // throw error
+                }
+            }
         }
 
         public static handlePrintStmt(node): void {
+            if (node.children[0].tokenType === T_INT) {
+                // Load the Y reg with the constant
+                this.setCode('A0');
+                this.setCode(node.children[0].name);
 
+                // Load the X reg with a 1 to prep for integer print
+                this.setCode('A2');
+                this.setCode('01');
+
+                // System call
+                this.setCode('FF');
+            } else if (node.children[0].tokenType === T_ID) {
+                // Load the Y reg with the constant
+                this.setCode('AC');
+
+                var idEntry: any = this.getEntry(node.children[0].name);
+                this.setCode(idEntry.name);
+                this.setCode('XX');
+
+                // Load the X reg with a 1 to prep for integer print
+                this.setCode('A2');
+                this.setCode('01');
+
+                // System call
+                this.setCode('FF');
+            }
         }
 
         public static createTempEntry(): any {
@@ -119,6 +183,20 @@ module COMPILER {
             this.staticTable.push(tempEntry);
 
             return tempEntry;
+        }
+
+        // TODO: support different scopes
+        public static getEntry(id/*, scope */): any {
+            var entry: any = null;
+
+            for (var i = 0; i < this.staticTable.length; i++) {
+                if (id === this.staticTable[i].id) {
+                    entry = this.staticTable[i];
+                    break;
+                }
+            }
+
+            return entry;
         }
 
         public static backpatch(): void {
@@ -144,7 +222,7 @@ module COMPILER {
         }
 
         public static printResults(): void {
-            var content: string = '';
+            var content: string = '<div id="code">';
 
             for (var i = 0; i < this.codeTable.length; i++) {
                 content += this.codeTable[i];
@@ -155,6 +233,8 @@ module COMPILER {
                     content += ' ';
                 }
             }
+
+            content += '</div>';
 
             document.getElementById('code-gen').innerHTML = content;
         }
