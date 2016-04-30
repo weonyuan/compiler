@@ -21,9 +21,8 @@ var COMPILER;
             }
             /*
                 TODO:
-                1. Var Declaration
-                2. Int assignment
-                3. String assignment
+                1. If statement
+                2. Multi scope support
             */
             this.generateCode(_AST.root);
             // Set break statement
@@ -116,6 +115,22 @@ var COMPILER;
                 else {
                 }
             }
+            else if (node.children[1].tokenType === T_QUOTE) {
+                var stringExpr = node.children[1].name;
+                var stringLength = stringExpr.length;
+                var stringStart = null;
+                var startPoint = this.codeTable.length - 1;
+                this.codeTable[startPoint] = '00';
+                for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
+                    this.codeTable[i] = stringExpr.charCodeAt(--stringLength).toString(16).toUpperCase();
+                    stringStart = i.toString(16).toUpperCase();
+                }
+                this.setCode('A9');
+                this.setCode(stringStart);
+                this.setCode('8D');
+                this.setCode(firstIdEntry.name);
+                this.setCode('XX');
+            }
         };
         CodeGenerator.handlePrintStmt = function (node) {
             if (node.children[0].tokenType === T_INT) {
@@ -136,9 +151,16 @@ var COMPILER;
                 this.setCode('XX');
                 // Load the X reg with a 1 to prep for integer print
                 this.setCode('A2');
-                this.setCode('01');
+                if (node.children[0].dataType === dataTypes.INT) {
+                    this.setCode('01');
+                }
+                else if (node.children[0].dataType === dataTypes.STRING) {
+                    this.setCode('02');
+                }
                 // System call
                 this.setCode('FF');
+            }
+            else if (node.children[0].tokenType === T_QUOTE) {
             }
         };
         CodeGenerator.createTempEntry = function () {
