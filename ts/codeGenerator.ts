@@ -11,6 +11,7 @@ module COMPILER {
         public static staticTable: any[] = [];
         public static jumpTable: any[] = [];
         public static currentIndex: number = 0;
+        public static heapIndex: number = 0;
 
         public static build(): void {
             Main.addLog(LOG_INFO, 'Performing 6502a code generation.');
@@ -24,6 +25,8 @@ module COMPILER {
             for (var i = 0; i < PROGRAM_SIZE; i++) {
                 this.codeTable[i] = '00';
             }
+
+            this.heapIndex = this.codeTable.length - 1;
 
             /*
                 TODO:
@@ -116,13 +119,50 @@ module COMPILER {
             var id: string = node.children[0].name;
             var firstIdEntry: any = this.getEntry(id);
 
-            if (node.children[1].tokenType === T_DIGIT) {
-                // Handle integer assignment
-                var value: number = parseInt(node.children[1].name);
+            // Check through every data type then do an identifier check
+            if (node.children[1].dataType === dataTypes.INT) {
+                if (node.children[1].tokenType === T_DIGIT) {
+                    // Handle integer assignment
+                    var value: number = parseInt(node.children[1].name);
 
-                console.log(id + ': ' + value);
+                    console.log(id + ': ' + value);
+                    this.setCode('A9');
+                    this.setCode(value.toString(16));
+
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
+                }
+            } else if (node.children[1].dataType === dataTypes.BOOLEAN) {
+                var value: number = 0;
+
+                if (node.children[1].tokenType === T_TRUE) {
+                    value = 1;
+                }
+
                 this.setCode('A9');
                 this.setCode(value.toString(16));
+
+                this.setCode('8D');
+                this.setCode(firstIdEntry.name);
+                this.setCode('XX');
+            } else if (node.children[1].dataType === dataTypes.STRING) {
+                var stringExpr: string = node.children[1].name;
+                var stringLength: number = stringExpr.length;
+                var stringStart: string = null;
+                var startPoint: number = this.heapIndex;
+
+                this.codeTable[startPoint] = '00';
+                this.heapIndex--;
+
+                for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
+                    this.codeTable[i] = stringExpr.charCodeAt(--stringLength).toString(16).toUpperCase();
+                    stringStart = i.toString(16).toUpperCase();
+                    this.heapIndex--;
+                }
+
+                this.setCode('A9');
+                this.setCode(stringStart);
 
                 this.setCode('8D');
                 this.setCode(firstIdEntry.name);
@@ -143,25 +183,6 @@ module COMPILER {
                 } else {
                     // throw error
                 }
-            } else if (node.children[1].tokenType === T_QUOTE) {
-                var stringExpr: string = node.children[1].name;
-                var stringLength: number = stringExpr.length;
-                var stringStart: string = null;
-                var startPoint: number = this.codeTable.length - 1;
-
-                this.codeTable[startPoint] = '00';
-
-                for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
-                    this.codeTable[i] = stringExpr.charCodeAt(--stringLength).toString(16).toUpperCase();
-                    stringStart = i.toString(16).toUpperCase();
-                }
-
-                this.setCode('A9');
-                this.setCode(stringStart);
-
-                this.setCode('8D');
-                this.setCode(firstIdEntry.name);
-                this.setCode('XX');
             }
         }
 

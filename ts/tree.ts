@@ -32,10 +32,13 @@ module COMPILER {
 
         public addNode(name, nodeType, token): void {
             var node: any = this.createNode(name);
-
-            if (nodeType === LEAF_NODE) {
+            
+            if (token !== null) {
                 node.tokenType = token.getType();
-                node.lineNum = token.getLineNum();
+
+                if (nodeType === LEAF_NODE) {
+                    node.lineNum = token.getLineNum();
+                }
             }
 
             // Check to see if the node is a root node

@@ -44,7 +44,7 @@ module COMPILER {
         // Block $
         public static parseProgram(): void {
             // console.log('parseProgram()');
-            this.cst.addNode('Program', BRANCH_NODE, '');
+            this.cst.addNode('Program', BRANCH_NODE, null);
 
             this.parseBlock();
             this.parseEOP();
@@ -53,8 +53,8 @@ module COMPILER {
         // { StatementList }
         public static parseBlock(): void {
             // console.log('parseBlock()');
-            this.cst.addNode('Block', BRANCH_NODE, '');
-            this.ast.addNode('Block', BRANCH_NODE, '');
+            this.cst.addNode('Block', BRANCH_NODE, null);
+            this.ast.addNode('Block', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting a left brace.');
 
@@ -90,7 +90,7 @@ module COMPILER {
         // epsilon
         public static parseStatementList(): void {
             // console.log('parseStatementList()');
-            this.cst.addNode('Statement List', BRANCH_NODE, '');
+            this.cst.addNode('Statement List', BRANCH_NODE, null);
 
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
@@ -120,7 +120,7 @@ module COMPILER {
         // Block
         public static parseStatement(): void {
             // console.log('parseStatement()');
-            this.cst.addNode('Statement', BRANCH_NODE, '');
+            this.cst.addNode('Statement', BRANCH_NODE, null);
 
             switch (_CurrentToken.getType()) {
                 case T_PRINT:
@@ -156,8 +156,8 @@ module COMPILER {
         // print ( Expr )
         public static parsePrintStatement(): void {
             // console.log('parsePrintStatement()');
-            this.cst.addNode('Print Statement', BRANCH_NODE, '');
-            this.ast.addNode('Print Statement', BRANCH_NODE, '');
+            this.cst.addNode('Print Statement', BRANCH_NODE, null);
+            this.ast.addNode('Print Statement', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting a print.');
             if (_CurrentToken.getType() === T_PRINT) {
@@ -199,8 +199,8 @@ module COMPILER {
         // Id = Expr
         public static parseAssignmentStatement(): void {
             // console.log('parseAssignmentStatement()');
-            this.cst.addNode('Assignment Statement', BRANCH_NODE, '');
-            this.ast.addNode('Assignment Statement', BRANCH_NODE, '');
+            this.cst.addNode('Assignment Statement', BRANCH_NODE, null);
+            this.ast.addNode('Assignment Statement', BRANCH_NODE, null);
 
             this.parseId();
             Main.addLog(LOG_VERBOSE, 'Expecting an equal sign.');
@@ -224,8 +224,8 @@ module COMPILER {
         // type Id
         public static parseVarDecl(): void {
             // console.log('parseVarDecl()');
-            this.cst.addNode('Var Declaration', BRANCH_NODE, '');
-            this.ast.addNode('Var Declaration', BRANCH_NODE, '');
+            this.cst.addNode('Var Declaration', BRANCH_NODE, null);
+            this.ast.addNode('Var Declaration', BRANCH_NODE, null);
 
             this.parseType();
             this.parseId();
@@ -237,8 +237,8 @@ module COMPILER {
         // while BooleanExpr Block
         public static parseWhileStatement(): void {
             // console.log('parseWhileStatement()');
-            this.cst.addNode('While Statement', BRANCH_NODE, '');
-            this.ast.addNode('While Statement', BRANCH_NODE, '');
+            this.cst.addNode('While Statement', BRANCH_NODE, null);
+            this.ast.addNode('While Statement', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting a while.');
 
@@ -262,8 +262,8 @@ module COMPILER {
         // if BooleanExpr block
         public static parseIfStatement(): void {
             // console.log('parseIfStatement()');
-            this.cst.addNode('If Statement', BRANCH_NODE, '');
-            this.ast.addNode('If Statement', BRANCH_NODE, '');
+            this.cst.addNode('If Statement', BRANCH_NODE, null);
+            this.ast.addNode('If Statement', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting an if.');
 
@@ -290,7 +290,7 @@ module COMPILER {
         // Id
         public static parseExpr(): void {
             // console.log('parseExpr()');
-            this.cst.addNode('Expression', BRANCH_NODE, '');
+            this.cst.addNode('Expression', BRANCH_NODE, null);
 
             switch (_CurrentToken.getType()) {
                 case T_DIGIT:
@@ -322,7 +322,7 @@ module COMPILER {
         public static parseIntExpr(): void {
             // console.log('parseIntExpr()');
             var tempToken: Token;
-            this.cst.addNode('Integer Expression', BRANCH_NODE, '');
+            this.cst.addNode('Integer Expression', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting a digit.');
 
@@ -358,7 +358,7 @@ module COMPILER {
         // " CharList "
         public static parseStringExpr(): void {
             // console.log('parseStringExpr()');
-            this.cst.addNode('String Expression', BRANCH_NODE, '');
+            this.cst.addNode('String Expression', BRANCH_NODE, null);
             Main.addLog(LOG_VERBOSE, 'Expecting a quote.');
 
             if (_CurrentToken.getType() === T_QUOTE) {
@@ -391,7 +391,7 @@ module COMPILER {
         // boolval
         public static parseBooleanExpr(): void {
             // console.log('parseBooleanExpr()');
-            this.cst.addNode('Boolean Expression', BRANCH_NODE, '');
+            this.cst.addNode('Boolean Expression', BRANCH_NODE, null);
             Main.addLog(LOG_VERBOSE, 'Expecting either a left parenthese or a boolean.');
 
             if (_CurrentToken.getType() === T_LPAREN) {
@@ -445,7 +445,7 @@ module COMPILER {
         // char
         public static parseId(): void {
             // console.log('parseId()');
-            this.cst.addNode('Id', BRANCH_NODE, '');
+            this.cst.addNode('Id', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting an id.');
 
@@ -469,7 +469,7 @@ module COMPILER {
         // epsilon
         public static parseCharList(): void {
             // console.log('parseCharList()');
-            this.cst.addNode('CharList', BRANCH_NODE, '');
+            this.cst.addNode('CharList', BRANCH_NODE, null);
             Main.addLog(LOG_VERBOSE, 'Expecting a character.');
 
             switch (_CurrentToken.getType()) {
@@ -495,7 +495,7 @@ module COMPILER {
         // int | string | boolean
         public static parseType(): void {
             // console.log('parseType()');
-            this.cst.addNode('Type', BRANCH_NODE, '');
+            this.cst.addNode('Type', BRANCH_NODE, null);
 
             Main.addLog(LOG_VERBOSE, 'Expecting a valid data type.');
 
@@ -522,7 +522,7 @@ module COMPILER {
         // == | !=
         public static parseBoolOp(): void {
             // console.log('parseBoolOp()');
-            this.cst.addNode('Boolean Operator', BRANCH_NODE, '');
+            this.cst.addNode('Boolean Operator', BRANCH_NODE, null);
             Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
 
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
