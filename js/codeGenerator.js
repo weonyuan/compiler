@@ -88,15 +88,90 @@ var COMPILER;
             this.setCode(tempEntry.name);
             this.setCode('XX');
         };
+        CodeGenerator.handleIntAddition = function (node, addresses) {
+            var value = parseInt(node.children[0].name);
+            this.setCode('A9');
+            this.setCode(value.toString(16));
+            // Create a temporary entry for the constant
+            var tempEntry = this.createTempEntry();
+            // tempEntry.scope = 
+            this.setCode('8D');
+            this.setCode(tempEntry.name);
+            this.setCode('XX');
+            addresses.push(tempEntry.name);
+            if (node.children[1].tokenType === T_ADD) {
+                // There are more addition to follow so run the method again
+                this.handleIntAddition(node.children[1], addresses);
+            }
+            else {
+                if (node.children[1].tokenType === T_DIGIT) {
+                    // We've reached the end so just add the codes for the last digit
+                    var value = parseInt(node.children[1].name);
+                    this.setCode('A9');
+                    this.setCode(value.toString(16));
+                    this.setCode('8D');
+                    // Create a temporary entry for the constant
+                    var tempEntry = this.createTempEntry();
+                    // tempEntry.scope = 
+                    this.setCode(tempEntry.name);
+                    addresses.push(tempEntry.name);
+                    this.setCode('XX');
+                }
+                else if (node.children[1].tokenType === T_ID) {
+                    var idEntry = this.getEntry(node.children[1].name);
+                    addresses.push(idEntry.name);
+                }
+            }
+            return addresses;
+        };
         CodeGenerator.handleAssignmentStmt = function (node) {
             var id = node.children[0].name;
             var firstIdEntry = this.getEntry(id);
             // Check through every data type then do an identifier check
-            if (node.children[1].dataType === dataTypes.INT) {
-                if (node.children[1].tokenType === T_DIGIT) {
+            if (node.children[1].tokenType === T_ID) {
+                // Handle id assignment
+                var secondIdEntry = this.getEntry(node.children[1].name);
+                if (secondIdEntry !== null) {
+                    this.setCode('AD');
+                    this.setCode(secondIdEntry.name);
+                    this.setCode('XX');
+                    // Store the accumulator value at the id's address
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
+                }
+                else {
+                }
+            }
+            else if (node.children[1].dataType === dataTypes.INT) {
+                if (node.children[1].tokenType === T_ADD) {
+                    var addresses = [];
+                    addresses = this.handleIntAddition(node.children[1], addresses);
+                    // Reset the accumulator to prep assignment by addition
+                    this.setCode('A9');
+                    this.setCode('00');
+                    // Work backward because the addresses are little endian
+                    for (var i = addresses.length - 1; i >= 0; i--) {
+                        this.setCode('6D');
+                        this.setCode(addresses[i]);
+                        this.setCode('XX');
+                    }
+                    var tempEntry = this.createTempEntry();
+                    // tempEntry.scope = ?
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                    this.setCode('AD');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
+                }
+                else if (node.children[1].tokenType === T_DIGIT) {
                     // Handle integer assignment
                     var value = parseInt(node.children[1].name);
-                    console.log(id + ': ' + value);
+                    console.log(node.name + ': ' + value);
                     this.setCode('A9');
                     this.setCode(value.toString(16));
                     this.setCode('8D');
@@ -132,21 +207,6 @@ var COMPILER;
                 this.setCode('8D');
                 this.setCode(firstIdEntry.name);
                 this.setCode('XX');
-            }
-            else if (node.children[1].tokenType === T_ID) {
-                // Handle id assignment
-                var secondIdEntry = this.getEntry(node.children[1].name);
-                if (secondIdEntry !== null) {
-                    this.setCode('AD');
-                    this.setCode(secondIdEntry.name);
-                    this.setCode('XX');
-                    // Store the accumulator value at the id's address
-                    this.setCode('8D');
-                    this.setCode(firstIdEntry.name);
-                    this.setCode('XX');
-                }
-                else {
-                }
             }
         };
         CodeGenerator.handlePrintStmt = function (node) {
@@ -212,7 +272,7 @@ var COMPILER;
                     var tempEntryIndex = parseInt(currentCode.substring(1));
                     var tempEntry = this.staticTable[tempEntryIndex];
                     var targetIndex = staticStartIndex + tempEntryIndex;
-                    console.log(targetIndex.toString(16));
+                    //console.log(targetIndex.toString(16));
                     this.injectCode(targetIndex.toString(16), i++);
                     this.injectCode('00', i);
                 }
