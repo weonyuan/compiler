@@ -228,7 +228,8 @@ var COMPILER;
                 this.setCode('XX');
                 // Load the X reg with a 1 to prep for integer print
                 this.setCode('A2');
-                if (node.children[0].dataType === dataTypes.INT) {
+                if (node.children[0].dataType === dataTypes.INT ||
+                    node.children[0].dataType === dataTypes.BOOLEAN) {
                     this.setCode('01');
                 }
                 else if (node.children[0].dataType === dataTypes.STRING) {

@@ -81,6 +81,8 @@ module COMPILER {
                                 ' was assigned before being initialized.');
                         }
                     }
+
+                    node.symbolEntry = entry;
                 }
             }
 

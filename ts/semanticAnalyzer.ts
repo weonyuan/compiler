@@ -85,19 +85,19 @@ module COMPILER {
                         }
 
                         break;
-                    /*case 'Id':
-                        var name: string = node.children[0].name;
-                        console.log('Id: ' + name);
-                        var lineNum: number = node.children[0].lineNum;
-                        var entryExists: boolean = this.currentScope.checkEntry(name, node, '');
+                }
 
-                        if (!entryExists) {
-                            _Errors++;
-                            Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + lineNum +
-                                ' was assigned before being declared.');
-                        }
+                if (node.tokenType === T_ID) {
+                    var name: string = node.name;
+                    console.log('Id: ' + name);
+                    var lineNum: number = node.lineNum;
+                    var entryExists: boolean = this.currentScope.checkEntry(name, node, '');
 
-                        break;*/
+                    if (!entryExists) {
+                        _Errors++;
+                        Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + lineNum +
+                            ' was assigned before being declared.');
+                    }
                 }
 
                 // Traverse through the child nodes
@@ -142,11 +142,10 @@ module COMPILER {
                         break;
 
                     case T_ID:
-                        var hashID: number = this.currentScope.assignHashID(node.name);
-                        var entry: SymbolTableEntry = this.currentScope.getEntry(this.currentScope, hashID);
+                        var entry = node.symbolEntry;
                         
                         // if (entry !== null) {
-                            var type: string = entry.getType();
+                            var type: string = entry.type;
                             this.establishTypeComparable(parentNode, type);
                             node.dataType = type;
                         // }

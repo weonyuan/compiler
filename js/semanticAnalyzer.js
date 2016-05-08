@@ -70,6 +70,17 @@ var COMPILER;
                         }
                         break;
                 }
+                if (node.tokenType === T_ID) {
+                    var name = node.name;
+                    console.log('Id: ' + name);
+                    var lineNum = node.lineNum;
+                    var entryExists = this.currentScope.checkEntry(name, node, '');
+                    if (!entryExists) {
+                        _Errors++;
+                        COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + name + ' on line ' + lineNum +
+                            ' was assigned before being declared.');
+                    }
+                }
                 // Traverse through the child nodes
                 for (var i = 0; i < node.children.length; i++) {
                     this.scopeCheck(node.children[i]);
@@ -105,10 +116,9 @@ var COMPILER;
                         node.dataType = dataTypes.INT;
                         break;
                     case T_ID:
-                        var hashID = this.currentScope.assignHashID(node.name);
-                        var entry = this.currentScope.getEntry(this.currentScope, hashID);
+                        var entry = node.symbolEntry;
                         // if (entry !== null) {
-                        var type = entry.getType();
+                        var type = entry.type;
                         this.establishTypeComparable(parentNode, type);
                         node.dataType = type;
                         // }

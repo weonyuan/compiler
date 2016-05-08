@@ -23,6 +23,7 @@ var COMPILER;
                 tokenType: null,
                 dataType: null,
                 lineNum: null,
+                symbolEntry: null,
                 parent: {},
                 children: []
             };
