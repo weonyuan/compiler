@@ -25,25 +25,66 @@ module COMPILER {
             this.nextScopeNum = 0;
             Main.addLog(LOG_INFO, 'Performing semantic analysis.');
 
-            this.generateAST(_AST.root);
+            //this.generateAST(_CST.root, '');
             this.scopeCheck(_AST.root);
             this.typeCheck(_AST.root);
             this.detectWarnings(this.currentScope.childrenList[0]);
 
-            if (_Errors === 0) {
-                this.printResults();
-            }
+            this.printResults();
 
             return this.currentScope;
         }
 
-        public static generateAST(node): void {
+        /*public static generateAST(node): void {
             // Fix the boolean expressions placement
             if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
                 node.parent = node;
             }
-        }
+        }*/
 
+
+        /*public static generateAST(node, buffer): void {
+            console.log(node);
+
+            // Branch nodes
+            switch (node.name) {
+                case 'Block':
+                case 'Var Declaration':
+                case 'Assignment Statement':
+                case 'Print Statement':
+                case 'While Statement':
+                case 'If Statement':
+                case '==':
+                case '!=':
+                case '+':
+                    _AST.addNode(node.name, BRANCH_NODE, node);
+                    break;
+                default:
+                    // epsilon
+                    break;
+            }
+
+            // Leaf nodes
+            switch (node.tokenType) {
+                case T_FALSE:
+                case T_TRUE:
+                case T_DIGIT:
+                    _AST.addNode(node.name, LEAF_NODE, node);
+                    break;
+                case T_CHAR:
+                    buffer += node.name;
+                    break;
+                default:
+                    // Add the buffer to a leaf node and clear buffer
+                    _AST.addNode(buffer, LEAF_NODE)
+                    break;
+            }
+
+            for (var i = 0; i < node.children.length; i++) {
+                this.generateAST(node.children[i], buffer);
+            }
+        }
+*/
         public static scopeCheck(node): void {
             if (node.name !== null || node.name !== undefined) {
                 var newScope: boolean = false;
@@ -144,11 +185,11 @@ module COMPILER {
                     case T_ID:
                         var entry = node.symbolEntry;
                         
-                        // if (entry !== null) {
+                        if (entry !== null) {
                             var type: string = entry.type;
                             this.establishTypeComparable(parentNode, type);
                             node.dataType = type;
-                        // }
+                        }
                         break;
 
                     default:
@@ -177,7 +218,7 @@ module COMPILER {
                             // Left...right...doesn't matter here
                             var propagateType = leftChild.dataType;
 
-                            if (node.name === '==' || node.name === '!=') {
+                            if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
                                 propagateType = dataTypes.BOOLEAN;
                             }
 

@@ -46,9 +46,9 @@ var COMPILER;
             var entryExists = false;
             var currentScope = this;
             COMPILER.Main.addLog(LOG_VERBOSE, 'Checking if identifier ' + name + ' is stored in the symbol table.');
-            var hashID = this.assignHashID(name);
             // Traverse through the entire symbol table for the entry
             while (currentScope !== null && !entryExists) {
+                var hashID = this.assignHashID(name);
                 if (currentScope.entryList[hashID] === null) {
                     // Look at the parent scope for a possible entry
                     currentScope = currentScope.getParent();

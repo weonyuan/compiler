@@ -353,6 +353,7 @@ module COMPILER {
             }
 
             this.cst.levelUp();
+            //this.ast.levelUp();
         }
 
         // " CharList "
@@ -427,10 +428,7 @@ module COMPILER {
 
                     Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-
-                    if (_PreviousToken.getType() !== T_LPAREN) {
-                        this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
-                    }
+                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
 
                     this.getNextToken();
                 } else {

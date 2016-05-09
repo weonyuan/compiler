@@ -300,6 +300,7 @@ var COMPILER;
                     ': Expected T_DIGIT but received ' + _CurrentToken.getName() + '.');
             }
             this.cst.levelUp();
+            //this.ast.levelUp();
         };
         // " CharList "
         Parser.parseStringExpr = function () {
@@ -362,9 +363,7 @@ var COMPILER;
                     this.tempToken = _CurrentToken;
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                    if (_PreviousToken.getType() !== T_LPAREN) {
-                        this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
-                    }
+                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
                     this.getNextToken();
                 }
                 else {

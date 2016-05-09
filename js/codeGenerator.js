@@ -29,7 +29,6 @@ var COMPILER;
             // Set break statement
             this.setCode('00');
             this.backpatch();
-            console.log(this.codeTable);
             this.printResults();
         };
         CodeGenerator.generateCode = function (node) {
@@ -195,10 +194,11 @@ var COMPILER;
                 var stringLength = stringExpr.length;
                 var stringStart = null;
                 var startPoint = this.heapIndex;
-                this.codeTable[startPoint] = '00';
+                this.injectCode('00', startPoint);
                 this.heapIndex--;
                 for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
-                    this.codeTable[i] = stringExpr.charCodeAt(--stringLength).toString(16).toUpperCase();
+                    var charAscii = stringExpr.charCodeAt(--stringLength).toString(16);
+                    this.injectCode(charAscii, i);
                     stringStart = i.toString(16).toUpperCase();
                     this.heapIndex--;
                 }
@@ -210,17 +210,7 @@ var COMPILER;
             }
         };
         CodeGenerator.handlePrintStmt = function (node) {
-            if (node.children[0].tokenType === T_INT) {
-                // Load the Y reg with the constant
-                this.setCode('A0');
-                this.setCode(node.children[0].name);
-                // Load the X reg with a 1 to prep for integer print
-                this.setCode('A2');
-                this.setCode('01');
-                // System call
-                this.setCode('FF');
-            }
-            else if (node.children[0].tokenType === T_ID) {
+            if (node.children[0].tokenType === T_ID) {
                 // Load the Y reg with the constant
                 this.setCode('AC');
                 var idEntry = this.getEntry(node.children[0].name);
@@ -235,11 +225,72 @@ var COMPILER;
                 else if (node.children[0].dataType === dataTypes.STRING) {
                     this.setCode('02');
                 }
-                // System call
-                this.setCode('FF');
             }
-            else if (node.children[0].tokenType === T_QUOTE) {
+            else if (node.children[0].dataType === dataTypes.INT) {
+                if (node.children[0].tokenType === T_ADD) {
+                    var addresses = [];
+                    addresses = this.handleIntAddition(node.children[0], addresses);
+                    // Reset the accumulator to prep assignment by addition
+                    this.setCode('A9');
+                    this.setCode('00');
+                    // Work backward because the addresses are little endian
+                    for (var i = addresses.length - 1; i >= 0; i--) {
+                        this.setCode('6D');
+                        this.setCode(addresses[i]);
+                        this.setCode('XX');
+                    }
+                    var tempEntry = this.createTempEntry();
+                    // tempEntry.scope = ?
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                    this.setCode('AC');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                }
+                else if (node.children[0].tokenType === T_DIGIT) {
+                    // Handle integer assignment
+                    var value = parseInt(node.children[1].name);
+                    // Load the Y reg with the constant
+                    this.setCode('A0');
+                    this.setCode(node.children[0].name);
+                }
+                // Load the X reg with a 1 to prep for integer print
+                this.setCode('A2');
+                this.setCode('01');
             }
+            else if (node.children[0].dataType === dataTypes.BOOLEAN) {
+                this.setCode('A0');
+                if (node.children[0].tokenType === T_TRUE) {
+                    this.setCode('01');
+                }
+                else {
+                    this.setCode('00');
+                }
+                // Load the X reg with a 1 to prep for boolean print
+                this.setCode('A2');
+                this.setCode('01');
+            }
+            else if (node.children[0].dataType === dataTypes.STRING) {
+                var stringExpr = node.children[0].name;
+                var stringLength = stringExpr.length;
+                var stringStart = null;
+                var startPoint = this.heapIndex;
+                this.injectCode('00', startPoint);
+                this.heapIndex--;
+                for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
+                    var charAscii = stringExpr.charCodeAt(--stringLength).toString(16);
+                    this.injectCode(charAscii, i);
+                    stringStart = i.toString(16).toUpperCase();
+                    this.heapIndex--;
+                }
+                this.setCode('A9');
+                this.setCode(stringStart);
+                this.setCode('A2');
+                this.setCode('02');
+            }
+            // System call
+            this.setCode('FF');
         };
         CodeGenerator.createTempEntry = function () {
             var tempEntry = {

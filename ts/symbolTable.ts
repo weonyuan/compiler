@@ -54,10 +54,10 @@ module COMPILER {
 
             Main.addLog(LOG_VERBOSE, 'Checking if identifier ' + name + ' is stored in the symbol table.');
 
-            var hashID: number = this.assignHashID(name);
-
             // Traverse through the entire symbol table for the entry
             while (currentScope !== null && !entryExists) {
+                var hashID: number = this.assignHashID(name);
+
                 if (currentScope.entryList[hashID] === null) {
                     // Look at the parent scope for a possible entry
                     currentScope = currentScope.getParent();
