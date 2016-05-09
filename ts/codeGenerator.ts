@@ -28,11 +28,6 @@ module COMPILER {
 
             this.heapIndex = this.codeTable.length - 1;
 
-            /*
-                TODO:
-                1. If statement
-                2. Multi scope support
-            */
             this.generateCode(_AST.root);
 
             // Set break statement
@@ -47,6 +42,7 @@ module COMPILER {
             console.log(node);
             var conditionalBlock: boolean = false;
             var jumpReturnIndex: number = -1;
+            var jumpEntry: any = null;
 
             switch (node.name) {
                 case 'Var Declaration':
@@ -59,7 +55,7 @@ module COMPILER {
                     this.handlePrintStmt(node);
                     break;
                 case 'If Statement':
-                    this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node);
 
                     conditionalBlock = true;
                     break;
@@ -68,7 +64,7 @@ module COMPILER {
                     // while block finishes
                     jumpReturnIndex = this.currentIndex;
 
-                    this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node);
 
                     conditionalBlock = true;
                     break;
@@ -79,6 +75,42 @@ module COMPILER {
 
             for (var i = 0; i < node.children.length; i++) {
                 this.generateCode(node.children[i]);
+            }
+
+            // Handles with while loops
+            if (conditionalBlock) {
+                if (jumpReturnIndex !== -1) {
+                    // Load X reg with 0
+                    this.setCode('A2');
+                    this.setCode('00');
+
+                    var tempEntry: any = this.createTempEntry();
+
+                    // Load accumulator with 1
+                    this.setCode('A9');
+                    this.setCode('01');
+
+                    // Store the accumulator value in a temp entry
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+
+                    // Compare the X reg (0) and the temp entry
+                    // This will set the Z flag to 0, so this will branch back
+                    this.setCode('EC');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+
+                    var jumpReturnEntry: any = this.createJumpEntry();
+
+                    // Branch back to the beginning of the loop
+                    this.setCode('D0');
+                    this.setCode(jumpReturnEntry.name);
+                    jumpReturnEntry.distance = PROGRAM_SIZE - (this.currentIndex - jumpReturnIndex);
+                }
+
+                conditionalBlock = false;
+                jumpEntry.distance = this.currentIndex - jumpEntry.distance + 1;
             }
         }
 
@@ -111,6 +143,7 @@ module COMPILER {
         public static handleVarDecl(node): void {
             var dataType: string = node.children[0].name;
             var id: string = node.children[1].name;
+            var idScopeNum: number = node.children[1].symbolEntry.scopeNum;
             
             // Initialize the id with '00'
             Main.addLog(LOG_VERBOSE, 'Generating declaration code for id ' + id + '.');
@@ -120,7 +153,7 @@ module COMPILER {
             // Create a temporary entry for the id
             var tempEntry = this.createTempEntry();
             tempEntry.id = id;
-            // tempEntry.scope = 
+            tempEntry.scope = idScopeNum;
 
             // Store the accumulator value at the id's address
             this.setCode('8D');
@@ -159,13 +192,19 @@ module COMPILER {
                 
                     // Create a temporary entry for the constant
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = 
+                    tempEntry.scope = node.children[1].symbolEntry.scopeNum;
+
                     this.setCode(tempEntry.name);
                     addresses.push(tempEntry.name);
                 
                     this.setCode('XX');
                 } else if (node.children[1].tokenType === T_ID) {
-                    var idEntry: any = this.getEntry(node.children[1].name);
+                    var idName: string = node.children[1].name;
+                    var idScopeNum: number = node.children[1].symbolEntry.scopeNum;
+                    var idEntry: any = this.getEntry(idName, idScopeNum);
+
+                    Main.addLog(LOG_VERBOSE, 'Found ' + idEntry.name + ':digit to add.');
+
                     addresses.push(idEntry.name);
                 }
             }
@@ -175,12 +214,15 @@ module COMPILER {
 
         public static handleAssignmentStmt(node): void {
             var id: string = node.children[0].name;
-            var firstIdEntry: any = this.getEntry(id);
+            var scopeNum: number = node.children[0].symbolEntry.scopeNum;
+            var firstIdEntry: any = this.getEntry(id, scopeNum);
 
             // Check through every data type then do an identifier check
             if (node.children[1].tokenType === T_ID) {
                 // Handle id assignment
-                var secondIdEntry: any = this.getEntry(node.children[1].name);
+                var secondId: string = node.children[1].name;
+                var secondScopeNum: number = node.children[1].symbolEntry.scopeNum;
+                var secondIdEntry: any = this.getEntry(secondId, secondScopeNum);
 
                 if (secondIdEntry !== null) {
                     this.setCode('AD');
@@ -196,6 +238,8 @@ module COMPILER {
                 }
             } else if (node.children[1].dataType === dataTypes.INT) {
                 if (node.children[1].tokenType === T_ADD) {
+                    Main.addLog(LOG_VERBOSE, 'Adding integer addition assignment to id ' + id);
+
                     var addresses: string[] = [];
                     addresses = this.handleIntAddition(node.children[1], addresses);
 
@@ -211,7 +255,8 @@ module COMPILER {
                     }
 
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = ?
+                    // DOES THIS WORK?
+                    tempEntry.scope = node.children[0].symbolEntry.scopeNum;
 
                     this.setCode('8D');
                     this.setCode(tempEntry.name);
@@ -279,7 +324,9 @@ module COMPILER {
                 // Load the Y reg with the constant
                 this.setCode('AC');
 
-                var idEntry: any = this.getEntry(node.children[0].name);
+                var idName: string = node.children[0].name;
+                var idScopeNum: number = node.children[0].symbolEntry.scopeNum;
+                var idEntry: any = this.getEntry(idName, idScopeNum);
                 this.setCode(idEntry.name);
                 this.setCode('XX');
 
@@ -309,7 +356,7 @@ module COMPILER {
                     }
 
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = ?
+                    tempEntry.scope = node.children[0].symbolEntry.scopeNum;
 
                     this.setCode('8D');
                     this.setCode(tempEntry.name);
@@ -369,7 +416,7 @@ module COMPILER {
             this.setCode('FF');
         }
 
-        public static handleBooleanConditions(node): void {
+        public static handleBooleanConditions(node): any {
             if (node.children[0].tokenType === T_TRUE) {
                 Main.addLog(LOG_VERBOSE, 'If/While statement is true.');
 
@@ -383,7 +430,6 @@ module COMPILER {
             }
 
             var tempEntry = this.createTempEntry();
-            // tempEntry.scope = ?
 
             this.setCode('8D');
             this.setCode(tempEntry.name);
@@ -406,6 +452,8 @@ module COMPILER {
 
             // Store the current index for now...as a starting point
             jumpEntry.distance = this.currentIndex + 1;
+
+            return jumpEntry;
         }
 
         public static createTempEntry(): any {
@@ -432,18 +480,19 @@ module COMPILER {
             return jumpEntry;
         }
 
-        // TODO: support different scopes
-        public static getEntry(id/*, scope */): any {
+        public static getEntry(id, scope): any {
             var entry: any = null;
 
             for (var i = 0; i < this.staticTable.length; i++) {
-                if (id === this.staticTable[i].id) {
-                    entry = this.staticTable[i];
-                    break;
+                entry = this.staticTable[i];
+                if (id === entry.id && scope === entry.scope) {
+                    return entry;
                 }
             }
 
-            return entry;
+            Main.addLog(LOG_ERROR, 'Identifier ' + id + ' was not found in the static table.');
+
+            return null;
         }
 
         public static backpatch(): void {
@@ -467,8 +516,6 @@ module COMPILER {
                 } else if (currentCode.match(jumpNameRegex)) {
                     var jumpEntryIndex: number = parseInt(currentCode.substring(1));
                     var jumpEntry: any = this.jumpTable[jumpEntryIndex];
-
-                    jumpEntry.distance = this.currentIndex - jumpEntry.distance;
                     var jumpDistance: string = jumpEntry.distance.toString(16);
 
                     this.injectCode(jumpDistance, i);

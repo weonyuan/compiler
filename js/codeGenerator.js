@@ -20,11 +20,6 @@ var COMPILER;
                 this.codeTable[i] = '00';
             }
             this.heapIndex = this.codeTable.length - 1;
-            /*
-                TODO:
-                1. If statement
-                2. Multi scope support
-            */
             this.generateCode(_AST.root);
             // Set break statement
             COMPILER.Main.addLog(LOG_VERBOSE, 'Adding break statement.');
@@ -36,6 +31,7 @@ var COMPILER;
             console.log(node);
             var conditionalBlock = false;
             var jumpReturnIndex = -1;
+            var jumpEntry = null;
             switch (node.name) {
                 case 'Var Declaration':
                     this.handleVarDecl(node);
@@ -47,14 +43,14 @@ var COMPILER;
                     this.handlePrintStmt(node);
                     break;
                 case 'If Statement':
-                    this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node);
                     conditionalBlock = true;
                     break;
                 case 'While Statement':
                     // Set the return index to current index after
                     // while block finishes
                     jumpReturnIndex = this.currentIndex;
-                    this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node);
                     conditionalBlock = true;
                     break;
                 default:
@@ -63,6 +59,34 @@ var COMPILER;
             }
             for (var i = 0; i < node.children.length; i++) {
                 this.generateCode(node.children[i]);
+            }
+            // Handles with while loops
+            if (conditionalBlock) {
+                if (jumpReturnIndex !== -1) {
+                    // Load X reg with 0
+                    this.setCode('A2');
+                    this.setCode('00');
+                    var tempEntry = this.createTempEntry();
+                    // Load accumulator with 1
+                    this.setCode('A9');
+                    this.setCode('01');
+                    // Store the accumulator value in a temp entry
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                    // Compare the X reg (0) and the temp entry
+                    // This will set the Z flag to 0, so this will branch back
+                    this.setCode('EC');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
+                    var jumpReturnEntry = this.createJumpEntry();
+                    // Branch back to the beginning of the loop
+                    this.setCode('D0');
+                    this.setCode(jumpReturnEntry.name);
+                    jumpReturnEntry.distance = PROGRAM_SIZE - (this.currentIndex - jumpReturnIndex);
+                }
+                conditionalBlock = false;
+                jumpEntry.distance = this.currentIndex - jumpEntry.distance + 1;
             }
         };
         CodeGenerator.setCode = function (opcode) {
@@ -88,6 +112,7 @@ var COMPILER;
         CodeGenerator.handleVarDecl = function (node) {
             var dataType = node.children[0].name;
             var id = node.children[1].name;
+            var idScopeNum = node.children[1].symbolEntry.scopeNum;
             // Initialize the id with '00'
             COMPILER.Main.addLog(LOG_VERBOSE, 'Generating declaration code for id ' + id + '.');
             this.setCode('A9');
@@ -95,7 +120,7 @@ var COMPILER;
             // Create a temporary entry for the id
             var tempEntry = this.createTempEntry();
             tempEntry.id = id;
-            // tempEntry.scope = 
+            tempEntry.scope = idScopeNum;
             // Store the accumulator value at the id's address
             this.setCode('8D');
             this.setCode(tempEntry.name);
@@ -125,13 +150,16 @@ var COMPILER;
                     this.setCode('8D');
                     // Create a temporary entry for the constant
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = 
+                    tempEntry.scope = node.children[1].symbolEntry.scopeNum;
                     this.setCode(tempEntry.name);
                     addresses.push(tempEntry.name);
                     this.setCode('XX');
                 }
                 else if (node.children[1].tokenType === T_ID) {
-                    var idEntry = this.getEntry(node.children[1].name);
+                    var idName = node.children[1].name;
+                    var idScopeNum = node.children[1].symbolEntry.scopeNum;
+                    var idEntry = this.getEntry(idName, idScopeNum);
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Found ' + idEntry.name + ':digit to add.');
                     addresses.push(idEntry.name);
                 }
             }
@@ -139,11 +167,14 @@ var COMPILER;
         };
         CodeGenerator.handleAssignmentStmt = function (node) {
             var id = node.children[0].name;
-            var firstIdEntry = this.getEntry(id);
+            var scopeNum = node.children[0].symbolEntry.scopeNum;
+            var firstIdEntry = this.getEntry(id, scopeNum);
             // Check through every data type then do an identifier check
             if (node.children[1].tokenType === T_ID) {
                 // Handle id assignment
-                var secondIdEntry = this.getEntry(node.children[1].name);
+                var secondId = node.children[1].name;
+                var secondScopeNum = node.children[1].symbolEntry.scopeNum;
+                var secondIdEntry = this.getEntry(secondId, secondScopeNum);
                 if (secondIdEntry !== null) {
                     this.setCode('AD');
                     this.setCode(secondIdEntry.name);
@@ -158,6 +189,7 @@ var COMPILER;
             }
             else if (node.children[1].dataType === dataTypes.INT) {
                 if (node.children[1].tokenType === T_ADD) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding integer addition assignment to id ' + id);
                     var addresses = [];
                     addresses = this.handleIntAddition(node.children[1], addresses);
                     // Reset the accumulator to prep assignment by addition
@@ -170,7 +202,8 @@ var COMPILER;
                         this.setCode('XX');
                     }
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = ?
+                    // DOES THIS WORK?
+                    tempEntry.scope = node.children[0].symbolEntry.scopeNum;
                     this.setCode('8D');
                     this.setCode(tempEntry.name);
                     this.setCode('XX');
@@ -227,7 +260,9 @@ var COMPILER;
             if (node.children[0].tokenType === T_ID) {
                 // Load the Y reg with the constant
                 this.setCode('AC');
-                var idEntry = this.getEntry(node.children[0].name);
+                var idName = node.children[0].name;
+                var idScopeNum = node.children[0].symbolEntry.scopeNum;
+                var idEntry = this.getEntry(idName, idScopeNum);
                 this.setCode(idEntry.name);
                 this.setCode('XX');
                 // Load the X reg with a 1 to prep for integer print
@@ -254,7 +289,7 @@ var COMPILER;
                         this.setCode('XX');
                     }
                     var tempEntry = this.createTempEntry();
-                    // tempEntry.scope = ?
+                    tempEntry.scope = node.children[0].symbolEntry.scopeNum;
                     this.setCode('8D');
                     this.setCode(tempEntry.name);
                     this.setCode('XX');
@@ -318,7 +353,6 @@ var COMPILER;
                 this.setCode('00');
             }
             var tempEntry = this.createTempEntry();
-            // tempEntry.scope = ?
             this.setCode('8D');
             this.setCode(tempEntry.name);
             this.setCode('XX');
@@ -335,6 +369,7 @@ var COMPILER;
             this.setCode(jumpEntry.name);
             // Store the current index for now...as a starting point
             jumpEntry.distance = this.currentIndex + 1;
+            return jumpEntry;
         };
         CodeGenerator.createTempEntry = function () {
             var tempEntry = {
@@ -354,16 +389,16 @@ var COMPILER;
             this.jumpTable.push(jumpEntry);
             return jumpEntry;
         };
-        // TODO: support different scopes
-        CodeGenerator.getEntry = function (id /*, scope */) {
+        CodeGenerator.getEntry = function (id, scope) {
             var entry = null;
             for (var i = 0; i < this.staticTable.length; i++) {
-                if (id === this.staticTable[i].id) {
-                    entry = this.staticTable[i];
-                    break;
+                entry = this.staticTable[i];
+                if (id === entry.id && scope === entry.scope) {
+                    return entry;
                 }
             }
-            return entry;
+            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + id + ' was not found in the static table.');
+            return null;
         };
         CodeGenerator.backpatch = function () {
             COMPILER.Main.addLog(LOG_VERBOSE, 'Backpatching the code.');
@@ -383,7 +418,6 @@ var COMPILER;
                 else if (currentCode.match(jumpNameRegex)) {
                     var jumpEntryIndex = parseInt(currentCode.substring(1));
                     var jumpEntry = this.jumpTable[jumpEntryIndex];
-                    jumpEntry.distance = this.currentIndex - jumpEntry.distance;
                     var jumpDistance = jumpEntry.distance.toString(16);
                     this.injectCode(jumpDistance, i);
                 }
