@@ -27,12 +27,15 @@ var COMPILER;
             */
             this.generateCode(_AST.root);
             // Set break statement
+            COMPILER.Main.addLog(LOG_VERBOSE, 'Adding break statement.');
             this.setCode('00');
             this.backpatch();
             this.printResults();
         };
         CodeGenerator.generateCode = function (node) {
             console.log(node);
+            var conditionalBlock = false;
+            var jumpReturnIndex = -1;
             switch (node.name) {
                 case 'Var Declaration':
                     this.handleVarDecl(node);
@@ -42,6 +45,17 @@ var COMPILER;
                     break;
                 case 'Print Statement':
                     this.handlePrintStmt(node);
+                    break;
+                case 'If Statement':
+                    this.handleBooleanConditions(node);
+                    conditionalBlock = true;
+                    break;
+                case 'While Statement':
+                    // Set the return index to current index after
+                    // while block finishes
+                    jumpReturnIndex = this.currentIndex;
+                    this.handleBooleanConditions(node);
+                    conditionalBlock = true;
                     break;
                 default:
                     // epsilon
@@ -292,6 +306,36 @@ var COMPILER;
             // System call
             this.setCode('FF');
         };
+        CodeGenerator.handleBooleanConditions = function (node) {
+            if (node.children[0].tokenType === T_TRUE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is true.');
+                this.setCode('A9');
+                this.setCode('01');
+            }
+            else if (node.children[0].tokenType === T_FALSE) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is false.');
+                this.setCode('A9');
+                this.setCode('00');
+            }
+            var tempEntry = this.createTempEntry();
+            // tempEntry.scope = ?
+            this.setCode('8D');
+            this.setCode(tempEntry.name);
+            this.setCode('XX');
+            // Load X reg with 1 (true)
+            this.setCode('A2');
+            this.setCode('01');
+            // Compare the X reg and the memory address
+            this.setCode('EC');
+            this.setCode(tempEntry.name);
+            this.setCode('XX');
+            var jumpEntry = this.createJumpEntry();
+            // Branch n bytes ONLY if Z flag is 0 (false)
+            this.setCode('D0');
+            this.setCode(jumpEntry.name);
+            // Store the current index for now...as a starting point
+            jumpEntry.distance = this.currentIndex + 1;
+        };
         CodeGenerator.createTempEntry = function () {
             var tempEntry = {
                 name: 'T' + this.staticTable.length,
@@ -301,6 +345,14 @@ var COMPILER;
             };
             this.staticTable.push(tempEntry);
             return tempEntry;
+        };
+        CodeGenerator.createJumpEntry = function () {
+            var jumpEntry = {
+                name: 'J' + this.jumpTable.length,
+                distance: 0
+            };
+            this.jumpTable.push(jumpEntry);
+            return jumpEntry;
         };
         // TODO: support different scopes
         CodeGenerator.getEntry = function (id /*, scope */) {
@@ -318,19 +370,27 @@ var COMPILER;
             var staticStartIndex = this.currentIndex;
             var currentCode = '';
             var tempNameRegex = /^T.*/;
+            var jumpNameRegex = /^J.*/;
             for (var i = 0; i < staticStartIndex; i++) {
                 currentCode = this.codeTable[i];
                 if (currentCode.match(tempNameRegex)) {
                     var tempEntryIndex = parseInt(currentCode.substring(1));
                     var tempEntry = this.staticTable[tempEntryIndex];
                     var targetIndex = staticStartIndex + tempEntryIndex;
-                    //console.log(targetIndex.toString(16));
                     this.injectCode(targetIndex.toString(16), i++);
                     this.injectCode('00', i);
+                }
+                else if (currentCode.match(jumpNameRegex)) {
+                    var jumpEntryIndex = parseInt(currentCode.substring(1));
+                    var jumpEntry = this.jumpTable[jumpEntryIndex];
+                    jumpEntry.distance = this.currentIndex - jumpEntry.distance;
+                    var jumpDistance = jumpEntry.distance.toString(16);
+                    this.injectCode(jumpDistance, i);
                 }
             }
         };
         CodeGenerator.printResults = function () {
+            COMPILER.Main.addLog(LOG_INFO, 'Code generation completed.');
             var content = '<div id="code">';
             for (var i = 0; i < this.codeTable.length; i++) {
                 content += this.codeTable[i];
