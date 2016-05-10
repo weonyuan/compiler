@@ -28,54 +28,6 @@ var COMPILER;
             this.printResults();
             return this.currentScope;
         };
-        /*public static generateAST(node): void {
-            // Fix the boolean expressions placement
-            if (node.name === 'CompareEqual' || node.name === 'CompareNotEqual') {
-                node.parent = node;
-            }
-        }*/
-        /*public static generateAST(node, buffer): void {
-            console.log(node);
-
-            // Branch nodes
-            switch (node.name) {
-                case 'Block':
-                case 'Var Declaration':
-                case 'Assignment Statement':
-                case 'Print Statement':
-                case 'While Statement':
-                case 'If Statement':
-                case '==':
-                case '!=':
-                case '+':
-                    _AST.addNode(node.name, BRANCH_NODE, node);
-                    break;
-                default:
-                    // epsilon
-                    break;
-            }
-
-            // Leaf nodes
-            switch (node.tokenType) {
-                case T_FALSE:
-                case T_TRUE:
-                case T_DIGIT:
-                    _AST.addNode(node.name, LEAF_NODE, node);
-                    break;
-                case T_CHAR:
-                    buffer += node.name;
-                    break;
-                default:
-                    // Add the buffer to a leaf node and clear buffer
-                    _AST.addNode(buffer, LEAF_NODE)
-                    break;
-            }
-
-            for (var i = 0; i < node.children.length; i++) {
-                this.generateAST(node.children[i], buffer);
-            }
-        }
-*/
         SemanticAnalyzer.scopeCheck = function (node) {
             if (node.name !== null || node.name !== undefined) {
                 var newScope = false;
@@ -112,7 +64,6 @@ var COMPILER;
                 }
                 if (node.tokenType === T_ID) {
                     var name = node.name;
-                    console.log('Id: ' + name);
                     var lineNum = node.lineNum;
                     var entryExists = this.currentScope.checkEntry(name, node, '');
                     if (!entryExists) {

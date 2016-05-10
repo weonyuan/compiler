@@ -17,6 +17,9 @@ module COMPILER {
             Main.addLog(LOG_INFO, 'Performing 6502a code generation.');
 
             // Reset and initialize
+            _Warnings = 0;
+            _Errors = 0;
+
             this.codeTable = [];
             this.staticTable = [];
             this.jumpTable = [];
@@ -39,7 +42,6 @@ module COMPILER {
         }
 
         public static generateCode(node): void {
-            console.log(node);
             var conditionalBlock: boolean = false;
             var jumpReturnIndex: number = -1;
             var jumpEntry: any = null;
@@ -192,7 +194,6 @@ module COMPILER {
                 
                     // Create a temporary entry for the constant
                     var tempEntry = this.createTempEntry();
-                    tempEntry.scope = node.children[1].symbolEntry.scopeNum;
 
                     this.setCode(tempEntry.name);
                     addresses.push(tempEntry.name);
@@ -278,7 +279,6 @@ module COMPILER {
                     // Handle integer assignment
                     var value: number = parseInt(node.children[1].name);
 
-                    console.log(node.name + ': ' + value);
                     this.setCode('A9');
                     this.setCode(value.toString(16));
 
@@ -375,7 +375,7 @@ module COMPILER {
                     this.setCode('XX');
                 } else if (node.children[0].tokenType === T_DIGIT) {
                     // Handle integer assignment
-                    var value: number = parseInt(node.children[1].name);
+                    var value: number = parseInt(node.children[0].name);
 
                     // Load the Y reg with the constant
                     this.setCode('A0');
@@ -753,7 +753,7 @@ module COMPILER {
         }
 
         public static printResults(): void {
-            Main.addLog(LOG_INFO, 'Code generation completed.');
+            Main.addLog(LOG_INFO, 'Code generator complete. Generator found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             var content: string = '<div id="code">';
 
             for (var i = 0; i < this.codeTable.length; i++) {

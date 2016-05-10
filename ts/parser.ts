@@ -404,13 +404,12 @@ module COMPILER {
                 this.cst.addNode('(', LEAF_NODE, _CurrentToken);
                 this.currentLayer++;
 
-                console.log(this.currentLayer);
-
                 this.getNextToken();
                 this.tempToken = _CurrentToken;
 
                 this.parseExpr();
                 this.parseBoolOp();
+                this.inBoolExpr = false;
                 this.parseExpr();
 
                 this.ast.levelUp();
@@ -423,8 +422,6 @@ module COMPILER {
                     this.currentLayer--;
                     this.getNextToken();
                 }
-
-                this.inBoolExpr = false;
             } else {
                 if (   _CurrentToken.getType() === T_TRUE
                     || _CurrentToken.getType() === T_FALSE) {

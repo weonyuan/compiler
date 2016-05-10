@@ -12,6 +12,8 @@ var COMPILER;
         CodeGenerator.build = function () {
             COMPILER.Main.addLog(LOG_INFO, 'Performing 6502a code generation.');
             // Reset and initialize
+            _Warnings = 0;
+            _Errors = 0;
             this.codeTable = [];
             this.staticTable = [];
             this.jumpTable = [];
@@ -28,7 +30,6 @@ var COMPILER;
             this.printResults();
         };
         CodeGenerator.generateCode = function (node) {
-            console.log(node);
             var conditionalBlock = false;
             var jumpReturnIndex = -1;
             var jumpEntry = null;
@@ -150,7 +151,6 @@ var COMPILER;
                     this.setCode('8D');
                     // Create a temporary entry for the constant
                     var tempEntry = this.createTempEntry();
-                    tempEntry.scope = node.children[1].symbolEntry.scopeNum;
                     this.setCode(tempEntry.name);
                     addresses.push(tempEntry.name);
                     this.setCode('XX');
@@ -220,7 +220,6 @@ var COMPILER;
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Adding integer assignment to id ' + id + '.');
                     // Handle integer assignment
                     var value = parseInt(node.children[1].name);
-                    console.log(node.name + ': ' + value);
                     this.setCode('A9');
                     this.setCode(value.toString(16));
                     this.setCode('8D');
@@ -306,7 +305,7 @@ var COMPILER;
                 }
                 else if (node.children[0].tokenType === T_DIGIT) {
                     // Handle integer assignment
-                    var value = parseInt(node.children[1].name);
+                    var value = parseInt(node.children[0].name);
                     // Load the Y reg with the constant
                     this.setCode('A0');
                     this.setCode(node.children[0].name);
@@ -602,7 +601,7 @@ var COMPILER;
             }
         };
         CodeGenerator.printResults = function () {
-            COMPILER.Main.addLog(LOG_INFO, 'Code generation completed.');
+            COMPILER.Main.addLog(LOG_INFO, 'Code generator complete. Generator found ' + _Errors + ' error(s) and ' + _Warnings + ' warning(s).');
             var content = '<div id="code">';
             for (var i = 0; i < this.codeTable.length; i++) {
                 content += this.codeTable[i];
