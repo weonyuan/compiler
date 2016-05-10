@@ -63,7 +63,6 @@ module COMPILER {
             }
         }
 
-
         public expand(node, depth): string {
             this.treeString += '<div>';
 

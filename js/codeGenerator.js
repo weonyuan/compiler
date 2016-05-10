@@ -43,14 +43,14 @@ var COMPILER;
                     this.handlePrintStmt(node);
                     break;
                 case 'If Statement':
-                    jumpEntry = this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node.children[0]);
                     conditionalBlock = true;
                     break;
                 case 'While Statement':
                     // Set the return index to current index after
                     // while block finishes
                     jumpReturnIndex = this.currentIndex;
-                    jumpEntry = this.handleBooleanConditions(node);
+                    jumpEntry = this.handleBooleanConditions(node.children[0]);
                     conditionalBlock = true;
                     break;
                 default:
@@ -175,6 +175,8 @@ var COMPILER;
                 var secondId = node.children[1].name;
                 var secondScopeNum = node.children[1].symbolEntry.scopeNum;
                 var secondIdEntry = this.getEntry(secondId, secondScopeNum);
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding ' + node.children[1].dataType + ' assignment ' +
+                    ' to id ' + id + '.');
                 if (secondIdEntry !== null) {
                     this.setCode('AD');
                     this.setCode(secondIdEntry.name);
@@ -189,7 +191,7 @@ var COMPILER;
             }
             else if (node.children[1].dataType === dataTypes.INT) {
                 if (node.children[1].tokenType === T_ADD) {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding integer addition assignment to id ' + id);
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding integer addition assignment to id ' + id + '.');
                     var addresses = [];
                     addresses = this.handleIntAddition(node.children[1], addresses);
                     // Reset the accumulator to prep assignment by addition
@@ -215,6 +217,7 @@ var COMPILER;
                     this.setCode('XX');
                 }
                 else if (node.children[1].tokenType === T_DIGIT) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding integer assignment to id ' + id + '.');
                     // Handle integer assignment
                     var value = parseInt(node.children[1].name);
                     console.log(node.name + ': ' + value);
@@ -228,7 +231,11 @@ var COMPILER;
             else if (node.children[1].dataType === dataTypes.BOOLEAN) {
                 var value = 0;
                 if (node.children[1].tokenType === T_TRUE) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:true to id ' + id + '.');
                     value = 1;
+                }
+                else {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:false to id ' + id + '.');
                 }
                 this.setCode('A9');
                 this.setCode(value.toString(16));
@@ -342,34 +349,203 @@ var COMPILER;
             this.setCode('FF');
         };
         CodeGenerator.handleBooleanConditions = function (node) {
-            if (node.children[0].tokenType === T_TRUE) {
-                COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is true.');
-                this.setCode('A9');
+            if (node.children.length === 0) {
+                // Leaf node
+                if (node.tokenType === T_TRUE) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is true.');
+                    this.setCode('A9');
+                    this.setCode('01');
+                }
+                else if (node.tokenType === T_FALSE) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is false.');
+                    this.setCode('A9');
+                    this.setCode('00');
+                }
+                var tempEntry = this.createTempEntry();
+                this.setCode('8D');
+                this.setCode(tempEntry.name);
+                this.setCode('XX');
+                // Load X reg with 1 (true)
+                this.setCode('A2');
                 this.setCode('01');
+                // Compare the X reg and the memory address
+                this.setCode('EC');
+                this.setCode(tempEntry.name);
+                this.setCode('XX');
+                var jumpEntry = this.createJumpEntry();
+                // Branch n bytes ONLY if Z flag is 0 (false)
+                this.setCode('D0');
+                this.setCode(jumpEntry.name);
+                // Store the current index for now...as a starting point
+                jumpEntry.distance = this.currentIndex + 1;
+                return jumpEntry;
             }
-            else if (node.children[0].tokenType === T_FALSE) {
-                COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is false.');
-                this.setCode('A9');
-                this.setCode('00');
+            else {
+                // Branch node
+                COMPILER.Main.addLog(LOG_VERBOSE, 'If/While statement is a boolean expression.');
+                var address = this.handleBooleanExpr(node);
+                // Load X reg with 1 for comparison
+                this.setCode('A2');
+                this.setCode('01');
+                // Compare X Reg with the address returned from the handling
+                this.setCode('EC');
+                this.setCode(address);
+                this.setCode('XX');
+                var jumpEntry = this.createJumpEntry();
+                // BNE around the if/while block
+                this.setCode('D0');
+                this.setCode(jumpEntry.name);
+                jumpEntry.distance = this.currentIndex + 1;
+                return jumpEntry;
             }
-            var tempEntry = this.createTempEntry();
-            this.setCode('8D');
-            this.setCode(tempEntry.name);
-            this.setCode('XX');
-            // Load X reg with 1 (true)
-            this.setCode('A2');
-            this.setCode('01');
-            // Compare the X reg and the memory address
-            this.setCode('EC');
-            this.setCode(tempEntry.name);
-            this.setCode('XX');
-            var jumpEntry = this.createJumpEntry();
-            // Branch n bytes ONLY if Z flag is 0 (false)
-            this.setCode('D0');
-            this.setCode(jumpEntry.name);
-            // Store the current index for now...as a starting point
-            jumpEntry.distance = this.currentIndex + 1;
-            return jumpEntry;
+        };
+        CodeGenerator.handleBooleanExpr = function (node) {
+            var returnAddress = '';
+            if (node !== null) {
+                var leftChildAddress = '';
+                var rightChildAddress = '';
+                if (node.children.length > 0) {
+                    // Node is a branch node
+                    leftChildAddress = this.handleBooleanExpr(node.children[0]);
+                    rightChildAddress = this.handleBooleanExpr(node.children[1]);
+                    if (leftChildAddress.length > 0 && rightChildAddress.length > 0) {
+                        // Load the left child's address into X reg
+                        this.setCode('AE');
+                        this.setCode(leftChildAddress); // left child address
+                        this.setCode('00');
+                        // Compare the left address (in X reg) to the right address
+                        this.setCode('EC');
+                        this.setCode(rightChildAddress); // right child address
+                        this.setCode('00');
+                        if (node.name === 'CompareEqual') {
+                            var tempEntry = this.createTempEntry();
+                            var jumpEntryCompareNotEqual = this.createJumpEntry();
+                            var jumpEntryCompareEqual = this.createJumpEntry();
+                            this.jumpTable.push(jumpEntryCompareNotEqual);
+                            this.jumpTable.push(jumpEntryCompareEqual);
+                            // Load accumulator with 0
+                            this.setCode('A9');
+                            this.setCode('00');
+                            // Store the accumulator value at the return address
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            // Branch out if Z flag is 0
+                            this.setCode('D0');
+                            this.setCode(jumpEntryCompareNotEqual.name);
+                            var firstJumpReturnIndex = this.currentIndex;
+                            this.setCode('A9');
+                            this.setCode('01');
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            jumpEntryCompareNotEqual.distance = this.currentIndex - firstJumpReturnIndex;
+                            this.setCode('A2');
+                            this.setCode('00');
+                            this.setCode('EC');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            this.setCode('D0');
+                            this.setCode(jumpEntryCompareEqual.name);
+                            var secondJumpReturnIndex = this.currentIndex;
+                            this.setCode('A9');
+                            this.setCode('00');
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            jumpEntryCompareEqual.distance = this.currentIndex - secondJumpReturnIndex;
+                            returnAddress = tempEntry.name;
+                        }
+                        else if (node.name === 'CompareNotEqual') {
+                            var tempEntry = this.createTempEntry();
+                            var jumpEntryCompareNotEqual = this.createJumpEntry();
+                            var jumpEntryCompareEqual = this.createJumpEntry();
+                            this.jumpTable.push(jumpEntryCompareNotEqual);
+                            this.jumpTable.push(jumpEntryCompareEqual);
+                            // Load accumulator with 1
+                            this.setCode('A9');
+                            this.setCode('01');
+                            // Store the accumulator value at the return address
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            // Branch out if Z flag is 0
+                            this.setCode('D0');
+                            this.setCode(jumpEntryCompareNotEqual.name);
+                            var firstJumpReturnIndex = this.currentIndex;
+                            this.setCode('A9');
+                            this.setCode('00');
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            jumpEntryCompareNotEqual.distance = this.currentIndex - firstJumpReturnIndex;
+                            this.setCode('A2');
+                            this.setCode('01');
+                            this.setCode('EC');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            this.setCode('D0');
+                            this.setCode(jumpEntryCompareEqual.name);
+                            var secondJumpReturnIndex = this.currentIndex;
+                            this.setCode('A9');
+                            this.setCode('01');
+                            this.setCode('8D');
+                            this.setCode(tempEntry.name);
+                            this.setCode('XX');
+                            jumpEntryCompareEqual.distance = this.currentIndex - secondJumpReturnIndex;
+                            returnAddress = tempEntry.name;
+                        }
+                    }
+                }
+                else if (node.tokenType !== null) {
+                    // Leaf nodes
+                    if (node.tokenType === T_DIGIT) {
+                        // Load accumulator with the digit
+                        this.setCode('A9');
+                        this.setCode(node.name);
+                        var tempEntry = this.createTempEntry();
+                        // Store accumulator value at the temp entry's address
+                        this.setCode('8D');
+                        this.setCode(tempEntry.name);
+                        this.setCode('XX');
+                        returnAddress = tempEntry.name;
+                    }
+                    else if (node.tokenType === T_TRUE) {
+                        // Load accumulator with the true value...get it? true?
+                        this.setCode('A9');
+                        this.setCode('01');
+                        var tempEntry = this.createTempEntry();
+                        // Store accumulator value at the temp entry's address
+                        this.setCode('8D');
+                        this.setCode(tempEntry.name);
+                        this.setCode('XX');
+                        returnAddress = tempEntry.name;
+                    }
+                    else if (node.tokenType === T_FALSE) {
+                        // Load accumulator with the false value
+                        this.setCode('A9');
+                        this.setCode('00');
+                        var tempEntry = this.createTempEntry();
+                        // Store accumulator value at the temp entry's address
+                        this.setCode('8D');
+                        this.setCode(tempEntry.name);
+                        this.setCode('XX');
+                        returnAddress = tempEntry.name;
+                    }
+                    else if (node.tokenType === T_ID) {
+                        var id = node.name;
+                        var scopeNum = node.symbolEntry.scopeNum;
+                        var idEntry = this.getEntry(id, scopeNum);
+                        returnAddress = idEntry.name;
+                    }
+                    else if (node.tokenType === T_QUOTE) {
+                        _Errors++;
+                        COMPILER.Main.addLog(LOG_ERROR, 'String literal on line ' + node.lineNum +
+                            ' is not allowed.');
+                    }
+                }
+            }
+            return returnAddress;
         };
         CodeGenerator.createTempEntry = function () {
             var tempEntry = {
@@ -419,6 +595,8 @@ var COMPILER;
                     var jumpEntryIndex = parseInt(currentCode.substring(1));
                     var jumpEntry = this.jumpTable[jumpEntryIndex];
                     var jumpDistance = jumpEntry.distance.toString(16);
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Resolving jump entry\'s distance (' + currentCode +
+                        ') to ' + jumpDistance + '.');
                     this.injectCode(jumpDistance, i);
                 }
             }

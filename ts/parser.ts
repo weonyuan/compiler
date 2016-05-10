@@ -15,7 +15,7 @@ module COMPILER {
         private static buffer: string = '';
         private static tempToken: Token = null;
         private static currentLayer: number = 0;
-        private static boolOpExists: boolean = false;
+        private static inBoolExpr: boolean = false;
         private static bufferArray: any[] = [];
 
         public static init(tokens): void {
@@ -344,6 +344,8 @@ module COMPILER {
                     // Grab the next token and verify for a digit
                     this.getNextToken();
                     this.parseExpr();
+                    this.ast.levelUp();
+
                 } else {
                     this.ast.addNode(tempToken.getValue(), LEAF_NODE, tempToken);
                 }
@@ -396,6 +398,8 @@ module COMPILER {
             Main.addLog(LOG_VERBOSE, 'Expecting either a left parenthese or a boolean.');
 
             if (_CurrentToken.getType() === T_LPAREN) {
+                this.inBoolExpr = true;
+
                 Main.addLog(LOG_VERBOSE, 'Received a left parenthese!');
                 this.cst.addNode('(', LEAF_NODE, _CurrentToken);
                 this.currentLayer++;
@@ -420,7 +424,7 @@ module COMPILER {
                     this.getNextToken();
                 }
 
-                this.boolOpExists = false;
+                this.inBoolExpr = false;
             } else {
                 if (   _CurrentToken.getType() === T_TRUE
                     || _CurrentToken.getType() === T_FALSE) {
@@ -450,7 +454,10 @@ module COMPILER {
             if (_CurrentToken.getType() === T_ID) {
                 Main.addLog(LOG_VERBOSE, 'Received an id!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                
+                if (!this.inBoolExpr) {
+                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                }
 
                 this.getNextToken();
             } else {
@@ -524,7 +531,6 @@ module COMPILER {
             Main.addLog(LOG_VERBOSE, 'Expecting a boolean operator.');
 
             if (_CurrentToken.getType() === T_EQUAL || _CurrentToken.getType() === T_NOTEQUAL) {
-                this.boolOpExists = true;
 
                 Main.addLog(LOG_VERBOSE, 'Received a boolean operator!');
                 this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
@@ -535,7 +541,9 @@ module COMPILER {
                     this.ast.addNode('CompareNotEqual', BRANCH_NODE, _CurrentToken);
                 }
 
-                this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                if (this.inBoolExpr) {
+                    this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                }
 
                 this.getNextToken();
             } else {
