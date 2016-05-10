@@ -29,7 +29,7 @@ var COMPILER;
                 if (_CST !== null) {
                     _SymbolTable = COMPILER.SemanticAnalyzer.init();
                 }
-                if (_SymbolTable !== null) {
+                if (_SymbolTable !== null && _Errors === 0) {
                     COMPILER.CodeGenerator.build();
                 }
             }, 90);

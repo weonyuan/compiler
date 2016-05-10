@@ -32,7 +32,7 @@ module COMPILER {
                     _SymbolTable = SemanticAnalyzer.init();
                 }
 
-                if (_SymbolTable !== null) {
+                if (_SymbolTable !== null && _Errors === 0) {
                     CodeGenerator.build();
                 }
             }, 90)            

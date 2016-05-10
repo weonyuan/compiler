@@ -27,7 +27,9 @@ var COMPILER;
             COMPILER.Main.addLog(LOG_VERBOSE, 'Adding break statement.');
             this.setCode('00');
             this.backpatch();
-            this.printResults();
+            if (_Errors === 0) {
+                this.printResults();
+            }
         };
         CodeGenerator.generateCode = function (node) {
             var conditionalBlock = false;
@@ -91,24 +93,40 @@ var COMPILER;
             }
         };
         CodeGenerator.setCode = function (opcode) {
-            // Set the opcode on the next available block
-            if (this.codeTable[this.currentIndex] === '00') {
-                if (opcode.length === 1) {
-                    opcode = '0' + opcode;
+            if (this.currentIndex <= this.heapIndex) {
+                // Set the opcode on the next available block
+                if (this.codeTable[this.currentIndex] === '00') {
+                    if (opcode.length === 1) {
+                        opcode = '0' + opcode;
+                    }
+                    opcode = opcode.toUpperCase();
+                    this.codeTable[this.currentIndex] = opcode;
+                    this.currentIndex++;
                 }
-                opcode = opcode.toUpperCase();
-                this.codeTable[this.currentIndex] = opcode;
-                this.currentIndex++;
+            }
+            else {
+                _Errors++;
+                COMPILER.Main.addLog(LOG_ERROR, 'Stack overflow has occurred when attempted to ' +
+                    'add the code ' + opcode + ' to the address ' + this.currentIndex.toString(16) +
+                    '.');
             }
         };
         // Set the opcode on the target index of the code table
         CodeGenerator.injectCode = function (opcode, index) {
-            // Pad the opcode
-            if (opcode.length === 1) {
-                opcode = '0' + opcode;
+            if (index <= this.heapIndex) {
+                // Pad the opcode
+                if (opcode.length === 1) {
+                    opcode = '0' + opcode;
+                }
+                opcode = opcode.toUpperCase();
+                this.codeTable[index] = opcode;
             }
-            opcode = opcode.toUpperCase();
-            this.codeTable[index] = opcode;
+            else {
+                _Errors;
+                COMPILER.Main.addLog(LOG_ERROR, 'Stack overflow has occurred when attempted to ' +
+                    'add the code ' + opcode + ' to the address ' + this.currentIndex.toString(16) +
+                    '.');
+            }
         };
         CodeGenerator.handleVarDecl = function (node) {
             var dataType = node.children[0].name;
@@ -243,16 +261,27 @@ var COMPILER;
                 this.setCode('XX');
             }
             else if (node.children[1].dataType === dataTypes.STRING) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding string ' + stringExpr + ' on line ' + node.children[1].lineNum +
+                    ' onto the heap.');
                 var stringExpr = node.children[1].name;
                 var stringLength = stringExpr.length;
                 var stringStart = null;
                 var startPoint = this.heapIndex;
+                var staticEndIndex = this.currentIndex;
                 this.injectCode('00', startPoint);
                 this.heapIndex--;
+                // Start from the end of the code table and allocate every character starting from the end
                 for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
+                    if (i <= staticEndIndex) {
+                        _Errors++;
+                        COMPILER.Main.addLog(LOG_ERROR, 'Heap overflow has occurred when trying to ' +
+                            'add string ' + stringExpr + ' on line ' + node.children[1].lineNum + '.');
+                        break;
+                    }
                     var charAscii = stringExpr.charCodeAt(--stringLength).toString(16);
                     this.injectCode(charAscii, i);
                     stringStart = i.toString(16).toUpperCase();
+                    // Update heap pointer
                     this.heapIndex--;
                 }
                 this.setCode('A9');
@@ -296,9 +325,11 @@ var COMPILER;
                     }
                     var tempEntry = this.createTempEntry();
                     tempEntry.scope = node.children[0].symbolEntry.scopeNum;
+                    // Store the accumulator value to the temp entry
                     this.setCode('8D');
                     this.setCode(tempEntry.name);
                     this.setCode('XX');
+                    // Load the Y reg with the value to print
                     this.setCode('AC');
                     this.setCode(tempEntry.name);
                     this.setCode('XX');
@@ -333,10 +364,12 @@ var COMPILER;
                 var startPoint = this.heapIndex;
                 this.injectCode('00', startPoint);
                 this.heapIndex--;
+                // Start from the end of the code table and allocate every character starting from the end
                 for (var i = startPoint - 1; i > (startPoint - 1) - stringExpr.length; i--) {
                     var charAscii = stringExpr.charCodeAt(--stringLength).toString(16);
                     this.injectCode(charAscii, i);
                     stringStart = i.toString(16).toUpperCase();
+                    // Update heap pointer
                     this.heapIndex--;
                 }
                 this.setCode('A9');
@@ -417,6 +450,8 @@ var COMPILER;
                         this.setCode(rightChildAddress); // right child address
                         this.setCode('00');
                         if (node.name === 'CompareEqual') {
+                            COMPILER.Main.addLog(LOG_VERBOSE, 'Determining whether the content of address ' +
+                                leftChildAddress + ' == content of address ' + rightChildAddress);
                             var tempEntry = this.createTempEntry();
                             var jumpEntryCompareNotEqual = this.createJumpEntry();
                             var jumpEntryCompareEqual = this.createJumpEntry();
@@ -433,22 +468,29 @@ var COMPILER;
                             this.setCode('D0');
                             this.setCode(jumpEntryCompareNotEqual.name);
                             var firstJumpReturnIndex = this.currentIndex;
+                            // Load accumulator with 1
                             this.setCode('A9');
                             this.setCode('01');
+                            // Store the accumulator value at the return address
                             this.setCode('8D');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
                             jumpEntryCompareNotEqual.distance = this.currentIndex - firstJumpReturnIndex;
+                            // Load X reg with 0 to set up next jump
                             this.setCode('A2');
                             this.setCode('00');
+                            // Compare X reg and return address
                             this.setCode('EC');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
+                            // Branch if Z flag is 0
                             this.setCode('D0');
                             this.setCode(jumpEntryCompareEqual.name);
                             var secondJumpReturnIndex = this.currentIndex;
+                            // Load accumulator with 0
                             this.setCode('A9');
                             this.setCode('00');
+                            // Store the accumulator at the return address
                             this.setCode('8D');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
@@ -456,6 +498,8 @@ var COMPILER;
                             returnAddress = tempEntry.name;
                         }
                         else if (node.name === 'CompareNotEqual') {
+                            COMPILER.Main.addLog(LOG_VERBOSE, 'Determining whether the content of address ' +
+                                leftChildAddress + ' != content of address ' + rightChildAddress);
                             var tempEntry = this.createTempEntry();
                             var jumpEntryCompareNotEqual = this.createJumpEntry();
                             var jumpEntryCompareEqual = this.createJumpEntry();
@@ -472,22 +516,29 @@ var COMPILER;
                             this.setCode('D0');
                             this.setCode(jumpEntryCompareNotEqual.name);
                             var firstJumpReturnIndex = this.currentIndex;
+                            // Load accumulator with 1
                             this.setCode('A9');
                             this.setCode('00');
+                            // Store the accumulator value at the return address
                             this.setCode('8D');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
                             jumpEntryCompareNotEqual.distance = this.currentIndex - firstJumpReturnIndex;
+                            // Load X reg with 0 to set up next jump
                             this.setCode('A2');
                             this.setCode('01');
+                            // Compare X reg and return address
                             this.setCode('EC');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
+                            // Branch if Z flag is 0
                             this.setCode('D0');
                             this.setCode(jumpEntryCompareEqual.name);
                             var secondJumpReturnIndex = this.currentIndex;
+                            // Load accumulator with 0
                             this.setCode('A9');
                             this.setCode('01');
+                            // Store the accumulator at the return address
                             this.setCode('8D');
                             this.setCode(tempEntry.name);
                             this.setCode('XX');
@@ -496,9 +547,10 @@ var COMPILER;
                         }
                     }
                 }
-                else if (node.tokenType !== null) {
+                else if (node.children.length === 0) {
                     // Leaf nodes
                     if (node.tokenType === T_DIGIT) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Storing temporary entry of an integer literal in static table.');
                         // Load accumulator with the digit
                         this.setCode('A9');
                         this.setCode(node.name);
@@ -510,6 +562,7 @@ var COMPILER;
                         returnAddress = tempEntry.name;
                     }
                     else if (node.tokenType === T_TRUE) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Storing temporary entry of a true literal in static table.');
                         // Load accumulator with the true value...get it? true?
                         this.setCode('A9');
                         this.setCode('01');
@@ -521,6 +574,7 @@ var COMPILER;
                         returnAddress = tempEntry.name;
                     }
                     else if (node.tokenType === T_FALSE) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Storing temporary entry of a false literal in static table.');
                         // Load accumulator with the false value
                         this.setCode('A9');
                         this.setCode('00');
@@ -535,6 +589,7 @@ var COMPILER;
                         var id = node.name;
                         var scopeNum = node.symbolEntry.scopeNum;
                         var idEntry = this.getEntry(id, scopeNum);
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Returning address of id ' + id + '.');
                         returnAddress = idEntry.name;
                     }
                     else if (node.tokenType === T_QUOTE) {
@@ -572,7 +627,10 @@ var COMPILER;
                     return entry;
                 }
             }
-            COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + id + ' was not found in the static table.');
+            if (entry === null) {
+                _Errors++;
+                COMPILER.Main.addLog(LOG_ERROR, 'Identifier ' + id + ' was not found in the static table.');
+            }
             return null;
         };
         CodeGenerator.backpatch = function () {
@@ -587,8 +645,18 @@ var COMPILER;
                     var tempEntryIndex = parseInt(currentCode.substring(1));
                     var tempEntry = this.staticTable[tempEntryIndex];
                     var targetIndex = staticStartIndex + tempEntryIndex;
-                    this.injectCode(targetIndex.toString(16), i++);
-                    this.injectCode('00', i);
+                    if (targetIndex < this.heapIndex) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Assigning temp entry ' + tempEntry.name + ' address to ' +
+                            targetIndex.toString(16).toUpperCase() + '.');
+                        this.injectCode(targetIndex.toString(16), i++);
+                        this.injectCode('00', i);
+                    }
+                    else {
+                        _Errors++;
+                        COMPILER.Main.addLog(LOG_ERROR, 'Static space is colliding with heap space when ' +
+                            tempEntry.name + ' was assigned the address ' + targetIndex.toString(16).toUpperCase() + '.');
+                        break;
+                    }
                 }
                 else if (currentCode.match(jumpNameRegex)) {
                     var jumpEntryIndex = parseInt(currentCode.substring(1));
