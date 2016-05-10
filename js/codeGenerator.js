@@ -246,19 +246,35 @@ var COMPILER;
                 }
             }
             else if (node.children[1].dataType === dataTypes.BOOLEAN) {
-                var value = 0;
-                if (node.children[1].tokenType === T_TRUE) {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:true to id ' + id + '.');
-                    value = 1;
+                if (node.children[1].children.length === 0) {
+                    // Leaf node
+                    var value = 0;
+                    if (node.children[1].tokenType === T_TRUE) {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:true to id ' + id + '.');
+                        value = 1;
+                    }
+                    else {
+                        COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:false to id ' + id + '.');
+                    }
+                    this.setCode('A9');
+                    this.setCode(value.toString(16));
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
                 }
                 else {
-                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean constant:false to id ' + id + '.');
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding boolean expression assignment to id ' + id + '.');
+                    var returnAddress = this.handleBooleanExpr(node.children[0]);
+                    // Load the accumulator with the return address
+                    this.setCode('AD');
+                    this.setCode(returnAddress);
+                    this.setCode('XX');
+                    var tempEntry = this.getEntry(id, scopeNum);
+                    // Store the value in the accumulator at the first id's address
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
                 }
-                this.setCode('A9');
-                this.setCode(value.toString(16));
-                this.setCode('8D');
-                this.setCode(firstIdEntry.name);
-                this.setCode('XX');
             }
             else if (node.children[1].dataType === dataTypes.STRING) {
                 COMPILER.Main.addLog(LOG_VERBOSE, 'Adding string ' + stringExpr + ' on line ' + node.children[1].lineNum +
@@ -293,6 +309,7 @@ var COMPILER;
         };
         CodeGenerator.handlePrintStmt = function (node) {
             if (node.children[0].tokenType === T_ID) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of id ' + node.children[0].name + '.');
                 // Load the Y reg with the constant
                 this.setCode('AC');
                 var idName = node.children[0].name;
@@ -310,8 +327,21 @@ var COMPILER;
                     this.setCode('02');
                 }
             }
+            else if (node.children[0].name === 'CompareEqual' ||
+                node.children[0].name === 'CompareNotEqual') {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of a boolean expression.');
+                var returnAddress = this.handleBooleanExpr(node.children[0]);
+                // Load X reg with 1 to print int
+                this.setCode('A2');
+                this.setCode('01');
+                // Load Y reg with the return address
+                this.setCode('AC');
+                this.setCode(returnAddress);
+                this.setCode('XX');
+            }
             else if (node.children[0].dataType === dataTypes.INT) {
                 if (node.children[0].tokenType === T_ADD) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of an integer expression.');
                     var addresses = [];
                     addresses = this.handleIntAddition(node.children[0], addresses);
                     // Reset the accumulator to prep assignment by addition
@@ -335,6 +365,7 @@ var COMPILER;
                     this.setCode('XX');
                 }
                 else if (node.children[0].tokenType === T_DIGIT) {
+                    COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of an integer constant: ' + node.children[0].name + '.');
                     // Handle integer assignment
                     var value = parseInt(node.children[0].name);
                     // Load the Y reg with the constant
@@ -346,6 +377,7 @@ var COMPILER;
                 this.setCode('01');
             }
             else if (node.children[0].dataType === dataTypes.BOOLEAN) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of a boolean constant: ' + node.children[0].name + '.');
                 this.setCode('A0');
                 if (node.children[0].tokenType === T_TRUE) {
                     this.setCode('01');
@@ -358,6 +390,7 @@ var COMPILER;
                 this.setCode('01');
             }
             else if (node.children[0].dataType === dataTypes.STRING) {
+                COMPILER.Main.addLog(LOG_VERBOSE, 'Adding print statement of a string expression: ' + node.children[0].name + '.');
                 var stringExpr = node.children[0].name;
                 var stringLength = stringExpr.length;
                 var stringStart = null;

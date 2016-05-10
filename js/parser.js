@@ -364,7 +364,9 @@ var COMPILER;
                     this.tempToken = _CurrentToken;
                     COMPILER.Main.addLog(LOG_VERBOSE, 'Received a ' + _CurrentToken.getValue() + '!');
                     this.cst.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
-                    this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                    if (!this.inBoolExpr) {
+                        this.ast.addNode(_CurrentToken.getValue(), LEAF_NODE, _CurrentToken);
+                    }
                     this.getNextToken();
                 }
                 else {

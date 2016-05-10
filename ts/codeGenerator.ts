@@ -304,21 +304,40 @@ module COMPILER {
                     this.setCode('XX');
                 }
             } else if (node.children[1].dataType === dataTypes.BOOLEAN) {
-                var value: number = 0;
+                if (node.children[1].children.length === 0) {
+                    // Leaf node
+                    var value: number = 0;
 
-                if (node.children[1].tokenType === T_TRUE) {
-                    Main.addLog(LOG_VERBOSE, 'Adding boolean constant:true to id ' + id + '.');
-                    value = 1;
+                    if (node.children[1].tokenType === T_TRUE) {
+                        Main.addLog(LOG_VERBOSE, 'Adding boolean constant:true to id ' + id + '.');
+                        value = 1;
+                    } else {
+                        Main.addLog(LOG_VERBOSE, 'Adding boolean constant:false to id ' + id + '.');
+                    }
+
+                    this.setCode('A9');
+                    this.setCode(value.toString(16));
+
+                    this.setCode('8D');
+                    this.setCode(firstIdEntry.name);
+                    this.setCode('XX');
                 } else {
-                    Main.addLog(LOG_VERBOSE, 'Adding boolean constant:false to id ' + id + '.');
+                    Main.addLog(LOG_VERBOSE, 'Adding boolean expression assignment to id ' + id + '.');
+
+                    var returnAddress: string = this.handleBooleanExpr(node.children[0]);
+
+                    // Load the accumulator with the return address
+                    this.setCode('AD');
+                    this.setCode(returnAddress);
+                    this.setCode('XX');
+
+                    var tempEntry: any = this.getEntry(id, scopeNum);
+
+                    // Store the value in the accumulator at the first id's address
+                    this.setCode('8D');
+                    this.setCode(tempEntry.name);
+                    this.setCode('XX');
                 }
-
-                this.setCode('A9');
-                this.setCode(value.toString(16));
-
-                this.setCode('8D');
-                this.setCode(firstIdEntry.name);
-                this.setCode('XX');
             } else if (node.children[1].dataType === dataTypes.STRING) {
                 Main.addLog(LOG_VERBOSE, 'Adding string ' + stringExpr + ' on line ' + node.children[1].lineNum +
                     ' onto the heap.');
@@ -360,6 +379,8 @@ module COMPILER {
 
         public static handlePrintStmt(node): void {
             if (node.children[0].tokenType === T_ID) {
+                Main.addLog(LOG_VERBOSE, 'Adding print statement of id ' + node.children[0].name + '.');
+
                 // Load the Y reg with the constant
                 this.setCode('AC');
 
@@ -378,8 +399,24 @@ module COMPILER {
                 } else if (node.children[0].dataType === dataTypes.STRING) {
                     this.setCode('02');
                 }
+            } else if (node.children[0].name === 'CompareEqual' ||
+                       node.children[0].name === 'CompareNotEqual') {
+                Main.addLog(LOG_VERBOSE, 'Adding print statement of a boolean expression.');
+                
+                var returnAddress: string = this.handleBooleanExpr(node.children[0]);
+
+                // Load X reg with 1 to print int
+                this.setCode('A2');
+                this.setCode('01');
+
+                // Load Y reg with the return address
+                this.setCode('AC');
+                this.setCode(returnAddress);
+                this.setCode('XX');
             } else if (node.children[0].dataType === dataTypes.INT) {
                 if (node.children[0].tokenType === T_ADD) {
+                    Main.addLog(LOG_VERBOSE, 'Adding print statement of an integer expression.');
+                    
                     var addresses: string[] = [];
                     addresses = this.handleIntAddition(node.children[0], addresses);
 
@@ -407,6 +444,8 @@ module COMPILER {
                     this.setCode(tempEntry.name);
                     this.setCode('XX');
                 } else if (node.children[0].tokenType === T_DIGIT) {
+                    Main.addLog(LOG_VERBOSE, 'Adding print statement of an integer constant: ' + node.children[0].name  + '.');
+
                     // Handle integer assignment
                     var value: number = parseInt(node.children[0].name);
 
@@ -419,6 +458,8 @@ module COMPILER {
                 this.setCode('A2');
                 this.setCode('01');
             } else if (node.children[0].dataType === dataTypes.BOOLEAN) {
+                Main.addLog(LOG_VERBOSE, 'Adding print statement of a boolean constant: ' + node.children[0].name + '.');
+
                 this.setCode('A0');
 
                 if (node.children[0].tokenType === T_TRUE) {
@@ -431,6 +472,8 @@ module COMPILER {
                 this.setCode('A2');
                 this.setCode('01');
             } else if (node.children[0].dataType === dataTypes.STRING) {
+                Main.addLog(LOG_VERBOSE, 'Adding print statement of a string expression: ' + node.children[0].name + '.');
+
                 var stringExpr: string = node.children[0].name;
                 var stringLength: number = stringExpr.length;
                 var stringStart: string = null;
