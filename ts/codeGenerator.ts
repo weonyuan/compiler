@@ -492,7 +492,7 @@ module COMPILER {
                     this.heapIndex--;
                 }
 
-                this.setCode('A9');
+                this.setCode('A0');
                 this.setCode(stringStart);
 
                 this.setCode('A2');

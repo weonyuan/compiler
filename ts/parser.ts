@@ -347,7 +347,9 @@ module COMPILER {
                     this.ast.levelUp();
 
                 } else {
-                    this.ast.addNode(tempToken.getValue(), LEAF_NODE, tempToken);
+                    if (!this.inBoolExpr) {
+                        this.ast.addNode(tempToken.getValue(), LEAF_NODE, tempToken);
+                    }
                 }
             } else {
                 Main.addLog(LOG_ERROR, 'Line ' + _PreviousToken.getLineNum() +
@@ -489,8 +491,10 @@ module COMPILER {
                     this.parseCharList();
                     break;
                 default:
-                    this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
-                    this.buffer = '';
+                    if (!this.inBoolExpr) {
+                        this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
+                        this.buffer = '';
+                    }
                     break;
             }
 
@@ -542,7 +546,12 @@ module COMPILER {
                 }
 
                 if (this.inBoolExpr) {
-                    this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                    if (this.buffer.length > 0) {
+                        this.ast.addNode(this.buffer, LEAF_NODE, _CurrentToken);
+                        this.buffer = '';
+                    } else {
+                        this.ast.addNode(this.tempToken.getValue(), LEAF_NODE, this.tempToken);
+                    }
                 }
 
                 this.getNextToken();
